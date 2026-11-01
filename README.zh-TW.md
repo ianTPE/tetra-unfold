@@ -145,6 +145,20 @@ python unfold360.py photo.jpg out/ --map    # 世界地圖方向
 
 - 形狀變形（最大與最小拉伸的比值），不校正模式下：離角落 10° 內約 2.4 倍，35° 以外約 1.5 倍以下
 
+## 相關的投影
+
+把地球展開到四面體上不是新點子，最接近的前例有：
+
+- **[Lee 保角四面體投影](https://en.wikipedia.org/wiki/Lee_conformal_world_in_a_tetrahedron)**（L. P. Lee，1965 年）：同樣把地球展開到正四面體上、可以無縫拼接，拼接單位也能排成同樣的 `√3 × 1` 長方形。原版以南極為中心，南極就在一個頂點上。它是保角投影（局部形狀正確），所以大圓會是曲線。D3 有現成的實作 [`d3.geoTetrahedralLee`](https://unpkg.com/browse/d3-geo-polygon@1.9.0/README.md)，通常畫成極點在中心的三角形。
+- **[Doug McIlroy 的四面體賀卡](https://cs.dartmouth.edu/~doug/cards/page1983.pdf)**（1983 年）：用 Lee 投影，把兩極放在兩條對邊的中點，四個頂點都在海上。這和 `unfold360.py` 處理照片時用的直立方向是同一種擺法。
+- **[AuthaGraph](https://en.wikipedia.org/wiki/AuthaGraph_projection)**（鳴川肇）：長方形、可以無縫拼接的四面體地圖，角落放在海上。演算法有專利，沒有公開。
+
+這個專案不同的地方：
+
+- 四面體的一條邊直立在地圖中央；上下拖曳時，地球沿著這條邊移動，北極在上方頂點、南極在下方頂點之間切換。
+- 每一面都是心射投影，大圓航線在同一面內是直線。
+- 地圖上直接整合出差行程：中英文機場搜尋、航線、距離和最短的造訪順序。
+
 ## 使用的資源
 
 - [D3.js](https://d3js.org/) 7.9.0：等距圓柱投影與繪製國界

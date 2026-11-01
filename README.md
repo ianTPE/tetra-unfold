@@ -145,6 +145,20 @@ The projection code has been checked with Node.js:
 
 - Shape distortion (ratio of maximum to minimum stretch) in uncorrected mode: about 2.4× within 10° of a corner, and 1.5× or less beyond 35°.
 
+## Related projections
+
+Unfolding the globe onto a tetrahedron is not new. The closest earlier work:
+
+- **[Lee's conformal tetrahedral projection](https://en.wikipedia.org/wiki/Lee_conformal_world_in_a_tetrahedron)** (L. P. Lee, 1965). It also maps the globe onto a regular tetrahedron and tiles the plane, and its tile can be rearranged into the same `√3 × 1` rectangle. The original is centred on the South Pole, which sits on a vertex. It is conformal (local shapes are right), so great circles are curved. It is available in D3 as [`d3.geoTetrahedralLee`](https://unpkg.com/browse/d3-geo-polygon@1.9.0/README.md), usually drawn as a triangle with the pole at its centre.
+- **[Doug McIlroy's tetrahedral map card](https://cs.dartmouth.edu/~doug/cards/page1983.pdf)** (1983) uses Lee's projection with the poles at the midpoints of two opposite edges and all four vertices in the oceans. This is the same arrangement as the upright orientation `unfold360.py` uses for photos.
+- **[AuthaGraph](https://en.wikipedia.org/wiki/AuthaGraph_projection)** (Hajime Narukawa) is a rectangular, seamlessly tiling tetrahedral map with its corners in the oceans. Its algorithm is patented and unpublished.
+
+What this project does differently:
+
+- One edge runs vertically down the centre of the map, and dragging slides the globe along it between the North Pole on the top corner and the South Pole on the bottom corner.
+- Each face is a gnomonic projection, so great-circle flight routes are straight within a face.
+- It includes a trip planner on top of the map: airport search in Chinese and English, routes, distances and the shortest visiting order.
+
 ## Credits
 
 - [D3.js](https://d3js.org/) 7.9.0: equirectangular projection and border rendering
