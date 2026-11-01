@@ -8,17 +8,13 @@ The demo uses a world map and is inspired by the [AuthaGraph world map](https://
 
 ## Demos
 
-**Try it online:**
+**Try it online: <https://iantpe.github.io/tetra-unfold/>**
 
-- World map: <https://iantpe.github.io/tetra-unfold/>
-- Dual-orientation unfolding: <https://iantpe.github.io/tetra-unfold/dual.html>
-
-Both pages are single HTML files. There is nothing to install or build: open one in a browser. An internet connection is needed to load D3 and the country data.
+The map is a single HTML file plus `airports.json`. There is nothing to install or build. An internet connection is needed to load D3 and the country data.
 
 | File | What it shows |
 |---|---|
 | [`index.html`](index.html) · [live](https://iantpe.github.io/tetra-unfold/) | Tetrahedral world map. One tetrahedron edge runs down the vertical centre line along 90°E, with corners at the top and bottom centre. By default the North Pole is on the top corner; dragging up and down slides the globe along that edge until the South Pole is on the bottom corner (the **North Pole up** and **South Pole down** buttons jump between the two). Dragging stops at these two positions; a checkbox removes the limit so the globe can keep turning. The other corners stay in the oceans in both positions. Seamless tiling, drag to rotate the globe, optional area correction, tetrahedron fold lines, and country names on hover. |
-| [`dual.html`](dual.html) · [live](https://iantpe.github.io/tetra-unfold/dual.html) | Dual-orientation unfolding. The same globe is unfolded in two orientations so that their corners do not overlap, with a map of which orientation to use for each place. |
 
 Controls:
 
@@ -107,7 +103,7 @@ python unfold360.py photo.jpg out/ --map    # world-map orientation
 
 Unlike the Earth, a photo has a clear up and down. By default the script uses an **upright orientation**: the zenith sits on the top edge of the rectangle and the nadir on the bottom edge, so the ceiling is at the top, the floor at the bottom, and things on the walls stand roughly upright. The 4 corners fall at ±35° elevation (the two on the top edge are in the ceiling; the three on the bottom edge are in the floor, and the ones at the left and right ends are the same point), so every point on the horizon is at least 35° from a corner.
 
-For dual-orientation unfolding, B must be rotated **90°** about the vertical axis in the upright orientation. A 180° rotation maps the tetrahedron onto itself, so both images would be identical. With 90°, the worst place in the panorama is 35.3° from a corner, the same as for the world map. Pass `--map` to use the same world-map orientation as orientation A of `dual.html`.
+For dual-orientation unfolding, B must be rotated **90°** about the vertical axis in the upright orientation. A 180° rotation maps the tetrahedron onto itself, so both images would be identical. With 90°, the worst place in the panorama is 35.3° from a corner, the same as for the world map. Pass `--map` to use the world-map orientation described in [Dual-orientation unfolding](#dual-orientation-unfolding).
 
 Tested with the [Art Studio](https://polyhaven.com/a/art_studio) panorama from Poly Haven (red lines are the tetrahedron fold lines):
 
