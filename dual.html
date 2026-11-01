@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>雙方向展開</title>
+<style>
+  :root {
+    --bg: #eef5f7;
+    --panel: #ffffff;
+    --text: #1d3340;
+    --muted: #5b7380;
+    --line: #d3e2e8;
+    --accent: #1f8fbf;
+    --a: #2f62d6;
+    --b: #e0731a;
+    --shadow: 0 2px 12px rgba(20, 60, 80, 0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1a20;
+      --panel: #16242c;
+      --text: #e3eef2;
+      --muted: #96aeb9;
+      --line: #2c4250;
+      --accent: #5cc0e8;
+      --a: #6d97f2;
+      --b: #f39a4f;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1a20;
+    --panel: #16242c;
+    --text: #e3eef2;
+    --muted: #96aeb9;
+    --line: #2c4250;
+    --accent: #5cc0e8;
+    --a: #6d97f2;
+    --b: #f39a4f;
+    --shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.55 system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 16px;
+    padding: 16px;
+    overflow: hidden;
+  }
+  .maps { display: flex; flex-direction: column; justify-content: center; gap: 12px; min-width: 0; }
+  .card {
+    width: 100%;
+    max-width: calc((100vh - 32px - 12px - 2 * 30px) / 2 * 2.3094);
+    margin: 0 auto;
+  }
+  .card .label { display: flex; align-items: baseline; gap: 8px; height: 30px; }
+  .card .label b { font-size: 15px; }
+  .card .label span { color: var(--muted); font-size: 12.5px; }
+  .chip { display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
+  .card canvas {
+    display: block; width: 100%; aspect-ratio: 2 / 0.8660254;
+    border-radius: 8px; box-shadow: var(--shadow);
+    cursor: grab; touch-action: none; background: #cbe7ef;
+  }
+  .card canvas.dragging { cursor: grabbing; }
+  aside {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: var(--shadow); padding: 16px; overflow: auto;
+  }
+  aside h1 { font-size: 17px; margin: 0; }
+  aside .sub { color: var(--muted); font-size: 12.5px; margin: 2px 0 12px; }
+  aside a { color: var(--accent); }
+  aside p { margin: 6px 0; }
+  .muted { color: var(--muted); font-size: 12.5px; }
+  h2 { font-size: 13px; margin: 16px 0 6px; color: var(--muted); font-weight: 600; letter-spacing: 0.03em; }
+  #cover { display: block; width: 100%; aspect-ratio: 2 / 1; border-radius: 6px; border: 1px solid var(--line); }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; margin-top: 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .stat {
+    margin-top: 10px; padding: 8px 10px; border-radius: 8px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent); font-size: 13px;
+  }
+  .stat b { font-size: 16px; }
+  #info { min-height: 92px; }
+  #info .name { font-size: 15px; font-weight: 600; }
+  #info table { border-collapse: collapse; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  #info td { padding: 1px 10px 1px 0; }
+  #info .pick { margin-top: 4px; font-weight: 600; }
+  .row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .row label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
+  button {
+    border: 1px solid var(--line); background: transparent; color: var(--text);
+    border-radius: 8px; padding: 5px 14px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  #status {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 15px; pointer-events: none; padding: 16px; text-align: center;
+  }
+  @media (max-width: 860px) {
+    body { grid-template-columns: 1fr; overflow: auto; height: auto; }
+    .card { max-width: none; }
+  }
+</style>
+</head>
+<body>
+<div id="status">載入地圖資料中…</div>
+
+<main class="maps">
+  <div class="card">
+    <div class="label"><span class="chip" style="background:var(--a)"></span><b>方向 A</b><span>角落放在四個大洋</span></div>
+    <canvas id="mapA"></canvas>
+  </div>
+  <div class="card">
+    <div class="label"><span class="chip" style="background:var(--b)"></span><b>方向 B</b><span id="labelB"></span></div>
+    <canvas id="mapB"></canvas>
+  </div>
+</main>
+
+<aside>
+  <h1>雙方向展開</h1>
+  <div class="sub">同一顆地球用兩種方向各展開一次 · <a href="index.html">回單張地圖</a></div>
+
+  <p>四面體展開圖在四個角落附近變形最大（紅色區域）。方向 B 是把地球繞地軸多轉一個角度再展開，讓兩張圖的角落錯開，每個地點至少在其中一張圖裡是清楚的。</p>
+
+  <h2>每個地方該看哪一張</h2>
+  <canvas id="cover"></canvas>
+  <div class="legend">
+    <span><span class="chip" style="background:var(--a)"></span>A 較好</span>
+    <span><span class="chip" style="background:var(--b)"></span>B 較好</span>
+    <span>▲ A 的角落</span>
+    <span>● B 的角落</span>
+  </div>
+  <div class="stat">兩張取較好的那張，任何地點離角落都至少 <b id="worst"></b>（單張圖最差是 0°）</div>
+
+  <h2>滑過的地點</h2>
+  <div id="info" class="muted">把滑鼠移到任一張地圖上，三張圖會同時標出同一個地點。</div>
+
+  <h2>設定</h2>
+  <div class="row">
+    <span>B 錯開</span>
+    <input type="range" id="offset" min="0" max="180" step="5" value="180" style="flex:1;min-width:0;accent-color:var(--accent)">
+    <span id="offsetVal" style="width:38px;text-align:right"></span>
+  </div>
+  <div class="row"><label><input type="checkbox" id="heat" checked> 標示變形區（離角落 35° 內）</label></div>
+  <div class="row"><label><input type="checkbox" id="equal"> 面積校正（關閉時直線保持直線）</label></div>
+  <div class="row"><button id="reset">重設方向</button></div>
+  <p class="muted">拖曳地圖可轉動地球，B 會跟著 A 一起轉，永遠保持對偶。</p>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+// ---------------------------------------------------------------------------
+// 幾何設定（與 index.html 相同的四面體展開）
+// ---------------------------------------------------------------------------
+const SQ3 = Math.sqrt(3);
+const ROW = SQ3 / 2;
+const MAP_W = 2, MAP_H = ROW;
+const TW = 4096, TH = 2048;
+const COLORS = ['#2b9cc8', '#ee7b30', '#9cbb4a', '#f3c641', '#b9926a'];
+const OCEAN = '#cbe7ef';
+const DEG = Math.PI / 180;
+const HEAT_DEG = 35;
+
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const norm = a => { const l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, a[1] / l, a[2] / l]; };
+const fromLonLat = (lon, lat) => [Math.cos(lat * DEG) * Math.cos(lon * DEG), Math.cos(lat * DEG) * Math.sin(lon * DEG), Math.sin(lat * DEG)];
+const apply = (M, v) => [dot(M[0], v), dot(M[1], v), dot(M[2], v)];
+const applyT = (M, v) => [
+  M[0][0] * v[0] + M[1][0] * v[1] + M[2][0] * v[2],
+  M[0][1] * v[0] + M[1][1] * v[1] + M[2][1] * v[2],
+  M[0][2] * v[0] + M[1][2] * v[1] + M[2][2] * v[2],
+];
+
+const V = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]].map(norm);
+if (dot(cross(sub(V[1], V[0]), sub(V[2], V[0])), V[3]) > 0) [V[1], V[2]] = [V[2], V[1]];
+const VX = V.map(v => v[0]), VY = V.map(v => v[1]), VZ = V.map(v => v[2]);
+
+function initialMatrix() {
+  const G = [[-160, 0], [-35, 55], [-35, -55], [91, 0]].map(p => fromLonLat(p[0], p[1]));
+  const build = g => {
+    const M = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    for (let k = 0; k < 4; k++)
+      for (let r = 0; r < 3; r++)
+        for (let c = 0; c < 3; c++) M[r][c] += 0.75 * g[k][r] * V[k][c];
+    return M;
+  };
+  let M = build(G);
+  if (dot(M[0], cross(M[1], M[2])) < 0) { [G[1], G[2]] = [G[2], G[1]]; M = build(G); }
+  const c0 = norm([M[0][0], M[1][0], M[2][0]]);
+  let c1 = [M[0][1], M[1][1], M[2][1]];
+  const d = dot(c0, c1);
+  c1 = norm([c1[0] - d * c0[0], c1[1] - d * c0[1], c1[2] - d * c0[2]]);
+  const c2 = cross(c0, c1);
+  return [[c0[0], c1[0], c2[0]], [c0[1], c1[1], c2[1]], [c0[2], c1[2], c2[2]]];
+}
+const R0 = initialMatrix();
+
+function matMul(A, B) {
+  const C = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+  for (let r = 0; r < 3; r++)
+    for (let c = 0; c < 3; c++) C[r][c] = A[r][0] * B[0][c] + A[r][1] * B[1][c] + A[r][2] * B[2][c];
+  return C;
+}
+function rotZ(a) { const c = Math.cos(a), s = Math.sin(a); return [[c, -s, 0], [s, c, 0], [0, 0, 1]]; }
+function rotY(a) { const c = Math.cos(a), s = Math.sin(a); return [[c, 0, s], [0, 1, 0], [-s, 0, c]]; }
+function inv3(m) {
+  const [a, b, c] = m[0], [d, e, f] = m[1], [g, h, i] = m[2];
+  const A = e * i - f * h, B = f * g - d * i, C = d * h - e * g;
+  const det = a * A + b * B + c * C;
+  return [
+    [A / det, (c * h - b * i) / det, (b * f - c * e) / det],
+    [B / det, (a * i - c * g) / det, (c * d - a * f) / det],
+    [C / det, (b * g - a * h) / det, (a * e - b * d) / det],
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// 狀態
+// ---------------------------------------------------------------------------
+// offset：B 比 A 繞地軸多轉幾度。A 的角落對赤道對稱，所以 180° 時
+// B 的角落剛好在 A 角落的正對面（= A 每一面的正中央），而且北方朝向和 A 一樣
+const state = { equal: false, heat: true, yaw: 0, pitch: 0, offset: 180, hover: null };
+const views = [
+  { canvas: document.getElementById('mapA'), color: '--a', M: null, VG: null },
+  { canvas: document.getElementById('mapB'), color: '--b', M: null, VG: null },
+];
+for (const v of views) {
+  v.ctx = v.canvas.getContext('2d');
+  v.buf = document.createElement('canvas');
+}
+
+function updateMatrices() {
+  const tilt = matMul(rotZ(state.yaw * DEG), rotY(state.pitch * DEG));
+  views[0].M = matMul(tilt, R0);
+  views[1].M = matMul(tilt, matMul(rotZ(state.offset * DEG), R0));
+  for (const v of views) v.VG = V.map(k => apply(v.M, k));
+}
+
+// 兩張取較好的那張時，全球最差的地點離角落幾度（用均勻分布的點估算）
+const SAMPLES = d3.range(20000).map(i => {
+  const z = 1 - 2 * (i + 0.5) / 20000, r = Math.sqrt(1 - z * z), a = i * Math.PI * (3 - Math.sqrt(5));
+  return [r * Math.cos(a), r * Math.sin(a), z];
+});
+function worstBestOfTwo() {
+  const [VA, VB] = [views[0].VG, views[1].VG];
+  let worst = -1;   // 內積越大越靠近角落
+  for (const p of SAMPLES) {
+    const mA = Math.max(dot(p, VA[0]), dot(p, VA[1]), dot(p, VA[2]), dot(p, VA[3]));
+    const mB = Math.max(dot(p, VB[0]), dot(p, VB[1]), dot(p, VB[2]), dot(p, VB[3]));
+    worst = Math.max(worst, Math.min(mA, mB));
+  }
+  return Math.acos(Math.min(1, worst)) / DEG;
+}
+function updateStat() {
+  document.getElementById('worst').textContent = worstBestOfTwo().toFixed(1) + '°';
+  document.getElementById('offsetVal').textContent = state.offset + '°';
+  document.getElementById('labelB').textContent = `A 繞地軸錯開 ${state.offset}°` +
+    (state.offset === 180 ? '：角落落在 A 角落的正對面' : '');
+}
+
+// 平面座標 → 地理座標的單位向量
+function planeToGeo(x, y, M, out) {
+  const b = y / ROW, a = x - b * 0.5;
+  const i = Math.floor(a), j = Math.floor(b);
+  const fa = a - i, fb = b - j;
+  const ci = i & 1, cj = j & 1;
+  let k0, k1, k2, w0, w1, w2;
+  if (fa + fb < 1) {
+    k0 = ci + 2 * cj; k1 = (ci ^ 1) + 2 * cj; k2 = ci + 2 * (cj ^ 1);
+    w0 = 1 - fa - fb; w1 = fa; w2 = fb;
+  } else {
+    k0 = (ci ^ 1) + 2 * (cj ^ 1); k1 = (ci ^ 1) + 2 * cj; k2 = ci + 2 * (cj ^ 1);
+    w0 = fa + fb - 1; w1 = 1 - fb; w2 = 1 - fa;
+  }
+  const qx = w0 * VX[k0] + w1 * VX[k1] + w2 * VX[k2];
+  const qy = w0 * VY[k0] + w1 * VY[k1] + w2 * VY[k2];
+  const qz = w0 * VZ[k0] + w1 * VZ[k1] + w2 * VZ[k2];
+  let px, py, pz;
+  if (state.equal) {
+    const opp = 6 - k0 - k1 - k2;
+    const nx = -VX[opp], ny = -VY[opp], nz = -VZ[opp];
+    const dx = qx - nx / 3, dy = qy - ny / 3, dz = qz - nz / 3;
+    const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    const t = 1 - 3 * Math.min(w0, w1, w2);
+    if (r < 1e-12 || t < 1e-12) { px = nx; py = ny; pz = nz; }
+    else {
+      const re = r / t;
+      const cosEdge = 1 / Math.sqrt(1 + 9 * re * re);
+      const cosT = 1 - t * t * (1 - cosEdge);
+      const sinT = Math.sqrt(Math.max(0, 1 - cosT * cosT)) / r;
+      px = nx * cosT + dx * sinT; py = ny * cosT + dy * sinT; pz = nz * cosT + dz * sinT;
+    }
+  } else {
+    const l = Math.sqrt(qx * qx + qy * qy + qz * qz);
+    px = qx / l; py = qy / l; pz = qz / l;
+  }
+  out[0] = M[0][0] * px + M[0][1] * py + M[0][2] * pz;
+  out[1] = M[1][0] * px + M[1][1] * py + M[1][2] * pz;
+  out[2] = M[2][0] * px + M[2][1] * py + M[2][2] * pz;
+}
+
+// 反過來：地理座標 → 地圖長方形裡的平面座標（用來在另一張圖上標出同一個地點）
+const FACES = [0, 1, 2, 3].map(opp => {
+  const ks = [0, 1, 2, 3].filter(k => k !== opp);
+  const cols = [0, 1, 2].map(r => ks.map(k => V[k][r]));
+  return { ks, inv: inv3(cols) };
+});
+// 長方形 [0,2]×[0,√3/2] 裡（含一半跨出去）的三角形，頂點用 [格點類別, x, y] 表示
+const RECT_TRIS = [];
+for (let i = -1; i <= 2; i++) {
+  const c = k => [((k % 2) + 2) % 2];
+  RECT_TRIS.push([[...c(i), i, 0], [...c(i + 1), i + 1, 0], [c(i)[0] + 2, i + 0.5, ROW]]);
+  RECT_TRIS.push([[c(i + 1)[0] + 2, i + 1.5, ROW], [...c(i + 1), i + 1, 0], [c(i)[0] + 2, i + 0.5, ROW]]);
+}
+
+function geoToPlane(g, M) {
+  const p = applyT(M, g);
+  let opp = 0;
+  for (let k = 1; k < 4; k++) if (dot(V[k], p) < dot(V[opp], p)) opp = k;
+  const n = V[opp].map(c => -c);
+  const face = FACES[opp];
+  const cosT = Math.min(1, dot(p, n));
+  let Q;
+  if (!state.equal) {
+    Q = p.map(c => c / (3 * cosT));
+  } else {
+    const u0 = p.map((c, i) => c - n[i] * cosT);
+    const ul = Math.hypot(...u0);
+    if (ul < 1e-12) Q = n.map(c => c / 3);
+    else {
+      const u = u0.map(c => c / ul);
+      const beta = apply(face.inv, u);
+      let re = Infinity;
+      for (const bk of beta) if (bk < 0) re = Math.min(re, 1 / (3 * -bk));
+      const cosEdge = 1 / Math.sqrt(1 + 9 * re * re);
+      const t = Math.min(1, Math.sqrt((1 - cosT) / (1 - cosEdge)));
+      Q = n.map((c, i) => c / 3 + u[i] * t * re);
+    }
+  }
+  const w = apply(face.inv, Q);
+  const W = [0, 0, 0, 0];
+  face.ks.forEach((k, i) => { W[k] = w[i]; });
+  let best = null;
+  for (const tri of RECT_TRIS) {
+    if (tri.some(t => t[0] === opp)) continue;
+    const x = tri.reduce((s, t) => s + W[t[0]] * t[1], 0);
+    const y = tri.reduce((s, t) => s + W[t[0]] * t[2], 0);
+    best = [x, y];
+    if (x >= -1e-9 && x <= MAP_W + 1e-9) return best;
+  }
+  return best;
+}
+
+// 離最近角落的角度（度）
+function cornerDist(g, VG) {
+  let m = -1;
+  for (const v of VG) m = Math.max(m, dot(g, v));
+  return Math.acos(Math.min(1, m)) / DEG;
+}
+
+// ---------------------------------------------------------------------------
+// 貼圖
+// ---------------------------------------------------------------------------
+let topo, features, colorIdx, tex32, ids32;
+const IW = 2048, IH = 1024;
+
+function assignColors() {
+  const geoms = topo.objects.countries.geometries;
+  const nb = topojson.neighbors(geoms);
+  const order = d3.range(geoms.length).sort((a, b) => nb[b].length - nb[a].length);
+  const used = new Array(COLORS.length).fill(0);
+  colorIdx = new Array(geoms.length).fill(-1);
+  for (const i of order) {
+    const taken = new Set(nb[i].map(n => colorIdx[n]));
+    let best = -1;
+    for (let c = 0; c < COLORS.length; c++)
+      if (!taken.has(c) && (best < 0 || used[c] < used[best])) best = c;
+    if (best < 0) best = i % COLORS.length;
+    colorIdx[i] = best;
+    used[best]++;
+  }
+}
+
+function buildTextures() {
+  let cv = document.createElement('canvas');
+  cv.width = TW; cv.height = TH;
+  let ctx = cv.getContext('2d');
+  let path = d3.geoPath(d3.geoEquirectangular().scale(TW / (2 * Math.PI)).translate([TW / 2, TH / 2]), ctx);
+  ctx.fillStyle = OCEAN;
+  ctx.fillRect(0, 0, TW, TH);
+  ctx.beginPath(); path(d3.geoGraticule().step([15, 15])());
+  ctx.strokeStyle = 'rgba(70, 140, 165, 0.35)'; ctx.lineWidth = 2; ctx.stroke();
+  features.forEach((f, i) => {
+    ctx.beginPath(); path(f);
+    ctx.fillStyle = f.id === '010' ? '#fbfdfe' : COLORS[colorIdx[i]];
+    ctx.fill();
+  });
+  ctx.beginPath(); path(topojson.mesh(topo, topo.objects.countries, (a, b) => a !== b));
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)'; ctx.lineWidth = 1.6; ctx.stroke();
+  ctx.beginPath(); path(topojson.mesh(topo, topo.objects.countries, (a, b) => a === b));
+  ctx.strokeStyle = 'rgba(30, 80, 100, 0.45)'; ctx.lineWidth = 1.4; ctx.stroke();
+  tex32 = new Uint32Array(ctx.getImageData(0, 0, TW, TH).data.buffer);
+
+  cv = document.createElement('canvas');
+  cv.width = IW; cv.height = IH;
+  ctx = cv.getContext('2d');
+  path = d3.geoPath(d3.geoEquirectangular().scale(IW / (2 * Math.PI)).translate([IW / 2, IH / 2]), ctx);
+  features.forEach((f, i) => {
+    const n = i + 1;
+    ctx.fillStyle = `rgb(${n & 255},${(n >> 8) & 255},0)`;
+    ctx.beginPath(); path(f); ctx.fill();
+  });
+  ids32 = new Uint32Array(ctx.getImageData(0, 0, IW, IH).data.buffer);
+}
+
+function texel(g) {
+  const lon = Math.atan2(g[1], g[0]);
+  const lat = Math.asin(Math.max(-1, Math.min(1, g[2])));
+  const u = Math.min(TW - 1, ((lon / (2 * Math.PI) + 0.5) * TW) | 0);
+  const v = Math.min(TH - 1, ((0.5 - lat / Math.PI) * TH) | 0);
+  return tex32[v * TW + u];
+}
+
+function countryAt(g) {
+  const lon = Math.atan2(g[1], g[0]) / DEG, lat = Math.asin(Math.max(-1, Math.min(1, g[2]))) / DEG;
+  const u = Math.min(IW - 1, ((lon / 360 + 0.5) * IW) | 0);
+  const v = Math.min(IH - 1, ((0.5 - lat / 180) * IH) | 0);
+  const px = ids32[v * IW + u];
+  const n = (px & 255) + (((px >> 8) & 255) << 8);
+  return px >>> 24 === 255 && n > 0 && n <= features.length ? features[n - 1] : null;
+}
+
+// ---------------------------------------------------------------------------
+// 繪製
+// ---------------------------------------------------------------------------
+const cover = { canvas: document.getElementById('cover') };
+cover.ctx = cover.canvas.getContext('2d');
+cover.buf = document.createElement('canvas');
+let dpr = 1;
+
+const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+function rgbOf(color) {
+  const c = document.createElement('canvas'); c.width = c.height = 1;
+  const x = c.getContext('2d');
+  x.fillStyle = color; x.fillRect(0, 0, 1, 1);
+  return Array.from(x.getImageData(0, 0, 1, 1).data.slice(0, 3));
+}
+
+function resize() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  for (const v of views) {
+    v.canvas.width = Math.round(v.canvas.clientWidth * dpr);
+    v.canvas.height = Math.round(v.canvas.width * MAP_H / MAP_W);
+  }
+  cover.canvas.width = Math.round(cover.canvas.clientWidth * dpr);
+  cover.canvas.height = Math.round(cover.canvas.width / 2);
+}
+
+function renderView(v, q) {
+  const W = Math.max(1, Math.round(v.canvas.width * q));
+  const H = Math.max(1, Math.round(v.canvas.height * q));
+  if (v.buf.width !== W || v.buf.height !== H) { v.buf.width = W; v.buf.height = H; }
+  const bctx = v.buf.getContext('2d');
+  const img = bctx.createImageData(W, H);
+  const out = new Uint32Array(img.data.buffer);
+  const S = W / MAP_W;
+  const g = [0, 0, 0];
+  const VG = v.VG, heat = state.heat;
+  const cut = Math.cos(HEAT_DEG * DEG);
+  let k = 0;
+  for (let py = 0; py < H; py++) {
+    const y = MAP_H - (py + 0.5) / S;
+    for (let px = 0; px < W; px++, k++) {
+      planeToGeo((px + 0.5) / S, y, v.M, g);
+      let c = texel(g);
+      if (heat) {
+        const m = Math.max(dot(g, VG[0]), dot(g, VG[1]), dot(g, VG[2]), dot(g, VG[3]));
+        if (m > cut) {
+          const a = 0.55 * (1 - Math.acos(Math.min(1, m)) / DEG / HEAT_DEG);
+          const r = (c & 255) * (1 - a) + 222 * a;
+          const gg = ((c >> 8) & 255) * (1 - a) + 48 * a;
+          const b = ((c >> 16) & 255) * (1 - a) + 48 * a;
+          c = 0xff000000 | (b << 16) | (gg << 8) | r;
+        }
+      }
+      out[k] = c;
+    }
+  }
+  bctx.putImageData(img, 0, 0);
+}
+
+function renderCover() {
+  const W = cover.canvas.width, H = cover.canvas.height;
+  if (cover.buf.width !== W || cover.buf.height !== H) { cover.buf.width = W; cover.buf.height = H; }
+  const bctx = cover.buf.getContext('2d');
+  const img = bctx.createImageData(W, H);
+  const out = new Uint32Array(img.data.buffer);
+  const ca = rgbOf(cssVar('--a')), cb = rgbOf(cssVar('--b'));
+  const [VA, VB] = [views[0].VG, views[1].VG];
+  let k = 0;
+  for (let py = 0; py < H; py++) {
+    const lat = (0.5 - (py + 0.5) / H) * Math.PI;
+    for (let px = 0; px < W; px++, k++) {
+      const lon = ((px + 0.5) / W - 0.5) * 2 * Math.PI;
+      const g = [Math.cos(lat) * Math.cos(lon), Math.cos(lat) * Math.sin(lon), Math.sin(lat)];
+      const mA = Math.max(dot(g, VA[0]), dot(g, VA[1]), dot(g, VA[2]), dot(g, VA[3]));
+      const mB = Math.max(dot(g, VB[0]), dot(g, VB[1]), dot(g, VB[2]), dot(g, VB[3]));
+      const t = mA < mB ? ca : cb;   // 離角落越遠（內積越小）越好
+      const c = texel(g);
+      const lum = 0.3 * (c & 255) + 0.59 * ((c >> 8) & 255) + 0.11 * ((c >> 16) & 255);
+      const r = lum * 0.5 + t[0] * 0.5, gg = lum * 0.5 + t[1] * 0.5, b = lum * 0.5 + t[2] * 0.5;
+      out[k] = 0xff000000 | (b << 16) | (gg << 8) | r;
+    }
+  }
+  bctx.putImageData(img, 0, 0);
+}
+
+function marker(ctx, x, y) {
+  const r = 7 * dpr;
+  ctx.lineWidth = 3.5 * dpr; ctx.strokeStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.stroke();
+  ctx.lineWidth = 2 * dpr; ctx.strokeStyle = '#111111';
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI);
+  ctx.moveTo(x - r * 1.8, y); ctx.lineTo(x - r * 0.5, y);
+  ctx.moveTo(x + r * 0.5, y); ctx.lineTo(x + r * 1.8, y);
+  ctx.moveTo(x, y - r * 1.8); ctx.lineTo(x, y - r * 0.5);
+  ctx.moveTo(x, y + r * 0.5); ctx.lineTo(x, y + r * 1.8);
+  ctx.stroke();
+}
+
+function composeView(v) {
+  const { ctx, canvas } = v;
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(v.buf, 0, 0, canvas.width, canvas.height);
+  if (state.hover) {
+    const [x, y] = geoToPlane(state.hover, v.M);
+    const s = canvas.width / MAP_W;
+    marker(ctx, x * s, (MAP_H - y) * s);
+  }
+}
+
+function lonLatPx(g, W, H) {
+  const lon = Math.atan2(g[1], g[0]), lat = Math.asin(Math.max(-1, Math.min(1, g[2])));
+  return [(lon / (2 * Math.PI) + 0.5) * W, (0.5 - lat / Math.PI) * H];
+}
+
+function composeCover() {
+  const { ctx, canvas } = cover;
+  const W = canvas.width, H = canvas.height;
+  ctx.drawImage(cover.buf, 0, 0);
+  const s = 6 * dpr;
+  ctx.lineWidth = 1.5 * dpr; ctx.strokeStyle = '#ffffff';
+  ctx.fillStyle = cssVar('--a');
+  for (const g of views[0].VG) {
+    const [x, y] = lonLatPx(g, W, H);
+    ctx.beginPath(); ctx.moveTo(x, y - s); ctx.lineTo(x + s, y + s * 0.8); ctx.lineTo(x - s, y + s * 0.8); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+  }
+  ctx.fillStyle = cssVar('--b');
+  for (const g of views[1].VG) {
+    const [x, y] = lonLatPx(g, W, H);
+    ctx.beginPath(); ctx.arc(x, y, s * 0.8, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+  }
+  if (state.hover) {
+    const [x, y] = lonLatPx(state.hover, W, H);
+    marker(ctx, x, y);
+  }
+}
+
+function composeAll() {
+  for (const v of views) composeView(v);
+  composeCover();
+}
+
+let pending = false, interacting = false, settleTimer = 0;
+function requestDraw() {
+  if (pending || !tex32) return;
+  pending = true;
+  requestAnimationFrame(() => {
+    pending = false;
+    const q = interacting ? 0.4 : 1;
+    for (const v of views) renderView(v, q);
+    renderCover();
+    composeAll();
+  });
+}
+function touch() {
+  interacting = true;
+  clearTimeout(settleTimer);
+  settleTimer = setTimeout(() => { interacting = false; requestDraw(); }, 160);
+  requestDraw();
+}
+
+// ---------------------------------------------------------------------------
+// 互動
+// ---------------------------------------------------------------------------
+const info = document.getElementById('info');
+
+function setHover(g) {
+  state.hover = g;
+  if (tex32) composeAll();
+  if (!g) return;
+  const f = countryAt(g);
+  const lon = Math.atan2(g[1], g[0]) / DEG, lat = Math.asin(Math.max(-1, Math.min(1, g[2]))) / DEG;
+  const dA = cornerDist(g, views[0].VG), dB = cornerDist(g, views[1].VG);
+  const pick = dA >= dB ? ['A', '--a'] : ['B', '--b'];
+  info.classList.remove('muted');
+  info.innerHTML =
+    `<div class="name">${f ? f.properties.name : '海洋'}</div>` +
+    `<div class="muted">${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'}　${Math.abs(lon).toFixed(1)}°${lon >= 0 ? 'E' : 'W'}</div>` +
+    `<table><tr><td>方向 A 離角落</td><td>${dA.toFixed(1)}°</td></tr>` +
+    `<tr><td>方向 B 離角落</td><td>${dB.toFixed(1)}°</td></tr></table>` +
+    `<div class="pick" style="color:var(${pick[1]})">→ 用方向 ${pick[0]} 辨識</div>`;
+}
+
+views.forEach(v => {
+  const c = v.canvas;
+  let drag = null;
+  const geoAt = e => {
+    const r = c.getBoundingClientRect();
+    const g = [0, 0, 0];
+    planeToGeo((e.clientX - r.left) / r.width * MAP_W, MAP_H - (e.clientY - r.top) / r.height * MAP_H, v.M, g);
+    return g;
+  };
+  c.addEventListener('pointerdown', e => {
+    c.setPointerCapture(e.pointerId);
+    drag = { x: e.clientX, y: e.clientY };
+    c.classList.add('dragging');
+    setHover(geoAt(e));
+  });
+  c.addEventListener('pointermove', e => {
+    if (!drag) { setHover(geoAt(e)); return; }
+    const k = 90 / (c.clientWidth / MAP_W);
+    state.yaw = (state.yaw - (e.clientX - drag.x) * k + 540) % 360 - 180;
+    state.pitch = Math.max(-90, Math.min(90, state.pitch + (e.clientY - drag.y) * k));
+    drag.x = e.clientX; drag.y = e.clientY;
+    state.hover = null;
+    updateMatrices();
+    touch();
+  });
+  const end = () => { drag = null; c.classList.remove('dragging'); };
+  c.addEventListener('pointerup', end);
+  c.addEventListener('pointercancel', end);
+});
+cover.canvas.addEventListener('pointermove', e => {
+  const r = cover.canvas.getBoundingClientRect();
+  const lon = ((e.clientX - r.left) / r.width * 360 - 180), lat = 90 - (e.clientY - r.top) / r.height * 180;
+  setHover(fromLonLat(lon, lat));
+});
+
+document.getElementById('heat').addEventListener('change', e => { state.heat = e.target.checked; requestDraw(); });
+document.getElementById('equal').addEventListener('change', e => {
+  state.equal = e.target.checked;
+  requestDraw();
+  if (state.hover) setHover(state.hover);
+});
+const offsetInput = document.getElementById('offset');
+offsetInput.addEventListener('input', () => {
+  state.offset = +offsetInput.value;
+  updateMatrices();
+  updateStat();
+  touch();
+});
+document.getElementById('reset').onclick = () => {
+  state.yaw = state.pitch = 0;
+  state.offset = 180;
+  offsetInput.value = 180;
+  updateMatrices();
+  updateStat();
+  requestDraw();
+};
+window.addEventListener('resize', () => { resize(); requestDraw(); });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', requestDraw);
+
+// ---------------------------------------------------------------------------
+// 啟動
+// ---------------------------------------------------------------------------
+resize();
+updateMatrices();
+updateStat();
+fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(data => {
+    topo = data;
+    features = topojson.feature(topo, topo.objects.countries).features;
+    assignColors();
+    buildTextures();
+    document.getElementById('status').remove();
+    requestDraw();
+  })
+  .catch(err => {
+    document.getElementById('status').textContent = '地圖資料載入失敗，請確認網路連線後重新整理。（' + err.message + '）';
+  });
+</script>
+</body>
+</html>

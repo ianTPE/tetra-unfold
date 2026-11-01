@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>四面體世界地圖</title>
+<style>
+  :root {
+    --bg: #cfe9f0;
+    --panel: rgba(255, 255, 255, 0.92);
+    --text: #1d3340;
+    --muted: #5b7380;
+    --line: #d3e2e8;
+    --accent: #1f8fbf;
+    --accent-text: #ffffff;
+    --shadow: 0 4px 18px rgba(20, 60, 80, 0.15);
+    --route: #d9381e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1a20;
+      --panel: rgba(18, 30, 38, 0.92);
+      --text: #e3eef2;
+      --muted: #96aeb9;
+      --line: #2c4250;
+      --accent: #5cc0e8;
+      --accent-text: #08202b;
+      --shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+      --route: #ff6b4a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1a20;
+    --panel: rgba(18, 30, 38, 0.92);
+    --text: #e3eef2;
+    --muted: #96aeb9;
+    --line: #2c4250;
+    --accent: #5cc0e8;
+    --accent-text: #08202b;
+    --shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+    --route: #ff6b4a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+  }
+  #map {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    display: block; cursor: grab; touch-action: none;
+  }
+  #map.dragging { cursor: grabbing; }
+  .panel {
+    position: fixed; top: 16px; left: 16px;
+    width: min(300px, calc(100vw - 32px));
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; box-shadow: var(--shadow);
+    padding: 14px 16px; backdrop-filter: blur(6px);
+    max-height: calc(100vh - 32px); overflow-y: auto;
+  }
+  .panel details + details { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+  .panel h1 { font-size: 17px; margin: 0; letter-spacing: 0.02em; }
+  .panel .sub { color: var(--muted); font-size: 12.5px; margin: 2px 0 10px; }
+  .panel details > summary {
+    cursor: pointer; color: var(--muted); font-size: 12.5px; list-style: none; user-select: none;
+  }
+  .panel details > summary::before { content: "▸ "; }
+  .panel details[open] > summary::before { content: "▾ "; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0; }
+  .row label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
+  input[type="range"] { accent-color: var(--accent); flex: 1; min-width: 0; }
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    border: 0; background: transparent; color: var(--text);
+    padding: 5px 10px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  .seg button.on { background: var(--accent); color: var(--accent-text); }
+  .btns { display: flex; gap: 6px; margin-top: 10px; }
+  .btns button {
+    flex: 1; border: 1px solid var(--line); background: transparent; color: var(--text);
+    border-radius: 8px; padding: 6px 0; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  .btns button:hover, .seg button:not(.on):hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .search { display: flex; gap: 6px; margin-top: 8px; }
+  .search input {
+    flex: 1; min-width: 0; border: 1px solid var(--line); background: transparent; color: var(--text);
+    border-radius: 8px; padding: 5px 8px; font: inherit; font-size: 13px;
+  }
+  .search button {
+    border: 1px solid var(--line); background: transparent; color: var(--text);
+    border-radius: 8px; padding: 0 10px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  #stops { list-style: none; margin: 8px 0 0; padding: 0; }
+  #stops li { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  #stops .num {
+    flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--route); color: #fff;
+    font-size: 11.5px; display: flex; align-items: center; justify-content: center;
+  }
+  #stops .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #stops .leg { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  #stops button { border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 0 2px; font: inherit; }
+  #stops button:hover:not(:disabled) { color: var(--text); }
+  #stops button:disabled { opacity: 0.3; cursor: default; }
+  #tripSummary { font-size: 13px; margin-top: 8px; }
+  #tripSummary b { font-size: 15px; }
+  #tripSummary .note { color: var(--muted); font-size: 12px; }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+  .hint p { margin: 2px 0; }
+  #tip {
+    position: fixed; pointer-events: none; display: none;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    box-shadow: var(--shadow); padding: 4px 8px; font-size: 12.5px; white-space: nowrap;
+  }
+  #tip b { display: block; font-size: 13px; }
+  #tip span { color: var(--muted); }
+  #status {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 15px; pointer-events: none; padding: 16px; text-align: center;
+  }
+</style>
+</head>
+<body>
+<canvas id="map"></canvas>
+<div id="status">載入地圖資料中…</div>
+<div id="tip"></div>
+
+<div class="panel">
+  <h1>四面體世界地圖</h1>
+  <div class="sub">AuthaGraph 風格的近似實作</div>
+  <details open>
+    <summary>設定</summary>
+    <div class="row"><label><input type="checkbox" id="tiled" checked> 無縫拼接</label></div>
+    <div class="row"><label><input type="checkbox" id="equal"> 面積校正（關閉時，同一面內的航線是直線）</label></div>
+    <div class="row"><label><input type="checkbox" id="folds"> 顯示四面體摺線</label></div>
+    <div class="row"><label><input type="checkbox" id="grat" checked> 經緯網</label></div>
+    <div class="row"><label><input type="checkbox" id="limit" checked> 上下拖曳限制在北極、南極之間</label></div>
+    <div class="row">
+      <span>翻轉</span>
+      <input type="range" id="roll" min="-180" max="180" step="1" value="0">
+    </div>
+    <div class="row">
+      <span>拖曳</span>
+      <div class="seg" id="mode">
+        <button data-mode="rotate" class="on">轉動地球</button>
+        <button data-mode="pan">平移畫面</button>
+      </div>
+    </div>
+    <div class="btns">
+      <button id="zoomIn" aria-label="放大">＋</button>
+      <button id="zoomOut" aria-label="縮小">－</button>
+      <button id="reset">重設</button>
+    </div>
+    <div class="btns">
+      <button id="toNorth">北極在上</button>
+      <button id="toSouth">南極在下</button>
+    </div>
+    <div class="hint">
+      <p>拖曳：轉動地球（Shift + 拖曳：平移）</p>
+      <p>上下拖曳：北極、南極沿著中央的邊移動</p>
+      <p>滾輪：縮放　滑過國家：顯示名稱</p>
+      <p><a href="dual.html" style="color:var(--accent)">雙方向展開比較 →</a></p>
+    </div>
+  </details>
+  <details open>
+    <summary>出差路線</summary>
+    <div class="search">
+      <input type="text" id="apSearch" list="apList" placeholder="機場代碼、城市或機場名，例如 TPE、倫敦" autocomplete="off">
+      <button id="apAdd">加入</button>
+    </div>
+    <datalist id="apList"></datalist>
+    <ol id="stops"></ol>
+    <div class="row"><label><input type="checkbox" id="roundTrip" checked> 最後回到出發地</label></div>
+    <div class="btns">
+      <button id="optimize">算最順的順序</button>
+      <button id="clearTrip">清除</button>
+    </div>
+    <div id="tripSummary"></div>
+    <div class="hint">
+      <p>在地圖上點機場（小圓點）也可以加入。</p>
+      <p>「算最順的順序」會固定第一站當出發地，排出總距離最短的走法。</p>
+      <p>距離是大圓距離（最短飛行距離），實際航線通常會長一些。</p>
+    </div>
+  </details>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+// ---------------------------------------------------------------------------
+// 幾何設定
+//
+// 格子座標 (x, y)：用邊長 1 的正三角形格子鋪滿，有一組邊是水平的。
+// 正四面體的表面 = 平面 ÷（繞每個格點轉 180°）。格點 (i, j) 依奇偶分成 4 類，
+// 正好對應四面體的 4 個頂點；每個小三角形就是四面體的一個面。
+//
+// 畫面座標 (X, Y)：把格子轉 90°，讓一條邊直立在地圖的垂直中線上，
+// 兩端的頂點分別在上邊中央和下邊中央。地圖是 √3 × 1 的長方形，
+// 內部沒有頂點，四個邊的中點各有一個頂點；繞這些點轉 180° 就得到
+// 上下左右相鄰的地圖，所以可以無限拼接。
+// ---------------------------------------------------------------------------
+const SQ3 = Math.sqrt(3);
+const ROW = SQ3 / 2;                 // 一列三角形的高度
+const MAP_W = SQ3, MAP_H = 1;
+// 畫面 → 格子：(x, y) = (Y, ROW − X)，是轉 90°，不是鏡射
+const dispToLat = (X, Y) => [Y, ROW - X];
+const latToDisp = (x, y) => [ROW - y, x];
+const TW = 4096, TH = 2048;          // 等距圓柱貼圖大小
+const COLORS = ['#2b9cc8', '#ee7b30', '#9cbb4a', '#f3c641', '#b9926a'];
+const OCEAN = '#cbe7ef';
+const DEG = Math.PI / 180;
+
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const norm = a => { const l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, a[1] / l, a[2] / l]; };
+const fromLonLat = (lon, lat) => [Math.cos(lat * DEG) * Math.cos(lon * DEG), Math.cos(lat * DEG) * Math.sin(lon * DEG), Math.sin(lat * DEG)];
+
+// 四面體頂點（單位球上），格點類別 k = (i&1) + 2*(j&1)
+const V = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]].map(norm);
+// 讓三角形 (0,0)(1,0)(0,1) 從外面看是逆時針，地圖才不會左右顛倒
+if (dot(cross(sub(V[1], V[0]), sub(V[2], V[0])), V[3]) > 0) [V[1], V[2]] = [V[2], V[1]];
+const VX = V.map(v => v[0]), VY = V.map(v => v[1]), VZ = V.map(v => v[2]);
+
+// 畫面上的頂點：上邊中央 = 頂點 1、下邊中央 = 頂點 0、左邊中點 = 頂點 2、右邊中點 = 頂點 3。
+// 中央直立的邊是頂點 0–1。
+//
+// 基本擺法 B：頂點 1 在北極，頂點 0 在經度 0、南緯 19.47°（離北極 109.47°），
+// 頂點 2、3 在經度 ±120°、南緯 19.47°。之後再整個轉到中央經線 CENTER_LON。
+// 上下拖曳時繞「垂直於中央經線的水平軸」轉，北極和南極就沿著中央那條邊上下移動。
+const CENTER_LON = 90;            // 用國界資料算過：北極、南極兩種擺法的角落頂點都離陸地最遠
+const EDGE = Math.acos(-1 / 3) / DEG;          // 四面體一條邊在球面上的角度 109.47°
+const SOUTH_PITCH = 180 - EDGE;               // 轉這麼多，南極就落在下邊中央的頂點
+function baseMatrix() {
+  const S = 90 - EDGE;
+  const G = [[0, S], [0, 90], [120, S], [-120, S]].map(p => fromLonLat(p[0], p[1]));
+  const build = g => {
+    const M = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    for (let k = 0; k < 4; k++)
+      for (let r = 0; r < 3; r++)
+        for (let c = 0; c < 3; c++) M[r][c] += 0.75 * g[k][r] * V[k][c];
+    return M;
+  };
+  let M = build(G);
+  // 頂點 2、3 對調只會左右交換，用來修正鏡像
+  if (dot(M[0], cross(M[1], M[2])) < 0) { [G[2], G[3]] = [G[3], G[2]]; M = build(G); }
+  // 浮點誤差，正交化一下
+  const c0 = norm([M[0][0], M[1][0], M[2][0]]);
+  let c1 = [M[0][1], M[1][1], M[2][1]];
+  const d = dot(c0, c1);
+  c1 = norm([c1[0] - d * c0[0], c1[1] - d * c0[1], c1[2] - d * c0[2]]);
+  const c2 = cross(c0, c1);
+  return [[c0[0], c1[0], c2[0]], [c0[1], c1[1], c2[1]], [c0[2], c1[2], c2[2]]];
+}
+const R0 = baseMatrix();
+
+function matMul(A, B) {
+  const C = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+  for (let r = 0; r < 3; r++)
+    for (let c = 0; c < 3; c++) C[r][c] = A[r][0] * B[0][c] + A[r][1] * B[1][c] + A[r][2] * B[2][c];
+  return C;
+}
+function rotZ(a) { const c = Math.cos(a), s = Math.sin(a); return [[c, -s, 0], [s, c, 0], [0, 0, 1]]; }
+function rotY(a) { const c = Math.cos(a), s = Math.sin(a); return [[c, 0, s], [0, 1, 0], [-s, 0, c]]; }
+function rotX(a) { const c = Math.cos(a), s = Math.sin(a); return [[1, 0, 0], [0, c, -s], [0, s, c]]; }
+
+// ---------------------------------------------------------------------------
+// 狀態
+// ---------------------------------------------------------------------------
+const state = {
+  tiled: true, equal: false, folds: false, grat: true, limit: true,
+  yaw: 0, pitch: 0, roll: 0,
+  cx: MAP_W / 2, cy: MAP_H / 2, scale: 300,
+  mode: 'rotate',
+};
+let M = R0;
+let geoVersion = 0;                  // 方向或投影模式改變時加一，用來更新機場位置的快取
+function updateMatrix() {
+  geoVersion++;
+  M = matMul(rotZ((CENTER_LON + state.yaw) * DEG), matMul(rotY(state.pitch * DEG), matMul(rotX(state.roll * DEG), R0)));
+}
+
+// 畫面座標 (X, Y) → 地理座標的單位向量，寫入 out
+function planeToGeo(X, Y, out) {
+  const x = Y, y = ROW - X;
+  const b = y / ROW, a = x - b * 0.5;
+  const i = Math.floor(a), j = Math.floor(b);
+  const fa = a - i, fb = b - j;
+  const ci = i & 1, cj = j & 1;
+  let k0, k1, k2, w0, w1, w2;
+  if (fa + fb < 1) {                 // 向上的三角形 (i,j)(i+1,j)(i,j+1)
+    k0 = ci + 2 * cj; k1 = (ci ^ 1) + 2 * cj; k2 = ci + 2 * (cj ^ 1);
+    w0 = 1 - fa - fb; w1 = fa; w2 = fb;
+  } else {                           // 向下的三角形 (i+1,j+1)(i+1,j)(i,j+1)
+    k0 = (ci ^ 1) + 2 * (cj ^ 1); k1 = (ci ^ 1) + 2 * cj; k2 = ci + 2 * (cj ^ 1);
+    w0 = fa + fb - 1; w1 = 1 - fb; w2 = 1 - fa;
+  }
+  // 四面體面上的點（離球心 1/3）
+  const qx = w0 * VX[k0] + w1 * VX[k1] + w2 * VX[k2];
+  const qy = w0 * VY[k0] + w1 * VY[k1] + w2 * VY[k2];
+  const qz = w0 * VZ[k0] + w1 * VZ[k1] + w2 * VZ[k2];
+  let px, py, pz;
+  if (state.equal) {
+    // 面積校正：沿著從面中心出發的每條射線重新分配距離，
+    // 讓每個細扇形裡的球面面積和平面面積成比例，邊界保持不動
+    const opp = 6 - k0 - k1 - k2;
+    const nx = -VX[opp], ny = -VY[opp], nz = -VZ[opp];
+    const dx = qx - nx / 3, dy = qy - ny / 3, dz = qz - nz / 3;
+    const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    const t = 1 - 3 * Math.min(w0, w1, w2);
+    if (r < 1e-12 || t < 1e-12) { px = nx; py = ny; pz = nz; }
+    else {
+      const re = r / t;
+      const cosEdge = 1 / Math.sqrt(1 + 9 * re * re);
+      const cosT = 1 - t * t * (1 - cosEdge);
+      const sinT = Math.sqrt(Math.max(0, 1 - cosT * cosT)) / r;
+      px = nx * cosT + dx * sinT; py = ny * cosT + dy * sinT; pz = nz * cosT + dz * sinT;
+    }
+  } else {
+    // 單純的心射投影：直接從球心把面上的點推到球面
+    const l = Math.sqrt(qx * qx + qy * qy + qz * qz);
+    px = qx / l; py = qy / l; pz = qz / l;
+  }
+  out[0] = M[0][0] * px + M[0][1] * py + M[0][2] * pz;
+  out[1] = M[1][0] * px + M[1][1] * py + M[1][2] * pz;
+  out[2] = M[2][0] * px + M[2][1] * py + M[2][2] * pz;
+}
+
+// planeToGeo 的反函數：地理座標的單位向量 → 畫面座標 (X, Y)。
+// 地圖無限拼接，同一個地點有很多份；這裡回傳其中一份，其他的用 copyTransforms 取得。
+// UP_TRI[opp]：格子裡對頂點是 opp 的向上三角形，三個頂點的 [類別, x, y]
+const UP_TRI = [0, 1, 2, 3].map(opp => {
+  const ci = (opp & 1) ^ 1, cj = (opp >> 1) ^ 1;
+  const pos = (i, j) => [i + j / 2, j * ROW];
+  return [[ci + 2 * cj, ...pos(ci, cj)], [(ci ^ 1) + 2 * cj, ...pos(ci + 1, cj)], [ci + 2 * (cj ^ 1), ...pos(ci, cj + 1)]];
+});
+function geoToPlane(g) {
+  // 世界座標 → 四面體本體座標（M 是旋轉矩陣，反矩陣就是轉置）
+  const px = M[0][0] * g[0] + M[1][0] * g[1] + M[2][0] * g[2];
+  const py = M[0][1] * g[0] + M[1][1] * g[1] + M[2][1] * g[2];
+  const pz = M[0][2] * g[0] + M[1][2] * g[1] + M[2][2] * g[2];
+  // 落在哪一面：離哪個頂點最遠，就是那個頂點對面的面
+  let opp = 0, md = Infinity;
+  for (let k = 0; k < 4; k++) { const d = px * VX[k] + py * VY[k] + pz * VZ[k]; if (d < md) { md = d; opp = k; } }
+  const nx = -VX[opp], ny = -VY[opp], nz = -VZ[opp];
+  const pn = px * nx + py * ny + pz * nz;          // 和面中心夾角的 cos
+  let qx = px / (3 * pn), qy = py / (3 * pn), qz = pz / (3 * pn);   // 從球心射到面上
+  const tri = UP_TRI[opp];
+  // 正四面體頂點兩兩內積 −1/3，所以重心座標 w = (3·q·V + 1) / 4
+  const bary = (x, y, z) => tri.map(([k]) => (3 * (x * VX[k] + y * VY[k] + z * VZ[k]) + 1) / 4);
+  let w = bary(qx, qy, qz);
+  if (state.equal) {
+    // 面積校正的反運算：沿同一條射線，把角度換回平面上的距離
+    const dx = qx - nx / 3, dy = qy - ny / 3, dz = qz - nz / 3;
+    const r = Math.hypot(dx, dy, dz), tg = 1 - 3 * Math.min(w[0], w[1], w[2]);
+    if (r > 1e-12 && tg > 1e-12) {
+      const re = r / tg, cosE = 1 / Math.sqrt(1 + 9 * re * re);
+      const t = Math.sqrt(Math.max(0, (1 - pn) / (1 - cosE)));
+      const f = re * t / r;
+      qx = nx / 3 + dx * f; qy = ny / 3 + dy * f; qz = nz / 3 + dz * f;
+      w = bary(qx, qy, qz);
+    }
+  }
+  return latToDisp(w[0] * tri[0][1] + w[1] * tri[1][1] + w[2] * tri[2][1],
+                   w[0] * tri[0][2] + w[1] * tri[1][2] + w[2] * tri[2][2]);
+}
+
+// 拼接的對稱：平移 a·(0, 2) + b·(√3, 1)，以及先繞上邊中央 (ROW, 1) 轉 180° 再平移。
+// 每個元素 [s, ox, oy] 表示 (X, Y) → (s·X + ox, s·Y + oy)。列出會落在 [x0,x1]×[y0,y1] 附近的那些。
+function copyTransforms(x0, x1, y0, y1) {
+  const out = [];
+  for (let b = Math.floor((x0 - MAP_W) / SQ3) - 1; b <= Math.ceil(x1 / SQ3) + 1; b++) {
+    for (let a = Math.floor((y0 - b - 2) / 2) - 1; a <= Math.ceil((y1 - b + 1) / 2) + 1; a++) {
+      const tx = b * SQ3, ty = 2 * a + b;
+      out.push([1, tx, ty], [-1, 2 * ROW + tx, 2 + ty]);
+    }
+  }
+  return out;
+}
+// 同一個地點離 ref 最近的那一份
+function nearestCopy(P, ref) {
+  let best = P, bd = Infinity;
+  for (const [s, ox, oy] of copyTransforms(ref[0] - 2, ref[0] + 2, ref[1] - 2, ref[1] + 2)) {
+    const X = s * P[0] + ox, Y = s * P[1] + oy, d = (X - ref[0]) ** 2 + (Y - ref[1]) ** 2;
+    if (d < bd) { bd = d; best = [X, Y]; }
+  }
+  return best;
+}
+
+// ---------------------------------------------------------------------------
+// 貼圖：先把世界地圖畫成等距圓柱投影，再逐像素反查
+// ---------------------------------------------------------------------------
+let topo, features, colorIdx;
+let tex32, texDim32;                 // 正常 / 拼接區外淡化
+let ids32, IW = 2048, IH = 1024;    // 國家編號貼圖，用來顯示滑過的國名
+
+function assignColors() {
+  const geoms = topo.objects.countries.geometries;
+  const nb = topojson.neighbors(geoms);
+  const order = d3.range(geoms.length).sort((a, b) => nb[b].length - nb[a].length);
+  const used = new Array(COLORS.length).fill(0);
+  colorIdx = new Array(geoms.length).fill(-1);
+  for (const i of order) {
+    const taken = new Set(nb[i].map(n => colorIdx[n]));
+    let best = -1;
+    for (let c = 0; c < COLORS.length; c++)
+      if (!taken.has(c) && (best < 0 || used[c] < used[best])) best = c;
+    if (best < 0) best = i % COLORS.length;
+    colorIdx[i] = best;
+    used[best]++;
+  }
+}
+
+function buildTexture() {
+  const cv = document.createElement('canvas');
+  cv.width = TW; cv.height = TH;
+  const ctx = cv.getContext('2d');
+  const proj = d3.geoEquirectangular().scale(TW / (2 * Math.PI)).translate([TW / 2, TH / 2]);
+  const path = d3.geoPath(proj, ctx);
+
+  ctx.fillStyle = OCEAN;
+  ctx.fillRect(0, 0, TW, TH);
+  if (state.grat) {
+    ctx.beginPath(); path(d3.geoGraticule().step([15, 15])());
+    ctx.strokeStyle = 'rgba(70, 140, 165, 0.35)'; ctx.lineWidth = 2; ctx.stroke();
+  }
+  features.forEach((f, i) => {
+    ctx.beginPath(); path(f);
+    ctx.fillStyle = f.id === '010' ? '#fbfdfe' : COLORS[colorIdx[i]];
+    ctx.fill();
+  });
+  ctx.beginPath(); path(topojson.mesh(topo, topo.objects.countries, (a, b) => a !== b));
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)'; ctx.lineWidth = 1.6; ctx.stroke();
+  ctx.beginPath(); path(topojson.mesh(topo, topo.objects.countries, (a, b) => a === b));
+  ctx.strokeStyle = 'rgba(30, 80, 100, 0.45)'; ctx.lineWidth = 1.4; ctx.stroke();
+
+  const data = ctx.getImageData(0, 0, TW, TH).data;
+  tex32 = new Uint32Array(data.buffer);
+  // 拼接區外：往白色混 35%
+  const dim = new Uint8ClampedArray(data.length);
+  for (let p = 0; p < data.length; p += 4) {
+    dim[p] = data[p] * 0.65 + 89;
+    dim[p + 1] = data[p + 1] * 0.65 + 89;
+    dim[p + 2] = data[p + 2] * 0.65 + 89;
+    dim[p + 3] = 255;
+  }
+  texDim32 = new Uint32Array(dim.buffer);
+}
+
+function buildIdTexture() {
+  const cv = document.createElement('canvas');
+  cv.width = IW; cv.height = IH;
+  const ctx = cv.getContext('2d');
+  const path = d3.geoPath(d3.geoEquirectangular().scale(IW / (2 * Math.PI)).translate([IW / 2, IH / 2]), ctx);
+  features.forEach((f, i) => {
+    const n = i + 1;
+    ctx.fillStyle = `rgb(${n & 255},${(n >> 8) & 255},0)`;
+    ctx.beginPath(); path(f); ctx.fill();
+  });
+  ids32 = new Uint32Array(ctx.getImageData(0, 0, IW, IH).data.buffer);
+}
+
+// ---------------------------------------------------------------------------
+// 繪製
+// ---------------------------------------------------------------------------
+const canvas = document.getElementById('map');
+const ctx = canvas.getContext('2d');
+const buf = document.createElement('canvas');
+const bctx = buf.getContext('2d');
+let dpr = 1, bgColor = 0;
+
+function readBg() {
+  const c = document.createElement('canvas'); c.width = c.height = 1;
+  const x = c.getContext('2d');
+  x.fillStyle = getComputedStyle(document.body).backgroundColor;
+  x.fillRect(0, 0, 1, 1);
+  bgColor = new Uint32Array(x.getImageData(0, 0, 1, 1).data.buffer)[0];
+}
+
+function resize() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(canvas.clientWidth * dpr);
+  canvas.height = Math.round(canvas.clientHeight * dpr);
+}
+
+function fitView() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  state.scale = Math.min(w * 0.9 / MAP_W, h * 0.8 / MAP_H);
+  state.cx = MAP_W / 2; state.cy = MAP_H / 2;
+}
+
+function draw(q) {
+  if (!tex32) return;
+  const W = Math.max(1, Math.round(canvas.width * q));
+  const H = Math.max(1, Math.round(canvas.height * q));
+  if (buf.width !== W || buf.height !== H) { buf.width = W; buf.height = H; }
+  const img = bctx.createImageData(W, H);
+  const out = new Uint32Array(img.data.buffer);
+  const S = state.scale * dpr * q;
+  const g = [0, 0, 0];
+  const tiled = state.tiled;
+  let k = 0;
+  for (let py = 0; py < H; py++) {
+    const y = state.cy - (py + 0.5 - H / 2) / S;
+    const rowIn = y >= 0 && y < MAP_H;
+    for (let px = 0; px < W; px++, k++) {
+      const x = state.cx + (px + 0.5 - W / 2) / S;
+      const inMain = rowIn && x >= 0 && x < MAP_W;
+      if (!inMain && !tiled) { out[k] = bgColor; continue; }
+      planeToGeo(x, y, g);
+      const lon = Math.atan2(g[1], g[0]);
+      const lat = Math.asin(Math.max(-1, Math.min(1, g[2])));
+      let u = ((lon / (2 * Math.PI) + 0.5) * TW) | 0;
+      let v = ((0.5 - lat / Math.PI) * TH) | 0;
+      if (u >= TW) u = TW - 1;
+      if (v >= TH) v = TH - 1;
+      out[k] = (inMain ? tex32 : texDim32)[v * TW + u];
+    }
+  }
+  bctx.putImageData(img, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
+  drawOverlay();
+}
+
+function toScreen(x, y) {
+  return [(canvas.clientWidth / 2 + (x - state.cx) * state.scale) * dpr,
+          (canvas.clientHeight / 2 - (y - state.cy) * state.scale) * dpr];
+}
+
+function drawOverlay() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  const x0 = state.cx - w / 2 / state.scale, x1 = state.cx + w / 2 / state.scale;
+  const y0 = state.cy - h / 2 / state.scale, y1 = state.cy + h / 2 / state.scale;
+  ctx.save();
+  if (state.folds) {
+    // 在格子座標裡畫摺線，再轉回畫面
+    const lx0 = y0, lx1 = y1, ly0 = ROW - x1, ly1 = ROW - x0;
+    const T = (x, y) => { const d = latToDisp(x, y); return toScreen(d[0], d[1]); };
+    ctx.strokeStyle = 'rgba(20, 50, 70, 0.45)';
+    ctx.lineWidth = 1 * dpr;
+    ctx.setLineDash([5 * dpr, 4 * dpr]);
+    ctx.beginPath();
+    for (let j = Math.floor(ly0 / ROW); j <= Math.ceil(ly1 / ROW); j++) {
+      const a = T(lx0, j * ROW), b = T(lx1, j * ROW);
+      ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+    }
+    // 斜線：x ∓ y/√3 = n
+    const span = (ly1 - ly0) / SQ3;
+    for (const s of [1, -1]) {
+      for (let n = Math.floor(lx0 - span) - 1; n <= Math.ceil(lx1 + span) + 1; n++) {
+        const a = T(n + s * ly0 / SQ3, ly0), b = T(n + s * ly1 / SQ3, ly1);
+        ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+      }
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // 四面體的四個頂點
+    const colors = ['#d43d3d', '#7a4fd0', '#1b9a6a', '#d08a12'];
+    for (let j = Math.floor(ly0 / ROW) - 1; j <= Math.ceil(ly1 / ROW) + 1; j++) {
+      for (let i = Math.floor(lx0 - j / 2) - 1; i <= Math.ceil(lx1 - j / 2) + 1; i++) {
+        const p = T(i + j / 2, j * ROW);
+        ctx.fillStyle = colors[(i & 1) + 2 * (j & 1)];
+        ctx.beginPath(); ctx.arc(p[0], p[1], 4 * dpr, 0, 2 * Math.PI); ctx.fill();
+      }
+    }
+  }
+  if (state.tiled) {
+    const a = toScreen(0, MAP_H), b = toScreen(MAP_W, 0);
+    ctx.strokeStyle = 'rgba(20, 50, 70, 0.7)';
+    ctx.lineWidth = 1.5 * dpr;
+    ctx.strokeRect(a[0], a[1], b[0] - a[0], b[1] - a[1]);
+  }
+  drawTrip(x0, x1, y0, y1);
+  ctx.restore();
+}
+
+// 拖曳中先用低解析度畫，停下來再畫完整的
+let pending = false, interacting = false, settleTimer = 0;
+function requestDraw() {
+  if (pending) return;
+  pending = true;
+  requestAnimationFrame(() => {
+    pending = false;
+    draw(interacting ? 0.4 : 1);
+  });
+}
+function touch() {
+  interacting = true;
+  clearTimeout(settleTimer);
+  settleTimer = setTimeout(() => { interacting = false; requestDraw(); }, 160);
+  requestDraw();
+}
+
+// ---------------------------------------------------------------------------
+// 互動
+// ---------------------------------------------------------------------------
+const tip = document.getElementById('tip');
+let drag = null;
+
+function screenToPlane(cx, cy) {
+  const r = canvas.getBoundingClientRect();
+  return [state.cx + (cx - r.left - r.width / 2) / state.scale,
+          state.cy - (cy - r.top - r.height / 2) / state.scale];
+}
+
+function placeTip(e) {
+  tip.style.display = 'block';
+  const tw = tip.offsetWidth;
+  const left = e.clientX + 14 + tw > window.innerWidth ? e.clientX - 14 - tw : e.clientX + 14;
+  tip.style.left = left + 'px';
+  tip.style.top = (e.clientY + 14) + 'px';
+}
+
+function showTip(e) {
+  const ap = pickAirport(e.clientX, e.clientY);
+  if (ap >= 0) {
+    const a = airports[ap];
+    tip.innerHTML = `<b>${a.iata}　${esc(a.zhName || a.name)}</b>` +
+      (a.zhName ? `<span>${esc(a.name)}</span><br>` : '') +
+      `<span>${esc(placeOf(a))}　·　點一下加入行程</span>`;
+    canvas.style.cursor = 'pointer';
+    placeTip(e);
+    return;
+  }
+  canvas.style.cursor = '';
+  if (!ids32) return;
+  const [x, y] = screenToPlane(e.clientX, e.clientY);
+  const inMain = x >= 0 && x < MAP_W && y >= 0 && y < MAP_H;
+  if (!state.tiled && !inMain) { tip.style.display = 'none'; return; }
+  const g = [0, 0, 0];
+  planeToGeo(x, y, g);
+  const lon = Math.atan2(g[1], g[0]) / DEG, lat = Math.asin(Math.max(-1, Math.min(1, g[2]))) / DEG;
+  const u = Math.min(IW - 1, ((lon / 360 + 0.5) * IW) | 0);
+  const v = Math.min(IH - 1, ((0.5 - lat / 180) * IH) | 0);
+  const px = ids32[v * IW + u];
+  const alpha = px >>> 24, n = (px & 255) + (((px >> 8) & 255) << 8);
+  const f = alpha === 255 && n > 0 && n <= features.length ? features[n - 1] : null;
+  const coord = `${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'}　${Math.abs(lon).toFixed(1)}°${lon >= 0 ? 'E' : 'W'}`;
+  tip.innerHTML = (f ? `<b>${f.properties.name}</b>` : '<b>海洋</b>') + `<span>${coord}</span>`;
+  placeTip(e);
+}
+
+canvas.addEventListener('pointerdown', e => {
+  canvas.setPointerCapture(e.pointerId);
+  drag = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, moved: false,
+           pan: state.mode === 'pan' || e.shiftKey || e.button === 2 };
+  canvas.classList.add('dragging');
+  tip.style.display = 'none';
+});
+canvas.addEventListener('pointermove', e => {
+  if (!drag) { if (e.pointerType === 'mouse') showTip(e); return; }
+  // 移動不到 4 像素當作點擊，不轉動地圖
+  if (!drag.moved && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 4) return;
+  drag.moved = true;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  drag.x = e.clientX; drag.y = e.clientY;
+  if (drag.pan) {
+    state.cx -= dx / state.scale;
+    state.cy += dy / state.scale;
+  } else {
+    const k = 90 / state.scale;      // 每像素轉幾度，放大時轉得比較細
+    state.yaw = (state.yaw - dx * k + 540) % 360 - 180;
+    // 往上拖：整個地球沿著中央的邊往上移，北極離開上邊中央，南極從下方移到下邊中央
+    // 有限制時：最北到北極對齊上邊中央，最南到南極對齊下邊中央
+    const p = state.pitch - dy * k;
+    state.pitch = state.limit ? Math.max(0, Math.min(SOUTH_PITCH, p)) : ((p % 360) + 540) % 360 - 180;
+    updateMatrix();
+  }
+  touch();
+});
+const endDrag = () => { drag = null; canvas.classList.remove('dragging'); };
+canvas.addEventListener('pointerup', e => {
+  const click = drag && !drag.moved && e.button === 0;
+  endDrag();
+  if (click) {
+    const ap = pickAirport(e.clientX, e.clientY);
+    if (ap >= 0) addStop(ap);
+  }
+});
+canvas.addEventListener('pointercancel', endDrag);
+canvas.addEventListener('pointerleave', () => { tip.style.display = 'none'; });
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+function zoomAt(factor, clientX, clientY) {
+  const before = screenToPlane(clientX, clientY);
+  state.scale = Math.max(40, Math.min(20000, state.scale * factor));
+  const after = screenToPlane(clientX, clientY);
+  state.cx += before[0] - after[0];
+  state.cy += before[1] - after[1];
+  touch();
+}
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX, e.clientY);
+}, { passive: false });
+document.getElementById('zoomIn').onclick = () => zoomAt(1.4, innerWidth / 2, innerHeight / 2);
+document.getElementById('zoomOut').onclick = () => zoomAt(1 / 1.4, innerWidth / 2, innerHeight / 2);
+
+document.getElementById('limit').addEventListener('change', e => {
+  state.limit = e.target.checked;
+  // 重新開啟限制時，把目前位置拉回範圍內
+  if (state.limit && (state.pitch < 0 || state.pitch > SOUTH_PITCH)) {
+    const gap = a => Math.abs(((state.pitch - a) % 360 + 540) % 360 - 180);   // 角度差（考慮繞一圈）
+    state.pitch = gap(0) <= gap(SOUTH_PITCH) ? 0 : SOUTH_PITCH;
+    updateMatrix();
+    requestDraw();
+  }
+});
+for (const id of ['tiled', 'equal', 'folds']) {
+  document.getElementById(id).addEventListener('change', e => { state[id] = e.target.checked; geoVersion++; requestDraw(); });
+}
+document.getElementById('grat').addEventListener('change', e => {
+  state.grat = e.target.checked;
+  buildTexture();
+  requestDraw();
+});
+const rollInput = document.getElementById('roll');
+rollInput.addEventListener('input', () => { state.roll = +rollInput.value; updateMatrix(); touch(); });
+document.getElementById('mode').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  state.mode = b.dataset.mode;
+  for (const x of e.currentTarget.children) x.classList.toggle('on', x === b);
+});
+function setPitch(p) {
+  state.yaw = state.roll = 0; rollInput.value = 0;
+  state.pitch = p;
+  updateMatrix();
+  requestDraw();
+}
+document.getElementById('toNorth').onclick = () => setPitch(0);
+document.getElementById('toSouth').onclick = () => setPitch(SOUTH_PITCH);
+document.getElementById('reset').onclick = () => {
+  state.yaw = state.pitch = state.roll = 0;
+  rollInput.value = 0;
+  updateMatrix();
+  fitView();
+  requestDraw();
+};
+
+window.addEventListener('resize', () => { resize(); requestDraw(); });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readBg(); requestDraw(); });
+
+// ---------------------------------------------------------------------------
+// 出差路線：機場、大圓航線、距離、最順的順序
+// ---------------------------------------------------------------------------
+const EARTH_R = 6371.0088;           // 地球平均半徑（公里）
+const MAX_STOPS = 10;
+let airports = [], apByCode = {};
+let apPlane = null, apPlaneVer = -1; // 每個機場在畫面上的一份位置，方向改變時重算
+const trip = { stops: [], legsCache: null, legsVer: -1, note: '' };
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const fmtKm = km => Math.round(km).toLocaleString('zh-TW') + ' 公里';
+const angBetween = (a, b) => Math.acos(Math.max(-1, Math.min(1, dot(a, b))));
+const legKm = (i, j) => angBetween(airports[i].v, airports[j].v) * EARTH_R;
+// 「城市，國家」，有中文就用中文
+const placeOf = a => [a.zhCity || a.city, a.country].filter(Boolean).join('，');
+const isRound = n => document.getElementById('roundTrip').checked && n > 2;
+
+// 小圓點：大型機場一直顯示；放大後也顯示中型機場
+const showMedium = () => state.scale > 1600;
+function airportPositions() {
+  if (apPlaneVer !== geoVersion) {
+    apPlane = airports.map(a => geoToPlane(a.v));
+    apPlaneVer = geoVersion;
+  }
+  return apPlane;
+}
+
+// 螢幕上離 (clientX, clientY) 12 像素內最近的機場，沒有就回傳 −1
+function pickAirport(clientX, clientY) {
+  if (!airports.length) return -1;
+  const P = screenToPlane(clientX, clientY);
+  if (!state.tiled && !(P[0] >= 0 && P[0] < MAP_W && P[1] >= 0 && P[1] < MAP_H)) return -1;
+  const pos = airportPositions(), lim = 12 / state.scale, med = showMedium();
+  const T = copyTransforms(P[0] - lim, P[0] + lim, P[1] - lim, P[1] + lim);
+  const near = [];                   // [機場, 螢幕上的距離（像素）]
+  airports.forEach((a, i) => {
+    if (!a.large && !med && !trip.stops.includes(i)) return;
+    const Q = pos[i];
+    let d = Infinity;
+    for (const [s, ox, oy] of T) d = Math.min(d, Math.hypot(s * Q[0] + ox - P[0], s * Q[1] + oy - P[1]));
+    if (d < lim) near.push([i, d * state.scale]);
+  });
+  if (!near.length) return -1;
+  // 幾個機場疊在一起（差不到 4 像素）時，選旅客最多的
+  const d0 = Math.min(...near.map(n => n[1]));
+  return near.filter(n => n[1] <= d0 + 4).sort((a, b) => airports[b[0]].pax - airports[a[0]].pax)[0][0];
+}
+
+// 每一段航線：沿大圓每 1° 取一點，投到畫面上，並讓相鄰的點選同一份拷貝，線才不會跳開
+function tripLegs() {
+  if (trip.legsVer === geoVersion && trip.legsCache) return trip.legsCache;
+  const st = trip.stops, n = st.length, legs = [];
+  const count = isRound(n) ? n : n - 1;
+  for (let k = 0; k < count; k++) {
+    const A = airports[st[k]].v, B = airports[st[(k + 1) % n]].v;
+    const ang = angBetween(A, B), sinA = Math.sin(ang);
+    if (ang < 1e-9 || sinA < 1e-9) continue;
+    const m = Math.max(2, Math.ceil(ang / DEG));
+    const pts = [];
+    let prev = null;
+    for (let i = 0; i <= m; i++) {
+      const t = i / m, wa = Math.sin((1 - t) * ang) / sinA, wb = Math.sin(t * ang) / sinA;
+      let P = geoToPlane([A[0] * wa + B[0] * wb, A[1] * wa + B[1] * wb, A[2] * wa + B[2] * wb]);
+      P = nearestCopy(P, prev || [MAP_W / 2, MAP_H / 2]);
+      pts.push(P); prev = P;
+    }
+    legs.push(pts);
+  }
+  trip.legsCache = legs; trip.legsVer = geoVersion;
+  return legs;
+}
+
+function drawTrip(x0, x1, y0, y1) {
+  if (!airports.length) return;
+  ctx.save();
+  if (!state.tiled) {
+    const a = toScreen(0, MAP_H), b = toScreen(MAP_W, 0);
+    ctx.beginPath(); ctx.rect(a[0], a[1], b[0] - a[0], b[1] - a[1]); ctx.clip();
+  }
+  const T = copyTransforms(x0, x1, y0, y1);
+  const inView = (X, Y, m) => X > x0 - m && X < x1 + m && Y > y0 - m && Y < y1 + m;
+  const pos = airportPositions(), med = showMedium();
+  // 機場小圓點
+  ctx.fillStyle = 'rgba(30, 45, 60, 0.55)';
+  ctx.beginPath();
+  const r = (med ? 2.6 : 2) * dpr;
+  airports.forEach((a, i) => {
+    if (!a.large && !med) return;
+    const Q = pos[i];
+    for (const [s, ox, oy] of T) {
+      const X = s * Q[0] + ox, Y = s * Q[1] + oy;
+      if (!inView(X, Y, 0)) continue;
+      const p = toScreen(X, Y);
+      ctx.moveTo(p[0] + r, p[1]); ctx.arc(p[0], p[1], r, 0, 2 * Math.PI);
+    }
+  });
+  ctx.fill();
+  // 航線：先畫白色外框，再畫顏色
+  const route = getComputedStyle(document.documentElement).getPropertyValue('--route').trim() || '#d9381e';
+  const legs = tripLegs();
+  for (const [lw, color] of [[6, 'rgba(255, 255, 255, 0.85)'], [2.6, route]]) {
+    ctx.strokeStyle = color; ctx.lineWidth = lw * dpr; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (const pts of legs) {
+      let bx0 = Infinity, bx1 = -Infinity, by0 = Infinity, by1 = -Infinity;
+      for (const [X, Y] of pts) { bx0 = Math.min(bx0, X); bx1 = Math.max(bx1, X); by0 = Math.min(by0, Y); by1 = Math.max(by1, Y); }
+      for (const [s, ox, oy] of T) {
+        const cx0 = s > 0 ? bx0 + ox : ox - bx1, cx1 = s > 0 ? bx1 + ox : ox - bx0;
+        const cy0 = s > 0 ? by0 + oy : oy - by1, cy1 = s > 0 ? by1 + oy : oy - by0;
+        if (cx1 < x0 || cx0 > x1 || cy1 < y0 || cy0 > y1) continue;
+        pts.forEach(([X, Y], i) => {
+          const p = toScreen(s * X + ox, s * Y + oy);
+          if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]);
+        });
+      }
+    }
+    ctx.stroke();
+  }
+  // 各站編號（同一個機場出現多次時，標第一次的編號）
+  ctx.font = `bold ${11 * dpr}px system-ui, sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const seen = new Set();
+  trip.stops.forEach((ap, k) => {
+    if (seen.has(ap)) return;
+    seen.add(ap);
+    const Q = pos[ap];
+    for (const [s, ox, oy] of T) {
+      const X = s * Q[0] + ox, Y = s * Q[1] + oy;
+      if (!inView(X, Y, 0.05)) continue;
+      const p = toScreen(X, Y);
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p[0], p[1], 10.5 * dpr, 0, 2 * Math.PI); ctx.fill();
+      ctx.fillStyle = route; ctx.beginPath(); ctx.arc(p[0], p[1], 9 * dpr, 0, 2 * Math.PI); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.fillText(String(k + 1), p[0], p[1] + 0.5 * dpr);
+    }
+  });
+  ctx.restore();
+}
+
+function tripChanged(note = '') {
+  trip.legsCache = null; trip.note = note;
+  renderTrip();
+  requestDraw();
+}
+function addStop(i) {
+  const st = trip.stops;
+  if (st.length && st[st.length - 1] === i) return;
+  if (st.length >= MAX_STOPS) { tripChanged(`最多 ${MAX_STOPS} 站。`); return; }
+  st.push(i);
+  tripChanged();
+}
+function tripLength(order) {
+  let s = 0;
+  for (let k = 0; k + 1 < order.length; k++) s += legKm(order[k], order[k + 1]);
+  if (isRound(order.length)) s += legKm(order[order.length - 1], order[0]);
+  return s;
+}
+function renderTrip() {
+  const st = trip.stops, list = document.getElementById('stops');
+  list.innerHTML = st.map((ap, k) => {
+    const a = airports[ap];
+    const leg = k ? fmtKm(legKm(st[k - 1], ap)) : '出發';
+    return `<li><span class="num">${k + 1}</span>` +
+      `<span class="name" title="${esc((a.zhName ? a.zhName + '\n' : '') + a.name)}">${a.iata} ${esc(a.zhCity || a.zhName || a.city || a.name)}</span>` +
+      `<span class="leg">${leg}</span>` +
+      `<button data-act="up" data-k="${k}" aria-label="往前移" ${k ? '' : 'disabled'}>↑</button>` +
+      `<button data-act="down" data-k="${k}" aria-label="往後移" ${k < st.length - 1 ? '' : 'disabled'}>↓</button>` +
+      `<button data-act="del" data-k="${k}" aria-label="刪除">×</button></li>`;
+  }).join('');
+  const sum = document.getElementById('tripSummary');
+  const note = trip.note ? `<span class="note">${trip.note}</span>` : '';
+  if (st.length < 2) {
+    sum.innerHTML = note || '<span class="note">加入兩個以上的機場，就會算出距離。</span>';
+    return;
+  }
+  const last = st[st.length - 1];
+  const back = isRound(st.length)
+    ? `<br><span class="note">最後一段 ${airports[last].iata} → ${airports[st[0]].iata}：${fmtKm(legKm(last, st[0]))}</span>` : '';
+  sum.innerHTML = `總距離 <b>${fmtKm(tripLength(st))}</b>${back}` + (note ? '<br>' + note : '');
+}
+document.getElementById('stops').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b || b.disabled) return;
+  const k = +b.dataset.k, st = trip.stops;
+  if (b.dataset.act === 'del') st.splice(k, 1);
+  else if (b.dataset.act === 'up') [st[k - 1], st[k]] = [st[k], st[k - 1]];
+  else if (b.dataset.act === 'down') [st[k + 1], st[k]] = [st[k], st[k + 1]];
+  tripChanged();
+});
+document.getElementById('roundTrip').addEventListener('change', () => tripChanged());
+document.getElementById('clearTrip').onclick = () => { trip.stops = []; tripChanged(); };
+
+// 最順的順序：第一站固定當出發地，其餘各站試遍所有排列（最多 9! = 362,880 種）
+document.getElementById('optimize').onclick = () => {
+  const st = trip.stops;
+  if (st.length < 3) { tripChanged('至少要三站才需要排順序。'); return; }
+  const before = tripLength(st);
+  const rest = st.slice(1), n = rest.length, c = new Array(n).fill(0);
+  let best = rest.slice(), bestLen = before;
+  // Heap's algorithm：每次只交換兩個元素，就能走過所有排列
+  for (let i = 0; i < n;) {
+    if (c[i] < i) {
+      const j = i % 2 ? c[i] : 0;
+      [rest[j], rest[i]] = [rest[i], rest[j]];
+      const len = tripLength([st[0], ...rest]);
+      if (len < bestLen - 1e-9) { bestLen = len; best = rest.slice(); }
+      c[i]++; i = 0;
+    } else { c[i] = 0; i++; }
+  }
+  trip.stops = [st[0], ...best];
+  const saved = before - bestLen;
+  tripChanged(saved > 0.5 ? `已重新排序：比原本少 ${fmtKm(saved)}。` : '目前的順序已經是最短的。');
+};
+
+// 搜尋用的正規化：不分大小寫，「台」「臺」視為相同
+const normText = t => String(t).toLowerCase().replace(/台/g, '臺');
+function findAirport(text) {
+  const t = text.trim();
+  if (!t) return -1;
+  const code = t.slice(0, 3).toUpperCase();
+  if (code in apByCode && (t.length === 3 || t[3] === ' ')) return apByCode[code];
+  const q = normText(t);
+  // 先找城市名完全相同的，再找名稱裡有這幾個字的（清單已經把大型機場排在前面）
+  // 依序找：城市名完全相同 → 國家名完全相同 → 名稱裡有這幾個字。同樣符合時，旅客最多的排在前面
+  let i = airports.findIndex(a => a.keys.cities.includes(q));
+  if (i < 0) i = airports.findIndex(a => a.keys.countries.includes(q));
+  if (i < 0) i = airports.findIndex(a => a.keys.all.includes(q));
+  return i;
+}
+function addFromSearch() {
+  const input = document.getElementById('apSearch');
+  const i = findAirport(input.value);
+  if (i < 0) { tripChanged(`找不到「${esc(input.value)}」。可以輸入三碼機場代碼、城市或機場名稱（中英文都可以）。`); return; }
+  input.value = '';
+  addStop(i);
+}
+document.getElementById('apAdd').onclick = addFromSearch;
+document.getElementById('apSearch').addEventListener('keydown', e => { if (e.key === 'Enter') addFromSearch(); });
+
+fetch('airports.json')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(data => {
+    // 國家中文名用瀏覽器內建的翻譯；不支援時用英文
+    let region = null;
+    try { region = new Intl.DisplayNames(['zh-Hant-TW', 'zh-Hant'], { type: 'region' }); } catch (e) { /* 用英文 */ }
+    const countryZh = cc => {
+      try { const n = region && region.of(cc); if (n && n !== cc) return n; } catch (e) { /* 用英文 */ }
+      return data.countries[cc] || cc;
+    };
+    // 清單已經依「大型機場優先、旅客人數多的優先」排好
+    airports = data.airports.map(([iata, name, city, cc, lat, lon, large, zhName, zhCity, zhCityAlt, paxM]) => {
+      const a = { iata, name, city, zhName: zhName || '', zhCity: zhCity || '', country: countryZh(cc),
+                  countryEn: data.countries[cc] || cc, lat, lon, large: !!large, pax: paxM || 0, v: fromLonLat(lon, lat) };
+      const cityNames = [a.zhCity, ...(zhCityAlt ? zhCityAlt.split('、') : [])].filter(Boolean);
+      a.keys = { cities: [...cityNames, ...cityNames.map(c => c.replace(/[市縣都]$/, '')), a.city].filter(Boolean).map(normText),
+                 countries: [a.country, a.countryEn].map(normText),
+                 all: normText([a.zhName, ...cityNames, a.name, a.city, a.country, a.countryEn].join('|')) };
+      return a;
+    });
+    airports.forEach((a, i) => { apByCode[a.iata] = i; });
+    document.getElementById('apList').innerHTML = airports.map(a =>
+      `<option value="${a.iata} ${esc(a.zhCity || a.city || a.zhName)}">${esc(a.zhName || a.name)}，${esc(a.country)}</option>`).join('');
+    renderTrip();
+    requestDraw();
+  })
+  .catch(err => { document.getElementById('tripSummary').textContent = '機場資料載入失敗（' + err.message + '）'; });
+
+// ---------------------------------------------------------------------------
+// 啟動
+// ---------------------------------------------------------------------------
+resize();
+readBg();
+fitView();
+updateMatrix();
+fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(data => {
+    topo = data;
+    features = topojson.feature(topo, topo.objects.countries).features;
+    assignColors();
+    buildTexture();
+    buildIdTexture();
+    document.getElementById('status').remove();
+    requestDraw();
+  })
+  .catch(err => {
+    document.getElementById('status').textContent = '地圖資料載入失敗，請確認網路連線後重新整理。（' + err.message + '）';
+  });
+</script>
+</body>
+</html>
