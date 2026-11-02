@@ -8,6 +8,8 @@ Die gesamte Kugeloberfläche wird auf ein **regelmäßiges Tetraeder** abgewicke
 
 Die Demo verwendet eine Weltkarte und ist von der [AuthaGraph-Weltkarte](https://www.authagraph.com/) von Hajime Narukawa inspiriert. Sie ist keine Implementierung von AuthaGraph: Dessen Algorithmus ist patentiert und nicht veröffentlicht, daher verwendet dieses Projekt eine eigene Annäherung. Dieselbe Methode lässt sich auch auf **Bilder von 360°-Kameras** anwenden, sodass ein KI-Modell die gesamte Kugel in einem einzigen flachen Bild sieht.
 
+![Demo: Ziehen verschiebt den Nordpol zum Südpol, und der Reiseplaner findet die kürzeste Reihenfolge für neun Flughäfen](media/demo.gif)
+
 ## Demos
 
 **Online ausprobieren: <https://iantpe.github.io/tetra-unfold/?lang=de>**

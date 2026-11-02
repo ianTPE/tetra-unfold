@@ -8,6 +8,8 @@ Desplegar toda la esfera sobre un **tetraedro regular** y aplanarla en un rectá
 
 La demostración usa un mapa del mundo y se inspira en el [mapa del mundo AuthaGraph](https://www.authagraph.com/) de Hajime Narukawa. No es una implementación de AuthaGraph: su algoritmo está patentado y no se ha publicado, así que este proyecto usa su propia aproximación. El mismo método también sirve para **imágenes de cámaras 360°**, de modo que un modelo de IA pueda ver toda la esfera en una sola imagen plana.
 
+![Demostración: al arrastrar, el Polo Norte se desliza hasta el Polo Sur, y el planificador encuentra el orden más corto para nueve aeropuertos](media/demo.gif)
+
 ## Demostraciones
 
 **Pruébalo en línea: <https://iantpe.github.io/tetra-unfold/?lang=es>**

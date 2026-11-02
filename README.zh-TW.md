@@ -6,6 +6,8 @@
 
 這個專案以世界地圖為例，受 [AuthaGraph 世界地圖](https://www.authagraph.com/)（鳴川肇設計）啟發，但不是它的實作：AuthaGraph 的精確演算法有專利且未公開，這裡用的是自己推導的近似做法。同樣的方法也可以用在 **360 相機影像**上，讓 AI 在一張平面圖裡辨識整個球面的內容。
 
+![示範：上下拖曳讓北極滑到南極，以及出差規劃自動排出 9 個機場的最短順序](media/demo.gif)
+
 ## 展示頁面
 
 **線上展示：<https://iantpe.github.io/tetra-unfold/>**

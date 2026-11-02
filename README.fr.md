@@ -8,6 +8,8 @@ Déplier toute la sphère sur un **tétraèdre régulier**, puis l’aplatir en 
 
 La démonstration utilise une carte du monde et s’inspire de la [carte du monde AuthaGraph](https://www.authagraph.com/) de Hajime Narukawa. Ce n’est pas une implémentation d’AuthaGraph : son algorithme est breveté et non publié, ce projet utilise donc sa propre approximation. La même méthode s’applique aussi aux **images de caméras 360°**, pour qu’un modèle d’IA voie toute la sphère dans une seule image plane.
 
+![Démo : le glissement fait passer du pôle Nord au pôle Sud, et le planificateur trouve l’ordre le plus court pour neuf aéroports](media/demo.gif)
+
 ## Démonstrations
 
 **Essayer en ligne : <https://iantpe.github.io/tetra-unfold/?lang=fr>**

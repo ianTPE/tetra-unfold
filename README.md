@@ -6,6 +6,8 @@ Unfold the whole sphere onto a **regular tetrahedron**, then flatten it into a r
 
 The demo uses a world map and is inspired by the [AuthaGraph world map](https://www.authagraph.com/) by Hajime Narukawa. It is not an implementation of AuthaGraph: that algorithm is patented and unpublished, so this project uses its own approximation. The same method can also be applied to **360° camera images**, so that an AI model can see the entire sphere in a single flat image.
 
+![Demo: dragging slides the North Pole to the South Pole, and the trip planner finds the shortest order for nine airports](media/demo.gif)
+
 ## Demos
 
 **Try it online: <https://iantpe.github.io/tetra-unfold/>**
