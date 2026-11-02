@@ -35,6 +35,26 @@ The map is handy for checking flight directions: with area correction off (the d
 - **Find the smoothest order** keeps the first stop as the starting point and tries every order of the others (up to 10 stops), then picks the shortest total distance.
 - Distances are great-circle distances on a sphere of radius 6,371 km. Real flight paths are usually somewhat longer.
 
+#### Checking fares with an AI browser assistant
+
+The map finds the order with the shortest distance, but not the cheapest or fastest flights. An AI assistant that can use your browser, such as Claude in Chrome or ChatGPT's agent, can do that part: it reads the order from the map, searches each leg on a flight search site such as Google Flights, and compares the combinations. For example:
+
+> Open https://iantpe.github.io/tetra-unfold/ and plan a trip from Taipei (TPE) to Tokyo, Singapore and London, returning to Taipei. Compare the order the map finds with the other orders. Then search one-way economy fares on Google Flights for 1, 4, 7 and 10 December, and list the total fare and total travel time for each order.
+
+In a test with exactly this trip (fares as shown in November 2026, one adult, economy, one-way tickets including taxes):
+
+| Visiting order (back to Taipei) | Great-circle distance | Flights found | Total fare | Total travel time |
+|---|---:|---|---:|---:|
+| Tokyo → Singapore → London | 28,206 km | London leg via Shanghai | NT$49,198 | 47 h 30 min |
+| Tokyo → Singapore → London | 28,206 km | London leg via Doha | NT$50,509 | 44 h 05 min |
+| Tokyo → London → Singapore (the map's order) | 25,878 km | Via Shanghai and Munich | NT$50,779 | 45 h 50 min |
+
+- **The shortest order is not always the cheapest.** The map's order saved 2,328 km (8.3%), but with these dates its flights cost slightly more. Fares depend mostly on which airlines fly each route.
+- **The connection can matter as much as the order.** Changing the Singapore–London connection from Shanghai to Doha cost NT$1,311 more but saved 3 h 25 min.
+- **Overnight flights shorten your stays**, which the map cannot show.
+
+So use the map to rule out orders that double back, and let the assistant compare fares for the few orders that are left. The assistant only searches; book and pay yourself. Fares change constantly, and a multi-city ticket can be cheaper than separate one-way tickets, so ask the assistant to check that as well.
+
 ## How it works
 
 ### Why it tiles seamlessly

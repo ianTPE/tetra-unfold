@@ -37,6 +37,26 @@ Die Karte eignet sich gut, um Flugrichtungen zu prüfen: Bei ausgeschalteter Fl�
 - **Beste Reihenfolge berechnen** behält den ersten Halt als Start, probiert alle Reihenfolgen der übrigen (bis zu 10 Halte) und wählt die mit der kürzesten Gesamtstrecke.
 - Entfernungen sind Großkreisentfernungen auf einer Kugel mit 6.371 km Radius. Tatsächliche Flugwege sind meist etwas länger.
 
+#### Flugpreise mit einem KI-Browserassistenten vergleichen
+
+Die Karte findet die Reihenfolge mit der kürzesten Strecke, aber nicht die günstigsten oder schnellsten Flüge. Diesen Teil kann ein KI-Assistent übernehmen, der Ihren Browser bedienen kann, etwa Claude in Chrome oder der Agent von ChatGPT: Er liest die Reihenfolge von der Karte ab, sucht jede Teilstrecke auf einer Flugsuchseite wie Google Flüge und vergleicht die Kombinationen. Zum Beispiel:
+
+> Öffne https://iantpe.github.io/tetra-unfold/ und plane eine Reise von Taipeh (TPE) nach Tokio, Singapur und London und zurück nach Taipeh. Vergleiche die Reihenfolge der Karte mit den anderen Reihenfolgen. Suche dann auf Google Flüge einfache Economy-Flüge für den 1., 4., 7. und 10. Dezember und liste für jede Reihenfolge den Gesamtpreis und die gesamte Reisezeit auf.
+
+Ein Test mit genau dieser Reise (Preise vom November 2026, ein Erwachsener, Economy, einfache Flüge inklusive Steuern, in Neuen Taiwan-Dollar):
+
+| Reihenfolge (zurück nach Taipeh) | Großkreisstrecke | Gefundene Flüge | Gesamtpreis | Gesamte Reisezeit |
+|---|---:|---|---:|---:|
+| Tokio → Singapur → London | 28.206 km | Londoner Strecke über Shanghai | NT$49.198 | 47 h 30 min |
+| Tokio → Singapur → London | 28.206 km | Londoner Strecke über Doha | NT$50.509 | 44 h 05 min |
+| Tokio → London → Singapur (Reihenfolge der Karte) | 25.878 km | Über Shanghai und München | NT$50.779 | 45 h 50 min |
+
+- **Die kürzeste Reihenfolge ist nicht immer die günstigste.** Die Reihenfolge der Karte sparte 2.328 km (8,3 %), doch an diesen Tagen kosteten ihre Flüge etwas mehr. Die Preise hängen vor allem davon ab, welche Fluggesellschaften eine Strecke bedienen.
+- **Der Umsteigeort kann so viel ausmachen wie die Reihenfolge.** Umsteigen in Doha statt in Shanghai auf der Strecke Singapur–London kostete 1.311 NT$ mehr, sparte aber 3 h 25 min.
+- **Nachtflüge verkürzen die Aufenthalte**, was die Karte nicht zeigen kann.
+
+Schließen Sie also mit der Karte Reihenfolgen aus, die Umwege machen, und lassen Sie den Assistenten die Preise der wenigen verbleibenden Reihenfolgen vergleichen. Der Assistent sucht nur; buchen und bezahlen Sie selbst. Die Preise ändern sich ständig, und ein Gabelflug- oder Multi-City-Ticket kann günstiger sein als einzelne einfache Flüge. Lassen Sie auch das prüfen.
+
 ## Funktionsweise
 
 ### Warum sich die Karte nahtlos kacheln lässt

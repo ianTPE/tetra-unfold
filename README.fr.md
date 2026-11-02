@@ -37,6 +37,26 @@ La carte est pratique pour vérifier les directions de vol : quand la correction
 - **Calculer le meilleur ordre** garde la première étape comme départ, essaie tous les ordres des autres (jusqu’à 10 étapes) et choisit celui dont la distance totale est la plus courte.
 - Les distances sont orthodromiques, sur une sphère de 6 371 km de rayon. Les trajets réels sont en général un peu plus longs.
 
+#### Comparer les billets avec un assistant IA dans le navigateur
+
+La carte trouve l’ordre le plus court en distance, mais pas les vols les moins chers ni les plus rapides. Un assistant IA capable d’utiliser votre navigateur, comme Claude in Chrome ou l’agent de ChatGPT, peut s’en charger : il lit l’ordre sur la carte, cherche chaque tronçon sur un site comme Google Vols et compare les combinaisons. Par exemple :
+
+> Ouvre https://iantpe.github.io/tetra-unfold/ et planifie un voyage de Taipei (TPE) vers Tokyo, Singapour et Londres, avec retour à Taipei. Compare l’ordre trouvé par la carte avec les autres ordres. Cherche ensuite sur Google Vols des allers simples en classe économique pour les 1er, 4, 7 et 10 décembre, et donne pour chaque ordre le prix total et la durée totale de trajet.
+
+Un test avec exactement ce voyage (prix affichés en novembre 2026, un adulte, classe économique, allers simples taxes comprises, en nouveaux dollars de Taïwan) :
+
+| Ordre de visite (retour à Taipei) | Distance orthodromique | Vols trouvés | Prix total | Durée totale |
+|---|---:|---|---:|---:|
+| Tokyo → Singapour → Londres | 28 206 km | Tronçon vers Londres via Shanghai | 49 198 NT$ | 47 h 30 |
+| Tokyo → Singapour → Londres | 28 206 km | Tronçon vers Londres via Doha | 50 509 NT$ | 44 h 05 |
+| Tokyo → Londres → Singapour (ordre de la carte) | 25 878 km | Via Shanghai et Munich | 50 779 NT$ | 45 h 50 |
+
+- **L’ordre le plus court n’est pas toujours le moins cher.** L’ordre de la carte a économisé 2 328 km (8,3 %), mais à ces dates ses vols coûtaient un peu plus. Les prix dépendent surtout des compagnies qui desservent chaque liaison.
+- **L’escale peut compter autant que l’ordre.** Passer par Doha plutôt que par Shanghai entre Singapour et Londres a coûté 1 311 NT$ de plus, mais a fait gagner 3 h 25.
+- **Les vols de nuit raccourcissent les séjours**, ce que la carte ne peut pas montrer.
+
+Utilisez donc la carte pour écarter les ordres qui font des allers-retours, puis laissez l’assistant comparer les prix des quelques ordres restants. L’assistant se contente de chercher ; réservez et payez vous-même. Les prix changent sans cesse, et un billet multidestination peut coûter moins cher que des allers simples séparés : demandez-lui de le vérifier aussi.
+
 ## Fonctionnement
 
 ### Pourquoi la carte pave le plan sans raccord

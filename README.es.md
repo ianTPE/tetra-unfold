@@ -37,6 +37,26 @@ El mapa es útil para comprobar las direcciones de vuelo: con la corrección de 
 - **Calcular el mejor orden** mantiene la primera parada como salida, prueba todos los órdenes de las demás (hasta 10 paradas) y elige el de menor distancia total.
 - Las distancias son ortodrómicas, sobre una esfera de 6371 km de radio. Las rutas reales suelen ser algo más largas.
 
+#### Comparar billetes con un asistente de IA en el navegador
+
+El mapa encuentra el orden con la menor distancia, pero no los vuelos más baratos ni los más rápidos. De eso puede encargarse un asistente de IA que maneje tu navegador, como Claude in Chrome o el agente de ChatGPT: lee el orden en el mapa, busca cada tramo en un sitio como Google Vuelos y compara las combinaciones. Por ejemplo:
+
+> Abre https://iantpe.github.io/tetra-unfold/ y planifica un viaje desde Taipéi (TPE) a Tokio, Singapur y Londres, con regreso a Taipéi. Compara el orden que encuentra el mapa con los demás órdenes. Después busca en Google Vuelos billetes de ida en clase turista para el 1, 4, 7 y 10 de diciembre, y enumera para cada orden el precio total y el tiempo total de viaje.
+
+Una prueba con exactamente este viaje (precios mostrados en noviembre de 2026, un adulto, clase turista, billetes de ida con impuestos, en nuevos dólares taiwaneses):
+
+| Orden de visita (regreso a Taipéi) | Distancia ortodrómica | Vuelos encontrados | Precio total | Tiempo total |
+|---|---:|---|---:|---:|
+| Tokio → Singapur → Londres | 28.206 km | Tramo a Londres vía Shanghái | NT$49.198 | 47 h 30 min |
+| Tokio → Singapur → Londres | 28.206 km | Tramo a Londres vía Doha | NT$50.509 | 44 h 05 min |
+| Tokio → Londres → Singapur (el orden del mapa) | 25.878 km | Vía Shanghái y Múnich | NT$50.779 | 45 h 50 min |
+
+- **El orden más corto no siempre es el más barato.** El orden del mapa ahorró 2.328 km (8,3 %), pero en estas fechas sus vuelos costaron algo más. Los precios dependen sobre todo de qué aerolíneas vuelan cada ruta.
+- **La escala puede importar tanto como el orden.** Hacer escala en Doha en vez de en Shanghái entre Singapur y Londres costó NT$1.311 más, pero ahorró 3 h 25 min.
+- **Los vuelos nocturnos acortan las estancias**, algo que el mapa no puede mostrar.
+
+Así que usa el mapa para descartar los órdenes que dan vueltas y deja que el asistente compare los precios de los pocos órdenes que quedan. El asistente solo busca; reserva y paga tú. Los precios cambian constantemente, y un billete multidestino puede salir más barato que varios billetes de ida por separado, así que pídele que lo compruebe también.
+
 ## Cómo funciona
 
 ### Por qué tesela sin costuras
