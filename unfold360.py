@@ -1,58 +1,54 @@
 """把等距圓柱（2:1）360 照片展開成四面體平面圖，數學與 index.html 的 planeToGeo 相同。
 
 需要: pip install numpy pillow
-用法: python unfold360.py <equirect.jpg> <out_dir> [--map]
+用法: python unfold360.py <equirect.jpg> <out_dir>
 
-方向（預設 upright）:
-  upright  天頂在長方形上邊、天底在下邊，牆面的東西大致直立；
-           四個角落在仰角 ±35°，水平線離角落至少 35°。
-           B 是 A 再繞垂直軸轉 90°（轉 180° 會和 A 完全相同）。
-  --map    世界地圖方向（四個角落在太平洋、北大西洋、南大西洋、印度洋），B 是 A 轉 180°。
+版面：和 index.html 相同的 √3 × 1 長方形（四面體的一條邊直立在中央）。
+擺法：相機水平時，水平中線就是地平線，上半張全部是天空、下半張全部是地面；
+      畫面正中央是正前方，正後方在四個角，天頂在上邊 1/4、3/4 處，天底在下邊 1/4、3/4 處。
+      四個角落頂點：上下邊中央（仰角 ±54.7°），左右邊中點（地平線上，方位 ±125.3°）。
+雙方向：B 是 A 繞垂直軸轉 180°。任何方向離其中一張的角落至少 35.3°，地平線上也是。
 
 輸出:
-  A_plain.jpg / A_equal.jpg   方向 A，未校正 / 面積校正
-  B_plain.jpg / B_equal.jpg   方向 B，角落和 A 錯開
+  A_plain.jpg / A_equal.jpg   方向 A，未校正（同一面內直線保持直線）/ 面積校正（每個像素的立體角相同）
+  B_plain.jpg / B_equal.jpg   方向 B
   A_plain_folds.jpg           A 加上四面體摺線
-  A_tiled.jpg                 A 的 2×2 拼接，用來檢查邊緣是否接得起來
+  A_tiled.jpg                 A 往四周拼接一圈，用來檢查邊緣是否接得起來
 """
 import sys, os
 import numpy as np
 from PIL import Image, ImageDraw
 
-SQ3 = np.sqrt(3); ROW = SQ3 / 2; DEG = np.pi / 180
+SQ3 = np.sqrt(3); ROW = SQ3 / 2
+MAP_W, MAP_H = SQ3, 1.0
 
-def norm(a): return a / np.linalg.norm(a)
-def lonlat(lon, lat):
-    return np.array([np.cos(lat*DEG)*np.cos(lon*DEG), np.cos(lat*DEG)*np.sin(lon*DEG), np.sin(lat*DEG)])
 
-V = np.array([norm(np.array(v, float)) for v in [[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1]]])
-if np.dot(np.cross(V[1]-V[0], V[2]-V[0]), V[3]) > 0: V[[1, 2]] = V[[2, 1]]
+def norm(a): return a / np.linalg.norm(a, axis=-1, keepdims=True)
 
-def initial_matrix():
-    G = [lonlat(*p) for p in [(-160, 0), (-35, 55), (-35, -55), (91, 0)]]
-    build = lambda g: sum(0.75 * np.outer(g[k], V[k]) for k in range(4))
-    M = build(G)
-    if np.linalg.det(M) < 0: G[1], G[2] = G[2], G[1]; M = build(G)
-    c0 = norm(M[:, 0]); c1 = M[:, 1] - np.dot(c0, M[:, 1]) * c0; c1 = norm(c1)
-    return np.column_stack([c0, c1, np.cross(c0, c1)])
+
+# 正四面體頂點；格點 (i, j) 的類別 k = (i&1) + 2*(j&1)。讓三角形 (0,0)(1,0)(0,1) 從外面看是逆時針，畫面才不會鏡像
+V = norm(np.array([[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]], float))
+if np.dot(np.cross(V[1] - V[0], V[2] - V[0]), V[3]) > 0: V[[1, 2]] = V[[2, 1]]
+
+# 四面體本體 → 相機座標（x 前、y 左、z 上）。中央直立的邊 V0V1 的方向當「上」，
+# 它的中點當「前」，於是水平中線 = 地平線
+_UP = norm(V[1] - V[0]); _FRONT = norm(V[0] + V[1])
+HORIZON = np.array([_FRONT, np.cross(_UP, _FRONT), _UP])
+
 
 def rotZ(a):
     c, s = np.cos(a), np.sin(a); return np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
 
-def upright_matrix():
-    """天頂 = 邊 V2V3 的中點（長方形上邊），天底 = 邊 V0V1 的中點（下邊）；
-    再轉到讓照片正前方（經度 0）落在長方形正中央。"""
-    e3 = norm(V[2] + V[3]); e1 = norm(V[2] - V[3]); e2 = np.cross(e3, e1)
-    return rotZ(-np.pi / 2) @ np.array([e1, e2, e3])
 
 def plane_to_sphere(x, y, M, equal):
+    """格子座標 (x, y) → 單位向量（M：四面體本體 → 輸出座標）"""
     b = y / ROW; a = x - b * 0.5
     i = np.floor(a).astype(int); j = np.floor(b).astype(int)
     fa = a - i; fb = b - j; ci = i & 1; cj = j & 1
     up = fa + fb < 1
-    k0 = np.where(up, ci + 2*cj, (ci^1) + 2*(cj^1))
-    k1 = (ci^1) + 2*cj
-    k2 = ci + 2*(cj^1)
+    k0 = np.where(up, ci + 2*cj, (ci ^ 1) + 2*(cj ^ 1))
+    k1 = (ci ^ 1) + 2*cj
+    k2 = ci + 2*(cj ^ 1)
     w0 = np.where(up, 1 - fa - fb, fa + fb - 1)
     w1 = np.where(up, fa, 1 - fb)
     w2 = np.where(up, fb, 1 - fa)
@@ -74,10 +70,29 @@ def plane_to_sphere(x, y, M, equal):
         p = q / np.linalg.norm(q, axis=-1, keepdims=True)
     return p @ M.T
 
+
+def display_to_sphere(X, Y, M, equal):
+    """畫面座標 (X, Y)（地圖是 [0, √3] × [0, 1]）→ 單位向量。格子轉 90°：(x, y) = (Y, ROW − X)"""
+    return plane_to_sphere(Y, ROW - X, M, equal)
+
+
+def display_grid(width, x0=0.0, y0=0.0, w=MAP_W, h=MAP_H):
+    height = int(round(width * h / w))
+    X = x0 + (np.arange(width) + 0.5) / width * w
+    Y = y0 + h - (np.arange(height) + 0.5) / height * h    # 影像 y 往下，畫面 Y 往上
+    return np.meshgrid(X, Y)
+
+
+def camera_dirs(width, equal, Q=np.eye(3), **region):
+    """展開圖每個像素在相機座標裡的方向。Q 是額外的旋轉（例如雙方向的 B，或穩定畫面用的修正）"""
+    X, Y = display_grid(width, **region)
+    return display_to_sphere(X, Y, Q @ HORIZON, equal)
+
+
 def sample(img, p):
+    """從等距圓柱影像取色（雙線性）。影像往右 = 經度增加，和照片原本的左右方向一致"""
     H, W, _ = img.shape
     lon = np.arctan2(p[..., 1], p[..., 0]); lat = np.arcsin(np.clip(p[..., 2], -1, 1))
-    # 影像的 x 軸直接當成經度用，和地圖貼圖完全一樣；展開後的左右方向就和原始照片一致
     u = ((lon + np.pi) / (2*np.pi) * W - 0.5) % W
     v = np.clip((np.pi/2 - lat) / np.pi * H - 0.5, 0, H - 1)
     u0 = np.floor(u).astype(int); v0 = np.floor(v).astype(int)
@@ -87,38 +102,36 @@ def sample(img, p):
     out = (f[v0, u0]*(1-du)*(1-dv) + f[v0, u1]*du*(1-dv) + f[v1, u0]*(1-du)*dv + f[v1, u1]*du*dv)
     return np.clip(out, 0, 255).astype(np.uint8)
 
-def render(img, M, equal, width, x0=0.0, y0=0.0, w=2.0, h=ROW):
-    height = int(round(width * h / w))
-    xs = x0 + (np.arange(width) + 0.5) / width * w
-    ys = y0 + h - (np.arange(height) + 0.5) / height * h   # 影像 y 往下，平面 y 往上
-    X, Y = np.meshgrid(xs, ys)
-    return sample(img, plane_to_sphere(X, Y, M, equal))
 
-def draw_folds(im, w=2.0, h=ROW, x0=0.0, y0=0.0):
-    d = ImageDraw.Draw(im); W, H = im.size
-    to = lambda x, y: ((x - x0) / w * W, (y0 + h - y) / h * H)
-    for jj in range(-1, 3):
-        y = jj * ROW
-        d.line([to(-1, y), to(5, y)], fill=(255, 60, 60), width=2)
-        for ii in range(-4, 6):
-            for s in (+1, -1):
-                xa = ii + jj * 0.5
-                d.line([to(xa, y), to(xa + s * 0.5 * 2, y + ROW * 2)], fill=(255, 60, 60), width=2)
+def unfold(img, width, equal=False, R=np.eye(3), Q=np.eye(3), **region):
+    """把世界座標的等距圓柱影像，依相機姿態 R（相機座標 → 世界座標）展開"""
+    return sample(img, camera_dirs(width, equal, Q, **region) @ R.T)
+
+
+def draw_folds(im, x0=0.0, y0=0.0, w=MAP_W, h=MAP_H, color=(255, 60, 60)):
+    """在展開圖上畫四面體摺線（在格子座標裡畫，再轉回畫面）"""
+    d = ImageDraw.Draw(im); PW, PH = im.size
+    to = lambda x, y: ((ROW - y - x0) / w * PW, (y0 + h - x) / h * PH)   # 格子 → 畫面 → 像素
+    lx0, lx1, ly0, ly1 = y0 - 1, y0 + h + 1, ROW - (x0 + w) - 1, ROW - x0 + 1
+    for j in range(int(np.floor(ly0 / ROW)), int(np.ceil(ly1 / ROW)) + 1):
+        d.line([to(lx0, j * ROW), to(lx1, j * ROW)], fill=color, width=2)
+    span = (ly1 - ly0) / SQ3
+    for s in (1, -1):
+        for n in range(int(np.floor(lx0 - span)) - 1, int(np.ceil(lx1 + span)) + 2):
+            d.line([to(n + s * ly0 / SQ3, ly0), to(n + s * ly1 / SQ3, ly1)], fill=color, width=2)
     return im
+
 
 if __name__ == '__main__':
     src, out = sys.argv[1], sys.argv[2]
     os.makedirs(out, exist_ok=True)
     img = np.asarray(Image.open(src).convert('RGB'))
-    if '--map' in sys.argv[3:]:
-        A = initial_matrix(); B = rotZ(np.pi) @ A
-    else:
-        A = upright_matrix(); B = rotZ(np.pi / 2) @ A
     Image.fromarray(img).resize((2048, 1024), Image.LANCZOS).save(f'{out}/0_equirect.jpg', quality=90)
-    for name, M in (('A', A), ('B', B)):
+    for name, Q in (('A', np.eye(3)), ('B', rotZ(np.pi))):
         for mode, eq in (('plain', False), ('equal', True)):
-            Image.fromarray(render(img, M, eq, 2400)).save(f'{out}/{name}_{mode}.jpg', quality=90)
+            Image.fromarray(unfold(img, 2400, eq, Q=Q)).save(f'{out}/{name}_{mode}.jpg', quality=90)
     draw_folds(Image.open(f'{out}/A_plain.jpg')).save(f'{out}/A_plain_folds.jpg', quality=90)
-    # 2×2 拼接：證明邊緣接得起來
-    Image.fromarray(render(img, A, False, 2400, x0=-1.0, y0=-ROW / 2, w=4.0, h=2 * ROW)).save(f'{out}/A_tiled.jpg', quality=90)
+    # 往四周拼接一圈：證明邊緣接得起來
+    big = dict(x0=-MAP_W / 2, y0=-0.5, w=2 * MAP_W, h=2.0)
+    Image.fromarray(unfold(img, 2400, **big)).save(f'{out}/A_tiled.jpg', quality=90)
     print('done')

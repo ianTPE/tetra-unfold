@@ -74,7 +74,7 @@
 | 90° | 9.9° |
 | 0° | 0°（兩張一樣，沒有效果） |
 
-## 應用：360 相機與 AI 辨識
+## 應用：360 相機、AI 辨識與無人機姿態
 
 360 相機匯出的照片通常是等距圓柱投影（2:1 的全景圖），和這裡用的世界地圖貼圖格式相同，所以只要把貼圖換成 360 照片就能套用。
 
@@ -82,28 +82,32 @@
 
 - **等距圓柱圖**：左右邊界會切斷物體，上下兩極被嚴重拉寬
 - **Cubemap（立方體 6 面）**：每一面都像普通照片，但接縫很多，跨接縫的物體要另外處理
-- **四面體展開**：一張長方形圖、沒有斷口，可以直接餵給一般的影像模型；缺點是四個角落會變形
+- **四面體展開**：一張長方形圖就涵蓋整個球面、沒有斷口，可以直接餵給一般的影像模型；缺點是四個角落會變形
 
-建議的流程：
+### 地平線擺法
 
-1. 同一張 360 照片輸出兩張展開圖：原本的方向，以及水平轉 90° 的方向（直立方向要轉 90°，見下方說明）
-2. AI 分別辨識兩張
-3. 每個偵測到的物體換算回球面座標，保留離角落比較遠的那張的結果
+[`unfold360.py`](unfold360.py) 使用和 `index.html` 相同的 `√3 × 1` 展開（四面體的一條邊直立在中央），並轉成相機水平時：
 
-做 AI 辨識時，**不校正模式**可能比較合適，因為直線保持直線，最接近模型訓練時看過的一般照片。
+- **水平中線就是地平線**。上半張全部是天空、下半張全部是地面，各占剛好半個球面。
+- 畫面正中央是正前方；正後方在四個角，地平線沿著左右兩邊繼續延伸。
+- 天頂在上邊的 1/4 和 3/4 處，天底在下邊的同樣位置。
+- 四個角落頂點：上邊中央和下邊中央（正前方，仰角 ±54.7°），以及左右兩邊的中點（在地平線上，左右各 125.3°）。
 
-### 實測：一張 360 照片
+雙方向展開時，**B 是 A 繞垂直軸轉 180°**。這樣任何方向在其中一張圖裡離角落至少 35.3°，地平線上的每一點也是：
 
-[`unfold360.py`](unfold360.py) 把等距圓柱照片展開成四面體平面圖，展開公式和 `index.html` 相同（需要 `pip install numpy pillow`）：
+| B 轉的角度 | 最差的方向離角落多遠 |
+|---|---|
+| 180° | 35.3° |
+| 150° | 20.3° |
+| 90° | 9.8° |
+| 0° | 0°（兩張完全相同） |
 
 ```
-python unfold360.py photo.jpg out/          # 直立方向（預設）
-python unfold360.py photo.jpg out/ --map    # 世界地圖方向
+pip install numpy pillow
+python unfold360.py photo.jpg out/
 ```
 
-照片和地球不同，有明確的「上下」。腳本預設用**直立方向**：天頂放在長方形的上邊、天底放在下邊，所以天花板在上、地板在下，牆上的東西大致直立。四個角落落在仰角 ±35°（上邊的兩個角在天花板；下邊的三個角在地板，其中左右兩端是同一個點），水平視線一圈離角落至少 35°。
-
-雙方向展開時，直立方向的 B 要水平轉 **90°**：直立方向繞垂直軸轉 180° 會和四面體自己重合，兩張圖會一模一樣。轉 90° 時，全景裡最差的地方離角落 35.3°，和世界地圖版相同。加 `--map` 可以改用[雙方向展開](#雙方向展開)一節裡方向 A 的世界地圖方向。
+### 室內照片測試
 
 用 Poly Haven 的 [Art Studio](https://polyhaven.com/a/art_studio) 全景照片測試（紅線是四面體摺線）：
 
@@ -111,20 +115,66 @@ python unfold360.py photo.jpg out/ --map    # 世界地圖方向
 |---|
 | ![原始等距圓柱圖](examples/art_studio_equirect.jpg) |
 
-| 方向 A | 方向 B（轉 90°） |
+| 方向 A | 方向 B（轉 180°） |
 |---|---|
 | ![方向 A](examples/art_studio_A.jpg) | ![方向 B](examples/art_studio_B.jpg) |
 
 觀察到的結果：
 
-- 整個房間都在同一張圖裡，沒有切口；等距圓柱圖左右邊緣被切開的音響在這裡連在一起
-- 天花板在上、地板在下，門、窗、畫架、音響都接近直立，比斜放的方向容易看懂
-- 每個三角形面各自是一張透視圖，所以牆角、天花板邊這類直線碰到摺線會折一下
-- 靠近角落的東西會被放大拉長，例如方向 B 下方中間的米色音響
-- 方向 A 的大幅壁畫被摺線切過、有明顯彎折；方向 B 把它放在中間，幾乎完整，驗證了「哪張離角落遠就用哪張」的做法
-- 左右方向和原始照片一致，沒有鏡像
+- 整個房間都在同一張圖裡，沒有切口。天花板在上半張、地板在下半張，地平線（視線高度）沿著水平中線。
+- 每個三角形面各自是一張透視圖，所以牆角這類直線碰到摺線會折一下。
+- 方向 A 的大幅壁畫剛好在右邊中點的角落旁，被拉歪了；方向 B 把它完整、端正地放在左邊。這正是「哪張離角落遠就用哪張」的用意。
+- 左右方向和原始照片一致，沒有鏡像。
 
-> 目前只用一張照片做過初步測試，判斷是用肉眼看，**還沒有接上 AI 物件辨識模型**，也還沒有實作「換算回球面座標、挑選較好結果」的步驟。
+物體辨識的建議流程：A、B 兩張都交給模型辨識，把每個偵測結果換算回球面座標，保留離角落比較遠的那張的結果。換算回球面的步驟還沒有實作，這個擺法也還沒有用物體辨識模型評估過。（先前用舊版面在三張室內全景上快速跑過 YOLO，結果沒有比等距圓柱圖好：室內的物體大多在地平線附近，而等距圓柱圖在那裡幾乎不變形。）
+
+### 無人機姿態：分辨天與地
+
+無人機靠 IMU（陀螺儀和加速度計）知道哪邊是上。但加速度計量到的是**重力加上無人機自己的加速度**，所以被強風吹、碰撞、翻滾或劇烈機動時，它指出的「下」會是錯的；單靠陀螺儀，時間一長又會漂移。磁力計也很容易被電磁干擾影響。
+
+360 畫面裡的天地分界是**獨立的參考**：不受電磁干擾，也不受無人機自身加速度影響。做法是**和 IMU 結合**：平常用 IMU，受干擾、加速度計不可靠時，用畫面裡的天地方向來校正姿態。這對必須在干擾下繼續飛行的無人機（例如軍用無人機）特別重要。
+
+地平線擺法很適合這個用途：
+
+- 一張沒有接縫的圖涵蓋整個球面，無人機不管怎麼轉，天空都不會被圖的邊界切開。
+- 無人機水平時，上半張是天、下半張是地，訓練天空／地面切割模型時，標註很直觀。
+- 面積校正模式下每個像素涵蓋的立體角相同，像素的方向可以直接平均。
+
+#### 測試
+
+[`drone_attitude.py`](drone_attitude.py) 對每張照片模擬 300 個隨機姿態（包含完全倒過來），在無人機自己的座標下展開 360 畫面（128 × 74 像素，面積校正模式），再用一個刻意簡單的規則估計「上」：
+
+- 又亮又偏藍的像素當作天空，門檻依每張畫面自動決定（Otsu 方法）。
+- 全黑的「沒有資料」區域不算。
+- 上方向 = 天空像素的平均方向 − 地面像素的平均方向。
+
+使用 Wikimedia Commons 上的 6 張空拍 360 全景（攝影 Gunther Tschuch，CC BY-SA 4.0）：
+
+| 地形 | 上下判斷錯誤 | 誤差（中位數） | 誤差（90%） | 最差 | 每次耗時 |
+|---|---|---|---|---|---|
+| 農田（Sebnitz） | 0 / 300 | 5.4° | 8.5° | 10.7° | 0.9 毫秒 |
+| 城鎮（Bad Karlshafen） | 0 / 300 | 6.6° | 10.7° | 13.9° | 0.9 毫秒 |
+| 河谷小鎮（Hirschhorn） | 0 / 300 | 7.6° | 11.4° | 16.7° | 0.9 毫秒 |
+| 島嶼海岸（Skye） | 0 / 300 | 11.1° | 16.1° | 20.5° | 0.9 毫秒 |
+| 湖泊（Loch Tay） | 0 / 300 | 11.5° | 16.2° | 18.4° | 0.9 毫秒 |
+| 海岸山地（Mull） | 0 / 300 | 13.6° | 18.1° | 22.3° | 0.9 毫秒 |
+
+| 水平時 | 傾斜 70° | 用估計結果轉回水平 |
+|---|---|---|
+| ![水平時](examples/aerial_level.jpg) | ![傾斜時](examples/aerial_tilted.jpg) | ![穩定後](examples/aerial_stabilized.jpg) |
+
+觀察到的結果：
+
+- **1,800 個隨機姿態裡，沒有一次把天地判斷反過來**。方向誤差的中位數是 5–14°，最差 22°；在桌上型電腦的 CPU 上用 Python 計算，每次不到 1 毫秒。
+- 會反射天空的水面（湖泊、海岸）誤差最大。
+- **相機必須看得到天空**。這些全景照在仰角約 25° 以上是全黑的，因為相機掛在機身下方。還沒排除黑色區域時，大多數姿態都判反了。實際使用時，無人機也需要能拍到上半球的鏡頭，例如機身上下各一顆鏡頭的 360 相機。
+- 人站在地上（離地 1.5 公尺）拍的全景照不能代表飛行中的無人機：樹和建築會擋住大半天空。
+
+限制：
+
+- 翻滾是把靜止的全景照旋轉來模擬的，動態模糊、曝光突然改變、螺旋槳入鏡、逆光都還沒有測試。
+- 亮度規則在夜晚、雪地、雲層上方會失效，需要訓練過的天空／地面切割模型，應該也能把 5–14° 的誤差再降低。
+- 和 IMU 結合的部分還沒有實作。
 
 ## 數值驗證
 
@@ -146,7 +196,7 @@ python unfold360.py photo.jpg out/ --map    # 世界地圖方向
 把地球展開到四面體上不是新點子，最接近的前例有：
 
 - **[Lee 保角四面體投影](https://en.wikipedia.org/wiki/Lee_conformal_world_in_a_tetrahedron)**（L. P. Lee，1965 年）：同樣把地球展開到正四面體上、可以無縫拼接，拼接單位也能排成同樣的 `√3 × 1` 長方形。原版以南極為中心，南極就在一個頂點上。它是保角投影（局部形狀正確），所以大圓會是曲線。D3 有現成的實作 [`d3.geoTetrahedralLee`](https://unpkg.com/browse/d3-geo-polygon@1.9.0/README.md)，通常畫成極點在中心的三角形。
-- **[Doug McIlroy 的四面體賀卡](https://cs.dartmouth.edu/~doug/cards/page1983.pdf)**（1983 年）：用 Lee 投影，把兩極放在兩條對邊的中點，四個頂點都在海上。這和 `unfold360.py` 處理照片時用的直立方向是同一種擺法。
+- **[Doug McIlroy 的四面體賀卡](https://cs.dartmouth.edu/~doug/cards/page1983.pdf)**（1983 年）：用 Lee 投影，把兩極放在兩條對邊的中點，四個頂點都在海上。
 - **[AuthaGraph](https://en.wikipedia.org/wiki/AuthaGraph_projection)**（鳴川肇）：長方形、可以無縫拼接的四面體地圖，角落放在海上。演算法有專利，沒有公開。
 
 這個專案不同的地方：
@@ -163,6 +213,7 @@ python unfold360.py photo.jpg out/ --map    # 世界地圖方向
 - [OurAirports](https://ourairports.com/data/)：機場清單（`airports.json`，有定期航班且有 IATA 代碼的機場），公有領域
 - [Wikidata](https://www.wikidata.org/)：機場和城市的中文名稱，以及用來排序搜尋結果的旅客人數，CC0 授權。簡體名稱以 [OpenCC](https://github.com/BYVoid/OpenCC) 轉成台灣用語
 - [Poly Haven](https://polyhaven.com/a/art_studio)：測試用 360 照片「Art Studio」，作者 Oliksiy Yakovlyev，CC0 授權
+- [Wikimedia Commons](https://commons.wikimedia.org/)：無人機測試用的空拍 360 全景，攝影 Gunther Tschuch（PaulT），CC BY-SA 4.0：[Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg)、[Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg)、[Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg)、[Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg)、[Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg)、[Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg)。`examples/aerial_*.jpg` 改作自 Sebnitz Ottendorf 這張，採 CC BY-SA 4.0 授權
 - AuthaGraph 為鳴川肇（Hajime Narukawa）的作品與註冊商標，本專案與其無關
 
 ## 授權條款
@@ -171,5 +222,5 @@ python unfold360.py photo.jpg out/ --map    # 世界地圖方向
 
 **商業使用需要另外付費取得授權**，請聯絡 ertiach@gmail.com。
 
-- 這個授權適用於本 repo 的程式碼。上面列出的函式庫與資料（D3、TopoJSON、world-atlas / Natural Earth、OurAirports、Wikidata、Poly Haven 照片）仍依各自的授權條款。
+- 這個授權適用於本 repo 的程式碼。上面列出的函式庫與資料（D3、TopoJSON、world-atlas / Natural Earth、OurAirports、Wikidata、Poly Haven 照片）仍依各自的授權條款。`examples/aerial_*.jpg` 採 CC BY-SA 4.0 授權（見「使用的資源」）。
 - LICENSE 檔是英文正式條文，中文說明僅供參考，以英文條文為準。

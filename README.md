@@ -74,7 +74,7 @@ For each place, use whichever map puts it further from a corner. The table shows
 | 90° | 9.9° |
 | 0° | 0° (both maps identical, no benefit) |
 
-## Application: 360° cameras and AI recognition
+## Application: 360° cameras, AI recognition and drone attitude
 
 360° cameras usually export equirectangular images (2:1 panoramas). That is the same format as the world map texture used here, so the method works by swapping the texture for a 360° photo.
 
@@ -82,28 +82,32 @@ Compared with common formats:
 
 - **Equirectangular**: objects are cut at the left and right edges, and the poles are heavily stretched.
 - **Cubemap (6 faces)**: each face looks like an ordinary photo, but there are many seams, and objects across seams need extra handling.
-- **Tetrahedral unfolding**: one rectangular image with no cuts, which can be fed directly to standard image models. The drawback is distortion near the 4 corners.
+- **Tetrahedral unfolding**: one rectangular image of the whole sphere with no cuts, which can be fed directly to standard image models. The drawback is distortion near the 4 corners.
 
-Suggested pipeline:
+### Horizon layout
 
-1. Unfold the same 360° photo twice: in the original orientation and rotated 90° horizontally (for the upright orientation, see below).
-2. Run the AI model on both images.
-3. Convert each detected object back to sphere coordinates and keep the result from the image where it is further from a corner.
+[`unfold360.py`](unfold360.py) uses the same `√3 × 1` net as `index.html` (one tetrahedron edge runs vertically down the centre), turned so that when the camera is level:
 
-For AI recognition, the **uncorrected mode** may work better, because straight lines stay straight and the images are closest to the ordinary photos that models are trained on.
+- **The horizontal centre line is the horizon.** The top half of the image is entirely sky and the bottom half entirely ground, each exactly half of the sphere.
+- The centre of the image looks straight ahead. Straight behind is at the four corners, and the horizon continues along the left and right edges.
+- The zenith is at 1/4 and 3/4 of the top edge, and the nadir at the same places on the bottom edge.
+- The 4 tetrahedron corners are at the top and bottom centre (54.7° above and below the horizon, straight ahead) and at the midpoints of the left and right edges (on the horizon, 125.3° to either side).
 
-### Test with a real 360° photo
+For dual-orientation unfolding, **B is A rotated 180°** about the vertical axis. Every direction is then at least 35.3° from a corner in one of the two images, including every point on the horizon:
 
-[`unfold360.py`](unfold360.py) unfolds an equirectangular photo onto the tetrahedron, using the same formulas as `index.html` (requires `pip install numpy pillow`):
+| B rotated by | Worst direction, distance from a corner |
+|---|---|
+| 180° | 35.3° |
+| 150° | 20.3° |
+| 90° | 9.8° |
+| 0° | 0° (both images identical) |
 
 ```
-python unfold360.py photo.jpg out/          # upright orientation (default)
-python unfold360.py photo.jpg out/ --map    # world-map orientation
+pip install numpy pillow
+python unfold360.py photo.jpg out/
 ```
 
-Unlike the Earth, a photo has a clear up and down. By default the script uses an **upright orientation**: the zenith sits on the top edge of the rectangle and the nadir on the bottom edge, so the ceiling is at the top, the floor at the bottom, and things on the walls stand roughly upright. The 4 corners fall at ±35° elevation (the two on the top edge are in the ceiling; the three on the bottom edge are in the floor, and the ones at the left and right ends are the same point), so every point on the horizon is at least 35° from a corner.
-
-For dual-orientation unfolding, B must be rotated **90°** about the vertical axis in the upright orientation. A 180° rotation maps the tetrahedron onto itself, so both images would be identical. With 90°, the worst place in the panorama is 35.3° from a corner, the same as for the world map. Pass `--map` to use the world-map orientation described in [Dual-orientation unfolding](#dual-orientation-unfolding).
+### Test with an indoor photo
 
 Tested with the [Art Studio](https://polyhaven.com/a/art_studio) panorama from Poly Haven (red lines are the tetrahedron fold lines):
 
@@ -111,20 +115,66 @@ Tested with the [Art Studio](https://polyhaven.com/a/art_studio) panorama from P
 |---|
 | ![Original equirectangular image](examples/art_studio_equirect.jpg) |
 
-| Orientation A | Orientation B (rotated 90°) |
+| Orientation A | Orientation B (rotated 180°) |
 |---|---|
 | ![Orientation A](examples/art_studio_A.jpg) | ![Orientation B](examples/art_studio_B.jpg) |
 
 What we observed:
 
-- The whole room fits in one image with no cuts. The speakers split across the left and right edges of the equirectangular image are joined here.
-- The ceiling is at the top and the floor at the bottom; doors, windows, easels and speakers stand roughly upright, which is easier to read than a tilted orientation.
-- Each triangular face is a separate perspective view, so straight lines such as wall corners and ceiling edges bend where they cross a fold line.
-- Objects near a corner are enlarged and stretched, for example the beige speaker at the bottom centre of orientation B.
-- In orientation A the large mural is crossed by a fold line and visibly bent; orientation B places it in the middle, almost intact. This confirms the idea of using whichever image puts an object further from a corner.
+- The whole room fits in one image with no cuts. The ceiling fills the top half and the floor the bottom half; the horizon (eye level) runs along the centre line.
+- Each triangular face is a separate perspective view, so straight lines such as wall corners bend where they cross a fold line.
+- In orientation A the large mural sits next to the corner at the right edge and is stretched. Orientation B shows it intact and upright on the left, which is the point of using whichever image puts an object further from a corner.
 - Left and right match the original photo; the image is not mirrored.
 
-> So far this is a first test with one photo, judged by eye. It has **not yet been run through an AI object detector**, and the step that converts detections back to sphere coordinates and picks the better result is not implemented.
+Suggested pipeline for object recognition: run the model on both A and B, convert each detection back to sphere coordinates, and keep the result from the image where it is further from a corner. The conversion back is not implemented yet, and object detection has not been evaluated with this layout. (A quick YOLO test on three indoor panoramas with an earlier layout found no advantage over the plain equirectangular image: indoor objects sit near the horizon, where equirectangular images are barely distorted.)
+
+### Drone attitude: telling sky from ground
+
+A drone knows which way is up from its IMU (gyroscope and accelerometer). But the accelerometer measures gravity **plus the drone's own acceleration**, so during gusts, collisions, tumbling or hard manoeuvres the "down" it reports is wrong, and the gyroscope on its own drifts over time. The magnetometer is also easily upset by electromagnetic interference.
+
+The boundary between sky and ground in a 360° image is an **independent reference**: it is not affected by electromagnetic interference or by the drone's acceleration. The idea is to **combine it with the IMU**: use the IMU normally, and when the drone is disturbed and the accelerometer cannot be trusted, correct the attitude with the up direction seen in the image. This matters most for drones that must keep flying under interference, such as military drones.
+
+The horizon layout suits this:
+
+- One seamless image covers the whole sphere, so the sky is never split across image borders, however the drone is turned.
+- When the drone is level, the top half is sky and the bottom half is ground, which makes labels for training a sky/ground segmentation model simple.
+- In area-corrected mode every pixel covers the same solid angle, so pixel directions can be averaged directly.
+
+#### Test
+
+[`drone_attitude.py`](drone_attitude.py) simulates a drone in 300 random attitudes per photo, including upside down. For each one it unfolds the 360° image in the drone's own frame (128 × 74 pixels, area-corrected) and estimates "up" with a deliberately simple rule:
+
+- Bright, bluish pixels are sky. The threshold is chosen automatically for each image (Otsu's method).
+- Black "no data" areas are ignored.
+- The up direction is the average direction of sky pixels minus that of ground pixels.
+
+It was run on six aerial 360° panoramas from Wikimedia Commons (by Gunther Tschuch, CC BY-SA 4.0):
+
+| Terrain | Upside down | Error (median) | Error (90%) | Worst | Time per estimate |
+|---|---|---|---|---|---|
+| Farmland (Sebnitz) | 0 / 300 | 5.4° | 8.5° | 10.7° | 0.9 ms |
+| Town (Bad Karlshafen) | 0 / 300 | 6.6° | 10.7° | 13.9° | 0.9 ms |
+| River valley town (Hirschhorn) | 0 / 300 | 7.6° | 11.4° | 16.7° | 0.9 ms |
+| Island coast (Skye) | 0 / 300 | 11.1° | 16.1° | 20.5° | 0.9 ms |
+| Lake (Loch Tay) | 0 / 300 | 11.5° | 16.2° | 18.4° | 0.9 ms |
+| Coast and mountains (Mull) | 0 / 300 | 13.6° | 18.1° | 22.3° | 0.9 ms |
+
+| Level | Tilted 70° | Turned back level using the estimate |
+|---|---|---|
+| ![Level](examples/aerial_level.jpg) | ![Tilted](examples/aerial_tilted.jpg) | ![Stabilized](examples/aerial_stabilized.jpg) |
+
+What we found:
+
+- **In 1,800 random attitudes the sky and ground were never swapped.** The direction was off by 5–14° (median) and at most 22°, and each estimate took under 1 ms in Python on a desktop CPU.
+- Water that reflects the sky (lakes, coasts) gives the largest errors.
+- **The camera must be able to see the sky.** These panoramas are black above about 25° elevation, because the camera hangs under the drone. Before the black areas were excluded, most attitudes came out upside down. A drone using this needs cameras covering the upper hemisphere too, for example a 360° camera with lenses above and below the body.
+- Panoramas taken from the ground (1.5 m) are not representative of a flying drone: trees and buildings hide much of the sky.
+
+Limitations:
+
+- The tumbling is simulated by rotating a still panorama. Motion blur, sudden exposure changes, propellers in view and sun glare are not tested.
+- The brightness rule fails at night, over snow and above clouds. A trained sky/ground segmentation model would be needed, and should also reduce the 5–14° error.
+- Combining the estimate with the IMU is not implemented.
 
 ## Numerical checks
 
@@ -146,7 +196,7 @@ The projection code has been checked with Node.js:
 Unfolding the globe onto a tetrahedron is not new. The closest earlier work:
 
 - **[Lee's conformal tetrahedral projection](https://en.wikipedia.org/wiki/Lee_conformal_world_in_a_tetrahedron)** (L. P. Lee, 1965). It also maps the globe onto a regular tetrahedron and tiles the plane, and its tile can be rearranged into the same `√3 × 1` rectangle. The original is centred on the South Pole, which sits on a vertex. It is conformal (local shapes are right), so great circles are curved. It is available in D3 as [`d3.geoTetrahedralLee`](https://unpkg.com/browse/d3-geo-polygon@1.9.0/README.md), usually drawn as a triangle with the pole at its centre.
-- **[Doug McIlroy's tetrahedral map card](https://cs.dartmouth.edu/~doug/cards/page1983.pdf)** (1983) uses Lee's projection with the poles at the midpoints of two opposite edges and all four vertices in the oceans. This is the same arrangement as the upright orientation `unfold360.py` uses for photos.
+- **[Doug McIlroy's tetrahedral map card](https://cs.dartmouth.edu/~doug/cards/page1983.pdf)** (1983) uses Lee's projection with the poles at the midpoints of two opposite edges and all four vertices in the oceans.
 - **[AuthaGraph](https://en.wikipedia.org/wiki/AuthaGraph_projection)** (Hajime Narukawa) is a rectangular, seamlessly tiling tetrahedral map with its corners in the oceans. Its algorithm is patented and unpublished.
 
 What this project does differently:
@@ -163,6 +213,7 @@ What this project does differently:
 - [OurAirports](https://ourairports.com/data/): airport list (`airports.json`, airports with scheduled service and an IATA code), public domain
 - [Wikidata](https://www.wikidata.org/): Chinese airport and city names, and passenger counts used for ranking search results, CC0. Simplified names were converted to Taiwan usage with [OpenCC](https://github.com/BYVoid/OpenCC)
 - [Poly Haven](https://polyhaven.com/a/art_studio): test 360° photo "Art Studio" by Oliksiy Yakovlyev, CC0
+- [Wikimedia Commons](https://commons.wikimedia.org/): aerial 360° panoramas by Gunther Tschuch (PaulT), CC BY-SA 4.0, used for the drone test: [Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg), [Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg), [Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg), [Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg), [Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg), [Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg). `examples/aerial_*.jpg` are adapted from the Sebnitz Ottendorf panorama and are licensed CC BY-SA 4.0
 - AuthaGraph is the work and registered trademark of Hajime Narukawa. This project is not affiliated with it.
 
 ## License
@@ -171,4 +222,4 @@ What this project does differently:
 
 **Commercial use needs a separate paid license.** Contact ertiach@gmail.com.
 
-- The license covers the code in this repository. The libraries and data listed above (D3, TopoJSON, world-atlas / Natural Earth, OurAirports, Wikidata, the Poly Haven photo) keep their own licenses.
+- The license covers the code in this repository. The libraries and data listed above (D3, TopoJSON, world-atlas / Natural Earth, OurAirports, Wikidata, the Poly Haven photo) keep their own licenses. `examples/aerial_*.jpg` are licensed CC BY-SA 4.0 (see Credits).
