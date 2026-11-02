@@ -1,6 +1,6 @@
 # tetra-unfold
 
-[English](README.md) | [繁體中文](README.zh-TW.md) | **简体中文** | [日本語](README.ja.md) | [한국어](README.ko.md) | [Deutsch](README.de.md) | [Français](README.fr.md) | [Español](README.es.md)
+[English](README.md) | [繁體中文](README.zh-TW.md) | **简体中文** | [日本語](README.ja.md) | [한국어](README.ko.md) | [Deutsch](README.de.md) | [Français](README.fr.md) | [Español](README.es.md) | [Русский](README.ru.md)
 
 > 本文是英文版的翻译；如有出入，以[英文版](README.md)为准。
 
@@ -12,7 +12,7 @@
 
 **在线体验：<https://iantpe.github.io/tetra-unfold/>**
 
-地图提供繁體中文、简体中文、English、日本語、한국어、Deutsch、Français、Español 八种语言，会根据浏览器语言自动选择；也可以用面板上的菜单切换，或在网址后加上 `?lang=`（`zh-Hant`、`zh-Hans`、`en`、`ja`、`ko`、`de`、`fr`、`es`），例如 <https://iantpe.github.io/tetra-unfold/?lang=zh-Hans>。
+地图提供繁體中文、简体中文、English、日本語、한국어、Deutsch、Français、Español、Русский 九种语言，会根据浏览器语言自动选择；也可以用面板上的菜单切换，或在网址后加上 `?lang=`（`zh-Hant`、`zh-Hans`、`en`、`ja`、`ko`、`de`、`fr`、`es`、`ru`），例如 <https://iantpe.github.io/tetra-unfold/?lang=zh-Hans>。
 
 地图是一个 HTML 文件，加上 `i18n.js`（界面文字）、`airports.json` 和 `names/<语言>.json`（机场和城市名称），无需安装或构建（需要联网加载 D3 和国界数据）。
 
@@ -207,7 +207,7 @@ python unfold360.py photo.jpg out/
 
 - 四面体的一条边竖直贯穿地图中线；拖动时地球沿着这条边移动，在北极位于上方顶点和南极位于下方顶点之间切换。
 - 每一面都是心射投影，大圆航线在同一面内是直线。
-- 地图上直接集成了行程规划：八种语言的机场搜索、航线、距离和最短的访问顺序。
+- 地图上直接集成了行程规划：九种语言的机场搜索、航线、距离和最短的访问顺序。
 
 ## 相关的行程规划工具
 
@@ -229,7 +229,7 @@ python unfold360.py photo.jpg out/
 - [TopoJSON](https://github.com/topojson/topojson) 3.0.2
 - [world-atlas](https://github.com/topojson/world-atlas) 2.0.2：国界数据，源自 [Natural Earth](https://www.naturalearthdata.com/)（1:50m）
 - [OurAirports](https://ourairports.com/data/)：机场列表（`airports.json`，有定期航班且有 IATA 代码的机场），公有领域
-- [Wikidata](https://www.wikidata.org/)：机场和城市的中文、日文、韩文、德文、法文、西班牙文名称，以及用于排序搜索结果的客流量，CC0。中文名称用 [OpenCC](https://github.com/BYVoid/OpenCC) 转换为繁体（台湾用语）或简体。国名使用浏览器内置的翻译（`Intl.DisplayNames`）
+- [Wikidata](https://www.wikidata.org/)：机场和城市的中文、日文、韩文、德文、法文、西班牙文、俄文名称，以及用于排序搜索结果的客流量，CC0。中文名称用 [OpenCC](https://github.com/BYVoid/OpenCC) 转换为繁体（台湾用语）或简体。国名使用浏览器内置的翻译（`Intl.DisplayNames`）
 - [Poly Haven](https://polyhaven.com/a/art_studio)：测试用 360° 照片「Art Studio」，作者 Oliksiy Yakovlyev，CC0
 - [Wikimedia Commons](https://commons.wikimedia.org/)：无人机测试用的航拍 360° 全景，摄影 Gunther Tschuch（PaulT），CC BY-SA 4.0：[Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg)、[Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg)、[Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg)、[Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg)、[Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg)、[Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg)。`examples/aerial_*.jpg` 改编自 Sebnitz Ottendorf 这张，采用 CC BY-SA 4.0 许可
 - AuthaGraph 是鸣川肇的作品和注册商标，本项目与其无关。

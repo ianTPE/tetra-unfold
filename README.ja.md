@@ -1,6 +1,6 @@
 # tetra-unfold
 
-[English](README.md) | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | **日本語** | [한국어](README.ko.md) | [Deutsch](README.de.md) | [Français](README.fr.md) | [Español](README.es.md)
+[English](README.md) | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | **日本語** | [한국어](README.ko.md) | [Deutsch](README.de.md) | [Français](README.fr.md) | [Español](README.es.md) | [Русский](README.ru.md)
 
 > この文書は英語版の翻訳です。内容に違いがある場合は[英語版](README.md)が優先されます。
 
@@ -12,7 +12,7 @@
 
 **オンラインで試す：<https://iantpe.github.io/tetra-unfold/?lang=ja>**
 
-地図は繁體中文、简体中文、English、日本語、한국어、Deutsch、Français、Español の 8 言語に対応しています。ブラウザの言語に合わせて自動で選ばれ、パネルのメニューで切り替えたり、アドレスに `?lang=`（`zh-Hant`、`zh-Hans`、`en`、`ja`、`ko`、`de`、`fr`、`es`）を付けて指定したりできます。
+地図は繁體中文、简体中文、English、日本語、한국어、Deutsch、Français、Español、Русский の 9 言語に対応しています。ブラウザの言語に合わせて自動で選ばれ、パネルのメニューで切り替えたり、アドレスに `?lang=`（`zh-Hant`、`zh-Hans`、`en`、`ja`、`ko`、`de`、`fr`、`es`、`ru`）を付けて指定したりできます。
 
 地図は 1 つの HTML ファイルと、`i18n.js`（画面の文言）、`airports.json`、`names/<言語>.json`（空港名と都市名）でできています。インストールやビルドは不要です（D3 と国境データの読み込みにインターネット接続が必要です）。
 
@@ -207,7 +207,7 @@ Wikimedia Commons の空撮 360° パノラマ 6 枚（撮影 Gunther Tschuch、
 
 - 1 本の辺が地図の中央を縦に通り、ドラッグすると地球がその辺に沿って動き、北極が上の頂点にある状態と南極が下の頂点にある状態の間を移ります。
 - 各面が心射図法なので、大圏航路は同じ面の中では直線です。
-- 地図の上に行程計画の機能があります：8 言語での空港検索、航路、距離、最短の訪問順。
+- 地図の上に行程計画の機能があります：9 言語での空港検索、航路、距離、最短の訪問順。
 
 ## 関連する旅程計画ツール
 
@@ -229,7 +229,7 @@ Wikimedia Commons の空撮 360° パノラマ 6 枚（撮影 Gunther Tschuch、
 - [TopoJSON](https://github.com/topojson/topojson) 3.0.2
 - [world-atlas](https://github.com/topojson/world-atlas) 2.0.2：[Natural Earth](https://www.naturalearthdata.com/)（1:50m）由来の国境データ
 - [OurAirports](https://ourairports.com/data/)：空港一覧（`airports.json`、定期便があり IATA コードを持つ空港）、パブリックドメイン
-- [Wikidata](https://www.wikidata.org/)：中国語、日本語、韓国語、ドイツ語、フランス語、スペイン語の空港名と都市名、および検索結果の並べ替えに使う利用者数、CC0。中国語の名称は [OpenCC](https://github.com/BYVoid/OpenCC) で繁体字（台湾の用法）または簡体字に変換しています。国名はブラウザの組み込み翻訳（`Intl.DisplayNames`）を使っています
+- [Wikidata](https://www.wikidata.org/)：中国語、日本語、韓国語、ドイツ語、フランス語、スペイン語、ロシア語の空港名と都市名、および検索結果の並べ替えに使う利用者数、CC0。中国語の名称は [OpenCC](https://github.com/BYVoid/OpenCC) で繁体字（台湾の用法）または簡体字に変換しています。国名はブラウザの組み込み翻訳（`Intl.DisplayNames`）を使っています
 - [Poly Haven](https://polyhaven.com/a/art_studio)：テスト用 360° 写真「Art Studio」、撮影 Oliksiy Yakovlyev、CC0
 - [Wikimedia Commons](https://commons.wikimedia.org/)：ドローンのテストに使った空撮 360° パノラマ、撮影 Gunther Tschuch（PaulT）、CC BY-SA 4.0：[Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg)、[Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg)、[Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg)、[Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg)、[Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg)、[Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg)。`examples/aerial_*.jpg` は Sebnitz Ottendorf のパノラマを改変したもので、CC BY-SA 4.0 でライセンスされています
 - AuthaGraph は鳴川肇氏の作品および登録商標です。本プロジェクトとは関係ありません。

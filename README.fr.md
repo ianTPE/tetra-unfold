@@ -1,6 +1,6 @@
 # tetra-unfold
 
-[English](README.md) | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Deutsch](README.de.md) | **Français** | [Español](README.es.md)
+[English](README.md) | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Deutsch](README.de.md) | **Français** | [Español](README.es.md) | [Русский](README.ru.md)
 
 > Ce document est une traduction de la version anglaise. En cas de différence, la [version anglaise](README.md) fait foi.
 
@@ -12,7 +12,7 @@ La démonstration utilise une carte du monde et s’inspire de la [carte du mond
 
 **Essayer en ligne : <https://iantpe.github.io/tetra-unfold/?lang=fr>**
 
-La carte est disponible en 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch, Français et Español. Elle choisit automatiquement la langue du navigateur ; on peut en changer avec le menu du panneau, ou ajouter `?lang=` à l’adresse (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`, `es`).
+La carte est disponible en 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch, Français, Español et Русский. Elle choisit automatiquement la langue du navigateur ; on peut en changer avec le menu du panneau, ou ajouter `?lang=` à l’adresse (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`, `es`, `ru`).
 
 La carte se compose d’un seul fichier HTML, de `i18n.js` (textes de l’interface), de `airports.json` et de `names/<langue>.json` (noms des aéroports et des villes). Rien à installer ni à compiler. Une connexion Internet est nécessaire pour charger D3 et les données des pays.
 
@@ -207,7 +207,7 @@ Ce que ce projet fait différemment :
 
 - Une arête traverse verticalement le centre de la carte, et le glissement fait coulisser le globe le long de celle-ci, entre le pôle Nord sur le sommet du haut et le pôle Sud sur le sommet du bas.
 - Chaque face est une projection gnomonique, si bien que les routes aériennes orthodromiques sont droites à l’intérieur d’une face.
-- Un planificateur de voyage est intégré à la carte : recherche d’aéroports en huit langues, routes, distances et ordre de visite le plus court.
+- Un planificateur de voyage est intégré à la carte : recherche d’aéroports en neuf langues, routes, distances et ordre de visite le plus court.
 
 ## Outils apparentés pour planifier un voyage
 
@@ -229,7 +229,7 @@ Les distances sont calculées ici sur une sphère (rayon 6 371 km). Elles diffè
 - [TopoJSON](https://github.com/topojson/topojson) 3.0.2
 - [world-atlas](https://github.com/topojson/world-atlas) 2.0.2 : frontières des pays issues de [Natural Earth](https://www.naturalearthdata.com/) (1:50m)
 - [OurAirports](https://ourairports.com/data/) : liste des aéroports (`airports.json`, aéroports avec service régulier et code IATA), domaine public
-- [Wikidata](https://www.wikidata.org/) : noms des aéroports et des villes en chinois, japonais, coréen, allemand, français et espagnol, et nombre de passagers utilisé pour classer les résultats de recherche, CC0. Les noms chinois ont été convertis en caractères traditionnels (usage de Taïwan) ou simplifiés avec [OpenCC](https://github.com/BYVoid/OpenCC). Les noms de pays proviennent des traductions intégrées au navigateur (`Intl.DisplayNames`)
+- [Wikidata](https://www.wikidata.org/) : noms des aéroports et des villes en chinois, japonais, coréen, allemand, français, espagnol et russe, et nombre de passagers utilisé pour classer les résultats de recherche, CC0. Les noms chinois ont été convertis en caractères traditionnels (usage de Taïwan) ou simplifiés avec [OpenCC](https://github.com/BYVoid/OpenCC). Les noms de pays proviennent des traductions intégrées au navigateur (`Intl.DisplayNames`)
 - [Poly Haven](https://polyhaven.com/a/art_studio) : photo 360° de test « Art Studio » d’Oliksiy Yakovlyev, CC0
 - [Wikimedia Commons](https://commons.wikimedia.org/) : panoramas aériens 360° de Gunther Tschuch (PaulT), CC BY-SA 4.0, utilisés pour le test des drones : [Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg), [Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg), [Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg), [Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg), [Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg), [Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg). `examples/aerial_*.jpg` sont adaptés du panorama Sebnitz Ottendorf et sont sous licence CC BY-SA 4.0
 - AuthaGraph est une œuvre et une marque déposée de Hajime Narukawa. Ce projet n’y est pas affilié.

@@ -1,6 +1,6 @@
 # tetra-unfold
 
-**English** | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Deutsch](README.de.md) | [Français](README.fr.md) | [Español](README.es.md)
+**English** | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Deutsch](README.de.md) | [Français](README.fr.md) | [Español](README.es.md) | [Русский](README.ru.md)
 
 Unfold the whole sphere onto a **regular tetrahedron**, then flatten it into a rectangle that **tiles the plane seamlessly**.
 
@@ -10,7 +10,7 @@ The demo uses a world map and is inspired by the [AuthaGraph world map](https://
 
 **Try it online: <https://iantpe.github.io/tetra-unfold/>**
 
-The map is available in 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch, Français and Español. It picks your browser's language automatically; use the menu in the panel to switch, or add `?lang=` to the address (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`, `es`), for example <https://iantpe.github.io/tetra-unfold/?lang=ja>.
+The map is available in 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch, Français, Español and Русский. It picks your browser's language automatically; use the menu in the panel to switch, or add `?lang=` to the address (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`, `es`, `ru`), for example <https://iantpe.github.io/tetra-unfold/?lang=ja>.
 
 The map is a single HTML file plus `i18n.js` (interface text), `airports.json` and `names/<language>.json` (airport and city names). There is nothing to install or build. An internet connection is needed to load D3 and the country data.
 
@@ -205,7 +205,7 @@ What this project does differently:
 
 - One edge runs vertically down the centre of the map, and dragging slides the globe along it between the North Pole on the top corner and the South Pole on the bottom corner.
 - Each face is a gnomonic projection, so great-circle flight routes are straight within a face.
-- It includes a trip planner on top of the map: airport search in eight languages, routes, distances and the shortest visiting order.
+- It includes a trip planner on top of the map: airport search in nine languages, routes, distances and the shortest visiting order.
 
 ## Related tools for trip planning
 
@@ -227,7 +227,7 @@ Distances here use a sphere (radius 6,371 km). They differ from ellipsoid distan
 - [TopoJSON](https://github.com/topojson/topojson) 3.0.2
 - [world-atlas](https://github.com/topojson/world-atlas) 2.0.2: country boundaries derived from [Natural Earth](https://www.naturalearthdata.com/) (1:50m)
 - [OurAirports](https://ourairports.com/data/): airport list (`airports.json`, airports with scheduled service and an IATA code), public domain
-- [Wikidata](https://www.wikidata.org/): airport and city names in Chinese, Japanese, Korean, German, French and Spanish, and passenger counts used for ranking search results, CC0. Chinese names were converted to Traditional (Taiwan usage) or Simplified script with [OpenCC](https://github.com/BYVoid/OpenCC); Traditional Chinese names were then checked for Taiwan-standard transliterations. Country names come from the browser's built-in translations (`Intl.DisplayNames`)
+- [Wikidata](https://www.wikidata.org/): airport and city names in Chinese, Japanese, Korean, German, French, Spanish and Russian, and passenger counts used for ranking search results, CC0. Chinese names were converted to Traditional (Taiwan usage) or Simplified script with [OpenCC](https://github.com/BYVoid/OpenCC); Traditional Chinese names were then checked for Taiwan-standard transliterations. Country names come from the browser's built-in translations (`Intl.DisplayNames`)
 - [Poly Haven](https://polyhaven.com/a/art_studio): test 360° photo "Art Studio" by Oliksiy Yakovlyev, CC0
 - [Wikimedia Commons](https://commons.wikimedia.org/): aerial 360° panoramas by Gunther Tschuch (PaulT), CC BY-SA 4.0, used for the drone test: [Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg), [Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg), [Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg), [Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg), [Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg), [Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg). `examples/aerial_*.jpg` are adapted from the Sebnitz Ottendorf panorama and are licensed CC BY-SA 4.0
 - AuthaGraph is the work and registered trademark of Hajime Narukawa. This project is not affiliated with it.
