@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>四面體世界地圖</title>
+<title>Tetrahedral World Map · 四面體世界地圖</title>
 <style>
   :root {
     --bg: #cfe9f0;
@@ -47,6 +47,10 @@
     color: var(--text);
     font: 14px/1.5 system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
   }
+  /* 中日韓的漢字字形各有標準，依語言選字型 */
+  :root[lang="zh-Hans"] body { font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif; }
+  :root[lang="ja"] body { font-family: system-ui, -apple-system, "Segoe UI", "Yu Gothic UI", "Hiragino Sans", "Meiryo", sans-serif; }
+  :root[lang="ko"] body { font-family: system-ui, -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; }
   #map {
     position: fixed; inset: 0; width: 100%; height: 100%;
     display: block; cursor: grab; touch-action: none;
@@ -89,6 +93,10 @@
     flex: 1; min-width: 0; border: 1px solid var(--line); background: transparent; color: var(--text);
     border-radius: 8px; padding: 5px 8px; font: inherit; font-size: 13px;
   }
+  #lang {
+    border: 1px solid var(--line); background: var(--panel); color: var(--text);
+    border-radius: 8px; padding: 3px 6px; font: inherit; font-size: 13px;
+  }
   .search button {
     border: 1px solid var(--line); background: transparent; color: var(--text);
     border-radius: 8px; padding: 0 10px; font: inherit; font-size: 13px; cursor: pointer;
@@ -124,70 +132,116 @@
 </head>
 <body>
 <canvas id="map"></canvas>
-<div id="status">載入地圖資料中…</div>
+<div id="status" data-i18n="loading"></div>
 <div id="tip"></div>
 
 <div class="panel">
-  <h1>四面體世界地圖</h1>
-  <div class="sub">AuthaGraph 風格的近似實作</div>
+  <h1 data-i18n="title"></h1>
+  <div class="sub" data-i18n="sub"></div>
+  <div class="row"><span data-i18n="language"></span><select id="lang"></select></div>
   <details open>
-    <summary>設定</summary>
-    <div class="row"><label><input type="checkbox" id="tiled" checked> 無縫拼接</label></div>
-    <div class="row"><label><input type="checkbox" id="equal"> 面積校正（關閉時，同一面內的航線是直線）</label></div>
-    <div class="row"><label><input type="checkbox" id="folds"> 顯示四面體摺線</label></div>
-    <div class="row"><label><input type="checkbox" id="grat" checked> 經緯網</label></div>
-    <div class="row"><label><input type="checkbox" id="limit" checked> 上下拖曳限制在北極、南極之間</label></div>
+    <summary data-i18n="settings"></summary>
+    <div class="row"><label><input type="checkbox" id="tiled" checked> <span data-i18n="tiled"></span></label></div>
+    <div class="row"><label><input type="checkbox" id="equal"> <span data-i18n="equal"></span></label></div>
+    <div class="row"><label><input type="checkbox" id="folds"> <span data-i18n="folds"></span></label></div>
+    <div class="row"><label><input type="checkbox" id="grat" checked> <span data-i18n="grat"></span></label></div>
+    <div class="row"><label><input type="checkbox" id="limit" checked> <span data-i18n="limit"></span></label></div>
     <div class="row">
-      <span>翻轉</span>
+      <span data-i18n="roll"></span>
       <input type="range" id="roll" min="-180" max="180" step="1" value="0">
     </div>
     <div class="row">
-      <span>拖曳</span>
+      <span data-i18n="drag"></span>
       <div class="seg" id="mode">
-        <button data-mode="rotate" class="on">轉動地球</button>
-        <button data-mode="pan">平移畫面</button>
+        <button data-mode="rotate" class="on" data-i18n="rotate"></button>
+        <button data-mode="pan" data-i18n="pan"></button>
       </div>
     </div>
     <div class="btns">
-      <button id="zoomIn" aria-label="放大">＋</button>
-      <button id="zoomOut" aria-label="縮小">－</button>
-      <button id="reset">重設</button>
+      <button id="zoomIn" data-i18n-aria="zoomIn">＋</button>
+      <button id="zoomOut" data-i18n-aria="zoomOut">－</button>
+      <button id="reset" data-i18n="reset"></button>
     </div>
     <div class="btns">
-      <button id="toNorth">北極在上</button>
-      <button id="toSouth">南極在下</button>
+      <button id="toNorth" data-i18n="toNorth"></button>
+      <button id="toSouth" data-i18n="toSouth"></button>
     </div>
     <div class="hint">
-      <p>拖曳：轉動地球（Shift + 拖曳：平移）</p>
-      <p>上下拖曳：北極、南極沿著中央的邊移動</p>
-      <p>滾輪：縮放　滑過國家：顯示名稱</p>
+      <p data-i18n="hintDrag"></p>
+      <p data-i18n="hintUpDown"></p>
+      <p data-i18n="hintWheel"></p>
     </div>
   </details>
   <details open>
-    <summary>出差路線</summary>
+    <summary data-i18n="trip"></summary>
     <div class="search">
-      <input type="text" id="apSearch" list="apList" placeholder="機場代碼、城市或機場名，例如 TPE、倫敦" autocomplete="off">
-      <button id="apAdd">加入</button>
+      <input type="text" id="apSearch" list="apList" data-i18n-placeholder="search" autocomplete="off">
+      <button id="apAdd" data-i18n="add"></button>
     </div>
     <datalist id="apList"></datalist>
     <ol id="stops"></ol>
-    <div class="row"><label><input type="checkbox" id="roundTrip" checked> 最後回到出發地</label></div>
+    <div class="row"><label><input type="checkbox" id="roundTrip" checked> <span data-i18n="roundTrip"></span></label></div>
     <div class="btns">
-      <button id="optimize">算最順的順序</button>
-      <button id="clearTrip">清除</button>
+      <button id="optimize" data-i18n="optimize"></button>
+      <button id="clearTrip" data-i18n="clear"></button>
     </div>
     <div id="tripSummary"></div>
     <div class="hint">
-      <p>在地圖上點機場（小圓點）也可以加入。</p>
-      <p>「算最順的順序」會固定第一站當出發地，排出總距離最短的走法。</p>
-      <p>距離是大圓距離（最短飛行距離），實際航線通常會長一些。</p>
+      <p data-i18n="hintClick"></p>
+      <p data-i18n="hintOptimize"></p>
+      <p data-i18n="hintDistance"></p>
     </div>
   </details>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="i18n.js"></script>
 <script>
+// ---------------------------------------------------------------------------
+// 語言（翻譯表在 i18n.js）
+// ---------------------------------------------------------------------------
+let lang = pickLang();
+const t = (key, vars = {}) => (STRINGS[lang][key] ?? STRINGS.en[key] ?? key).replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
+const locale = () => (lang === 'zh-Hant' ? 'zh-TW' : lang === 'zh-Hans' ? 'zh-CN' : lang);
+let regionNames = null, kmFormat = null;
+function setupLocale() {
+  try { regionNames = new Intl.DisplayNames([locale(), lang], { type: 'region' }); } catch (e) { regionNames = null; }
+  try {
+    kmFormat = new Intl.NumberFormat(locale(), { style: 'unit', unit: 'kilometer', unitDisplay: 'short', maximumFractionDigits: 0 });
+  } catch (e) {
+    kmFormat = { format: n => Math.round(n).toLocaleString() + ' km' };
+  }
+}
+// 國名用瀏覽器內建的翻譯；沒有的話用 fallback（英文）
+function regionName(code, fallback) {
+  try { const n = regionNames && code && regionNames.of(code); if (n && n !== code) return n; } catch (e) { /* 用 fallback */ }
+  return fallback || code || '';
+}
+function applyTexts() {
+  document.documentElement.lang = lang;
+  document.title = t('title');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+}
+function setLang(l) {
+  lang = l;
+  setupLocale();
+  applyTexts();
+  try { localStorage.setItem('tetra-unfold-lang', l); } catch (e) { /* 不能存就算了 */ }
+  const url = new URL(location.href);
+  url.searchParams.set('lang', l);
+  history.replaceState(null, '', url);
+  localizeAirports();
+}
+const langSelect = document.getElementById('lang');
+langSelect.innerHTML = Object.entries(LANGS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+langSelect.value = lang;
+langSelect.addEventListener('change', () => setLang(langSelect.value));
+setupLocale();
+applyTexts();
+
 // ---------------------------------------------------------------------------
 // 幾何設定
 //
@@ -617,9 +671,9 @@ function showTip(e) {
   const ap = pickAirport(e.clientX, e.clientY);
   if (ap >= 0) {
     const a = airports[ap];
-    tip.innerHTML = `<b>${a.iata}　${esc(a.zhName || a.name)}</b>` +
-      (a.zhName ? `<span>${esc(a.name)}</span><br>` : '') +
-      `<span>${esc(placeOf(a))}　·　點一下加入行程</span>`;
+    tip.innerHTML = `<b>${a.iata}　${esc(apName(a))}</b>` +
+      (apName(a) !== a.name ? `<span>${esc(a.name)}</span><br>` : '') +
+      `<span>${esc(placeOf(a))}　·　${esc(t('clickToAdd'))}</span>`;
     canvas.style.cursor = 'pointer';
     placeTip(e);
     return;
@@ -638,7 +692,7 @@ function showTip(e) {
   const alpha = px >>> 24, n = (px & 255) + (((px >> 8) & 255) << 8);
   const f = alpha === 255 && n > 0 && n <= features.length ? features[n - 1] : null;
   const coord = `${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'}　${Math.abs(lon).toFixed(1)}°${lon >= 0 ? 'E' : 'W'}`;
-  tip.innerHTML = (f ? `<b>${f.properties.name}</b>` : '<b>海洋</b>') + `<span>${coord}</span>`;
+  tip.innerHTML = `<b>${esc(f ? countryName(f) : t('ocean'))}</b><span>${coord}</span>`;
   placeTip(e);
 }
 
@@ -748,15 +802,21 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
 // ---------------------------------------------------------------------------
 const EARTH_R = 6371.0088;           // 地球平均半徑（公里）
 const MAX_STOPS = 10;
-let airports = [], apByCode = {};
+let airports = [], apByCode = {}, apCountriesEn = {};
+const namesCache = {};               // 各語言的機場名稱（names/<lang>.json），載入過就留著
 let apPlane = null, apPlaneVer = -1; // 每個機場在畫面上的一份位置，方向改變時重算
 const trip = { stops: [], legsCache: null, legsVer: -1, note: '' };
 const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-const fmtKm = km => Math.round(km).toLocaleString('zh-TW') + ' 公里';
+const fmtKm = km => kmFormat.format(Math.round(km));
 const angBetween = (a, b) => Math.acos(Math.max(-1, Math.min(1, dot(a, b))));
 const legKm = (i, j) => angBetween(airports[i].v, airports[j].v) * EARTH_R;
-// 「城市，國家」，有中文就用中文
-const placeOf = a => [a.zhCity || a.city, a.country].filter(Boolean).join('，');
+// 目前語言的機場名稱、城市名稱；沒有翻譯時用英文
+const apName = a => a.lname || a.name;
+const apCity = a => a.lcity || a.city;
+const placeOf = a => [apCity(a), a.country].filter(Boolean).join(t('sep'));
+// 滑過的國家：用數字代碼換成兩碼代碼，再交給瀏覽器翻譯
+const countryName = f => regionName(COUNTRY_NUM_TO_ALPHA2[String(f.id).padStart(3, '0')] || COUNTRY_NAME_TO_ALPHA2[f.properties.name],
+                                    f.properties.name);
 const isRound = n => document.getElementById('roundTrip').checked && n > 2;
 
 // 小圓點：大型機場一直顯示；放大後也顯示中型機場
@@ -888,7 +948,7 @@ function tripChanged(note = '') {
 function addStop(i) {
   const st = trip.stops;
   if (st.length && st[st.length - 1] === i) return;
-  if (st.length >= MAX_STOPS) { tripChanged(`最多 ${MAX_STOPS} 站。`); return; }
+  if (st.length >= MAX_STOPS) { tripChanged(t('maxStops', { n: MAX_STOPS })); return; }
   st.push(i);
   tripChanged();
 }
@@ -902,24 +962,25 @@ function renderTrip() {
   const st = trip.stops, list = document.getElementById('stops');
   list.innerHTML = st.map((ap, k) => {
     const a = airports[ap];
-    const leg = k ? fmtKm(legKm(st[k - 1], ap)) : '出發';
+    const leg = k ? fmtKm(legKm(st[k - 1], ap)) : esc(t('start'));
+    const full = apName(a) !== a.name ? apName(a) + '\n' + a.name : a.name;
     return `<li><span class="num">${k + 1}</span>` +
-      `<span class="name" title="${esc((a.zhName ? a.zhName + '\n' : '') + a.name)}">${a.iata} ${esc(a.zhCity || a.zhName || a.city || a.name)}</span>` +
+      `<span class="name" title="${esc(full)}">${a.iata} ${esc(a.lcity || a.lname || a.city || a.name)}</span>` +
       `<span class="leg">${leg}</span>` +
-      `<button data-act="up" data-k="${k}" aria-label="往前移" ${k ? '' : 'disabled'}>↑</button>` +
-      `<button data-act="down" data-k="${k}" aria-label="往後移" ${k < st.length - 1 ? '' : 'disabled'}>↓</button>` +
-      `<button data-act="del" data-k="${k}" aria-label="刪除">×</button></li>`;
+      `<button data-act="up" data-k="${k}" aria-label="${esc(t('moveUp'))}" ${k ? '' : 'disabled'}>↑</button>` +
+      `<button data-act="down" data-k="${k}" aria-label="${esc(t('moveDown'))}" ${k < st.length - 1 ? '' : 'disabled'}>↓</button>` +
+      `<button data-act="del" data-k="${k}" aria-label="${esc(t('remove'))}">×</button></li>`;
   }).join('');
   const sum = document.getElementById('tripSummary');
   const note = trip.note ? `<span class="note">${trip.note}</span>` : '';
   if (st.length < 2) {
-    sum.innerHTML = note || '<span class="note">加入兩個以上的機場，就會算出距離。</span>';
+    sum.innerHTML = note || `<span class="note">${esc(t('needTwo'))}</span>`;
     return;
   }
   const last = st[st.length - 1];
   const back = isRound(st.length)
-    ? `<br><span class="note">最後一段 ${airports[last].iata} → ${airports[st[0]].iata}：${fmtKm(legKm(last, st[0]))}</span>` : '';
-  sum.innerHTML = `總距離 <b>${fmtKm(tripLength(st))}</b>${back}` + (note ? '<br>' + note : '');
+    ? `<br><span class="note">${esc(t('lastLeg', { a: airports[last].iata, b: airports[st[0]].iata, d: fmtKm(legKm(last, st[0])) }))}</span>` : '';
+  sum.innerHTML = `${esc(t('total'))} <b>${fmtKm(tripLength(st))}</b>${back}` + (note ? '<br>' + note : '');
 }
 document.getElementById('stops').addEventListener('click', e => {
   const b = e.target.closest('button');
@@ -936,7 +997,7 @@ document.getElementById('clearTrip').onclick = () => { trip.stops = []; tripChan
 // 最順的順序：第一站固定當出發地，其餘各站試遍所有排列（最多 9! = 362,880 種）
 document.getElementById('optimize').onclick = () => {
   const st = trip.stops;
-  if (st.length < 3) { tripChanged('至少要三站才需要排順序。'); return; }
+  if (st.length < 3) { tripChanged(esc(t('needThree'))); return; }
   const before = tripLength(st);
   const rest = st.slice(1), n = rest.length, c = new Array(n).fill(0);
   let best = rest.slice(), bestLen = before;
@@ -952,7 +1013,7 @@ document.getElementById('optimize').onclick = () => {
   }
   trip.stops = [st[0], ...best];
   const saved = before - bestLen;
-  tripChanged(saved > 0.5 ? `已重新排序：比原本少 ${fmtKm(saved)}。` : '目前的順序已經是最短的。');
+  tripChanged(esc(saved > 0.5 ? t('reordered', { d: fmtKm(saved) }) : t('alreadyBest')));
 };
 
 // 搜尋用的正規化：不分大小寫，「台」「臺」視為相同
@@ -973,40 +1034,56 @@ function findAirport(text) {
 function addFromSearch() {
   const input = document.getElementById('apSearch');
   const i = findAirport(input.value);
-  if (i < 0) { tripChanged(`找不到「${esc(input.value)}」。可以輸入三碼機場代碼、城市或機場名稱（中英文都可以）。`); return; }
+  if (i < 0) { tripChanged(esc(t('notFound', { q: input.value.trim() }))); return; }
   input.value = '';
   addStop(i);
 }
 document.getElementById('apAdd').onclick = addFromSearch;
 document.getElementById('apSearch').addEventListener('keydown', e => { if (e.key === 'Enter') addFromSearch(); });
 
+// 依目前語言設定機場的顯示名稱和搜尋關鍵字。名稱檔第一次用到時才下載
+const CITY_SUFFIX = /(特別市|広域市|특별시|광역시|市|縣|县|都|府|県|시)$/;
+function localizeAirports() {
+  if (!airports.length) return;
+  const want = lang;
+  const apply = names => {
+    if (lang !== want) return;
+    for (const a of airports) {
+      const [n = '', c = '', alt = ''] = names[a.iata] || [];
+      a.lname = n; a.lcity = c;
+      a.country = regionName(a.cc, apCountriesEn[a.cc]);
+      const cityNames = [c, ...(alt ? alt.split('|') : [])].filter(Boolean);
+      a.keys = {
+        cities: [...cityNames, ...cityNames.map(x => x.replace(CITY_SUFFIX, '')), a.city].filter(Boolean).map(normText),
+        countries: [a.country, apCountriesEn[a.cc]].filter(Boolean).map(normText),
+        all: normText([n, ...cityNames, a.name, a.city, a.country, apCountriesEn[a.cc]].join('|')),
+      };
+    }
+    document.getElementById('apList').innerHTML = airports.map(a =>
+      `<option value="${a.iata} ${esc(apCity(a) || apName(a))}">${esc(apName(a))}${esc(t('sep'))}${esc(a.country)}</option>`).join('');
+    trip.note = '';
+    renderTrip();
+    requestDraw();
+  };
+  if (namesCache[want]) { apply(namesCache[want]); return; }
+  fetch(`names/${want}.json`)
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .catch(() => ({}))                // 沒有翻譯檔就全部用英文
+    .then(d => { namesCache[want] = d; apply(d); });
+}
+
+// 清單已經依「大型機場優先、旅客人數多的優先」排好
 fetch('airports.json')
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(data => {
-    // 國家中文名用瀏覽器內建的翻譯；不支援時用英文
-    let region = null;
-    try { region = new Intl.DisplayNames(['zh-Hant-TW', 'zh-Hant'], { type: 'region' }); } catch (e) { /* 用英文 */ }
-    const countryZh = cc => {
-      try { const n = region && region.of(cc); if (n && n !== cc) return n; } catch (e) { /* 用英文 */ }
-      return data.countries[cc] || cc;
-    };
-    // 清單已經依「大型機場優先、旅客人數多的優先」排好
-    airports = data.airports.map(([iata, name, city, cc, lat, lon, large, zhName, zhCity, zhCityAlt, paxM]) => {
-      const a = { iata, name, city, zhName: zhName || '', zhCity: zhCity || '', country: countryZh(cc),
-                  countryEn: data.countries[cc] || cc, lat, lon, large: !!large, pax: paxM || 0, v: fromLonLat(lon, lat) };
-      const cityNames = [a.zhCity, ...(zhCityAlt ? zhCityAlt.split('、') : [])].filter(Boolean);
-      a.keys = { cities: [...cityNames, ...cityNames.map(c => c.replace(/[市縣都]$/, '')), a.city].filter(Boolean).map(normText),
-                 countries: [a.country, a.countryEn].map(normText),
-                 all: normText([a.zhName, ...cityNames, a.name, a.city, a.country, a.countryEn].join('|')) };
-      return a;
-    });
+    apCountriesEn = data.countries;
+    airports = data.airports.map(([iata, name, city, cc, lat, lon, large, paxM]) =>
+      ({ iata, name, city, cc, lat, lon, large: !!large, pax: paxM || 0, v: fromLonLat(lon, lat),
+         lname: '', lcity: '', country: data.countries[cc] || cc, keys: { cities: [], countries: [], all: '' } }));
     airports.forEach((a, i) => { apByCode[a.iata] = i; });
-    document.getElementById('apList').innerHTML = airports.map(a =>
-      `<option value="${a.iata} ${esc(a.zhCity || a.city || a.zhName)}">${esc(a.zhName || a.name)}，${esc(a.country)}</option>`).join('');
-    renderTrip();
-    requestDraw();
+    localizeAirports();
   })
-  .catch(err => { document.getElementById('tripSummary').textContent = '機場資料載入失敗（' + err.message + '）'; });
+  .catch(err => { document.getElementById('tripSummary').textContent = t('apFail', { msg: err.message }); });
 
 // ---------------------------------------------------------------------------
 // 啟動
@@ -1027,7 +1104,7 @@ fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json')
     requestDraw();
   })
   .catch(err => {
-    document.getElementById('status').textContent = '地圖資料載入失敗，請確認網路連線後重新整理。（' + err.message + '）';
+    document.getElementById('status').textContent = t('mapFail', { msg: err.message });
   });
 </script>
 </body>

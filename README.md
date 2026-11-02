@@ -10,7 +10,9 @@ The demo uses a world map and is inspired by the [AuthaGraph world map](https://
 
 **Try it online: <https://iantpe.github.io/tetra-unfold/>**
 
-The map is a single HTML file plus `airports.json`. There is nothing to install or build. An internet connection is needed to load D3 and the country data.
+The map is available in 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch and Français. It picks your browser's language automatically; use the menu in the panel to switch, or add `?lang=` to the address (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`), for example <https://iantpe.github.io/tetra-unfold/?lang=ja>.
+
+The map is a single HTML file plus `i18n.js` (interface text), `airports.json` and `names/<language>.json` (airport and city names). There is nothing to install or build. An internet connection is needed to load D3 and the country data.
 
 | File | What it shows |
 |---|---|
@@ -26,7 +28,7 @@ Controls:
 
 The map is handy for checking flight directions: with area correction off (the default), each triangular face is a gnomonic projection, so a great-circle route is a straight line within a face and only bends where it crosses a fold line.
 
-- Add airports by clicking the dots on the map, or by typing an IATA code, a city, an airport name or a country, in Chinese or English (for example `TPE`, `倫敦`, `Munich`). When a city has several airports, the busiest one comes first. Zoom in to also see medium-sized airports.
+- Add airports by clicking the dots on the map, or by typing an IATA code, a city, an airport name or a country, in the selected language or in English (for example `TPE`, `London`, `ロンドン`, `Londres`). When a city has several airports, the busiest one comes first. Zoom in to also see medium-sized airports.
 - Each leg is drawn as a great-circle route, with its distance and the trip total. Tick **return to the start** for a round trip.
 - **Find the smoothest order** keeps the first stop as the starting point and tries every order of the others (up to 10 stops), then picks the shortest total distance.
 - Distances are great-circle distances on a sphere of radius 6,371 km. Real flight paths are usually somewhat longer.
@@ -203,7 +205,7 @@ What this project does differently:
 
 - One edge runs vertically down the centre of the map, and dragging slides the globe along it between the North Pole on the top corner and the South Pole on the bottom corner.
 - Each face is a gnomonic projection, so great-circle flight routes are straight within a face.
-- It includes a trip planner on top of the map: airport search in Chinese and English, routes, distances and the shortest visiting order.
+- It includes a trip planner on top of the map: airport search in seven languages, routes, distances and the shortest visiting order.
 
 ## Related tools for trip planning
 
@@ -225,7 +227,7 @@ Distances here use a sphere (radius 6,371 km). They differ from ellipsoid distan
 - [TopoJSON](https://github.com/topojson/topojson) 3.0.2
 - [world-atlas](https://github.com/topojson/world-atlas) 2.0.2: country boundaries derived from [Natural Earth](https://www.naturalearthdata.com/) (1:50m)
 - [OurAirports](https://ourairports.com/data/): airport list (`airports.json`, airports with scheduled service and an IATA code), public domain
-- [Wikidata](https://www.wikidata.org/): Chinese airport and city names, and passenger counts used for ranking search results, CC0. Simplified names were converted to Taiwan usage with [OpenCC](https://github.com/BYVoid/OpenCC)
+- [Wikidata](https://www.wikidata.org/): airport and city names in Chinese, Japanese, Korean, German and French, and passenger counts used for ranking search results, CC0. Chinese names were converted to Traditional (Taiwan usage) or Simplified script with [OpenCC](https://github.com/BYVoid/OpenCC). Country names come from the browser's built-in translations (`Intl.DisplayNames`)
 - [Poly Haven](https://polyhaven.com/a/art_studio): test 360° photo "Art Studio" by Oliksiy Yakovlyev, CC0
 - [Wikimedia Commons](https://commons.wikimedia.org/): aerial 360° panoramas by Gunther Tschuch (PaulT), CC BY-SA 4.0, used for the drone test: [Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg), [Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg), [Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg), [Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg), [Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg), [Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg). `examples/aerial_*.jpg` are adapted from the Sebnitz Ottendorf panorama and are licensed CC BY-SA 4.0
 - AuthaGraph is the work and registered trademark of Hajime Narukawa. This project is not affiliated with it.
