@@ -205,6 +205,20 @@ What this project does differently:
 - Each face is a gnomonic projection, so great-circle flight routes are straight within a face.
 - It includes a trip planner on top of the map: airport search in Chinese and English, routes, distances and the shortest visiting order.
 
+## Related tools for trip planning
+
+Other web tools also draw multi-stop flight routes and add up great-circle distances:
+
+| | What you see | Routes | Good for |
+|---|---|---|---|
+| [Great Circle Map](https://www.greatcirclemap.com/) | A 3D globe you can turn (a Mercator map is also available); the globe shows only half the Earth at a time | Correct great-circle arcs; distances on the ellipsoid | One leg or a few legs |
+| [RapidToolset Multi-City Flight Planner](https://rapidtoolset.com/en/tool/multi-city-flight-planner) | The whole world on a conventional flat map | Arcs between stops; high-latitude routes are stretched, so their real direction is hard to judge | Adding up distances |
+| This map | The whole world on one flat, seamlessly tiling map | Straight within each face, bending only at fold lines | Planning the **order** of a complex multi-country trip |
+
+A globe shows directions correctly but never the whole trip at once; a conventional map shows the whole trip but with misleading directions. This map shows the whole trip with directions that stay close to true, and can try every visiting order to find the shortest one.
+
+Distances here use a sphere (radius 6,371 km). They differ from ellipsoid distances, such as Great Circle Map's, by less than 0.4% (for example Taipei–London: 9,783 km vs 9,802 km). That is far smaller than the gap between different visiting orders, so it does not change which order is shortest.
+
 ## Credits
 
 - [D3.js](https://d3js.org/) 7.9.0: equirectangular projection and border rendering
