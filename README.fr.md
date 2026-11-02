@@ -158,7 +158,7 @@ Chaîne suggérée pour la reconnaissance d’objets : passer A et B au modèle,
 
 Un drone sait où est le haut grâce à sa centrale inertielle (IMU : gyroscope et accéléromètre). Mais l’accéléromètre mesure la gravité **plus l’accélération propre du drone** : lors de rafales, de collisions, de culbutes ou de manœuvres brusques, le « bas » qu’il indique est faux, et le gyroscope seul dérive avec le temps. Le magnétomètre est lui aussi facilement perturbé par les interférences électromagnétiques.
 
-La limite entre ciel et sol dans une image 360° est une **référence indépendante** : elle n’est affectée ni par les interférences électromagnétiques ni par l’accélération du drone. L’idée est de la **combiner avec l’IMU** : utiliser l’IMU en temps normal et, quand le drone est perturbé et que l’accéléromètre n’est plus fiable, corriger l’attitude avec la direction du haut vue dans l’image. C’est surtout important pour les drones qui doivent continuer à voler sous brouillage, comme les drones militaires.
+La limite entre ciel et sol dans une image 360° est une **référence indépendante** : elle n’est affectée ni par les interférences électromagnétiques ni par l’accélération du drone. L’idée est de la **combiner avec l’IMU** : utiliser l’IMU en temps normal et, quand le drone est perturbé et que l’accéléromètre n’est plus fiable, corriger l’attitude avec la direction du haut vue dans l’image. C’est surtout important pour les drones qui doivent continuer à voler sous brouillage.
 
 La disposition « horizon » s’y prête bien :
 

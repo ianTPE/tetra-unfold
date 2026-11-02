@@ -158,7 +158,7 @@ Vorgeschlagener Ablauf für die Objekterkennung: das Modell auf A und B anwenden
 
 Eine Drohne weiß über ihre IMU (Gyroskop und Beschleunigungsmesser), wo oben ist. Der Beschleunigungsmesser misst aber die Schwerkraft **plus die eigene Beschleunigung der Drohne**. Bei Böen, Zusammenstößen, Überschlägen oder harten Manövern ist das „Unten“, das er meldet, daher falsch, und das Gyroskop allein driftet mit der Zeit. Auch das Magnetometer lässt sich leicht durch elektromagnetische Störungen beeinflussen.
 
-Die Grenze zwischen Himmel und Boden in einem 360°-Bild ist eine **unabhängige Referenz**: Sie wird weder von elektromagnetischen Störungen noch von der Beschleunigung der Drohne beeinflusst. Die Idee ist, sie **mit der IMU zu kombinieren**: normalerweise die IMU verwenden und, wenn die Drohne gestört wird und dem Beschleunigungsmesser nicht zu trauen ist, die Lage mit der im Bild erkannten Richtung nach oben korrigieren. Das ist vor allem für Drohnen wichtig, die auch unter Störungen weiterfliegen müssen, etwa militärische Drohnen.
+Die Grenze zwischen Himmel und Boden in einem 360°-Bild ist eine **unabhängige Referenz**: Sie wird weder von elektromagnetischen Störungen noch von der Beschleunigung der Drohne beeinflusst. Die Idee ist, sie **mit der IMU zu kombinieren**: normalerweise die IMU verwenden und, wenn die Drohne gestört wird und dem Beschleunigungsmesser nicht zu trauen ist, die Lage mit der im Bild erkannten Richtung nach oben korrigieren. Das ist vor allem für Drohnen wichtig, die auch unter Störungen weiterfliegen müssen.
 
 Die Horizont-Anordnung eignet sich dafür:
 

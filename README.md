@@ -156,7 +156,7 @@ Suggested pipeline for object recognition: run the model on both A and B, conver
 
 A drone knows which way is up from its IMU (gyroscope and accelerometer). But the accelerometer measures gravity **plus the drone's own acceleration**, so during gusts, collisions, tumbling or hard manoeuvres the "down" it reports is wrong, and the gyroscope on its own drifts over time. The magnetometer is also easily upset by electromagnetic interference.
 
-The boundary between sky and ground in a 360° image is an **independent reference**: it is not affected by electromagnetic interference or by the drone's acceleration. The idea is to **combine it with the IMU**: use the IMU normally, and when the drone is disturbed and the accelerometer cannot be trusted, correct the attitude with the up direction seen in the image. This matters most for drones that must keep flying under interference, such as military drones.
+The boundary between sky and ground in a 360° image is an **independent reference**: it is not affected by electromagnetic interference or by the drone's acceleration. The idea is to **combine it with the IMU**: use the IMU normally, and when the drone is disturbed and the accelerometer cannot be trusted, correct the attitude with the up direction seen in the image. This matters most for drones that must keep flying under interference.
 
 The horizon layout suits this:
 

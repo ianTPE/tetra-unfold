@@ -158,7 +158,7 @@ Proceso sugerido para el reconocimiento de objetos: pasar A y B por el modelo, c
 
 Un dron sabe dónde está arriba gracias a su IMU (giroscopio y acelerómetro). Pero el acelerómetro mide la gravedad **más la aceleración propia del dron**, así que durante ráfagas de viento, choques, vuelcos o maniobras bruscas el «abajo» que indica es erróneo, y el giroscopio por sí solo deriva con el tiempo. El magnetómetro también se ve alterado fácilmente por interferencias electromagnéticas.
 
-El límite entre cielo y suelo en una imagen 360° es una **referencia independiente**: no le afectan las interferencias electromagnéticas ni la aceleración del dron. La idea es **combinarla con la IMU**: usar la IMU normalmente y, cuando el dron sufre perturbaciones y no se puede confiar en el acelerómetro, corregir la actitud con la dirección hacia arriba que se ve en la imagen. Esto es especialmente importante para drones que deben seguir volando bajo interferencias, como los drones militares.
+El límite entre cielo y suelo en una imagen 360° es una **referencia independiente**: no le afectan las interferencias electromagnéticas ni la aceleración del dron. La idea es **combinarla con la IMU**: usar la IMU normalmente y, cuando el dron sufre perturbaciones y no se puede confiar en el acelerómetro, corregir la actitud con la dirección hacia arriba que se ve en la imagen. Esto es especialmente importante para drones que deben seguir volando bajo interferencias.
 
 La disposición de horizonte se presta a ello:
 
