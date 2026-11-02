@@ -215,7 +215,11 @@ function setupLocale() {
 }
 // 國名用瀏覽器內建的翻譯；沒有的話用 fallback（英文）
 function regionName(code, fallback) {
-  try { const n = regionNames && code && regionNames.of(code); if (n && n !== code) return n; } catch (e) { /* 用 fallback */ }
+  try {
+    const n = regionNames && code && regionNames.of(code);
+    // 繁體中文依教育部用字寫「臺灣」，和「臺灣桃園國際機場」一致
+    if (n && n !== code) return lang === 'zh-Hant' ? n.replace(/台灣/g, '臺灣') : n;
+  } catch (e) { /* 用 fallback */ }
   return fallback || code || '';
 }
 function applyTexts() {
