@@ -90,24 +90,6 @@ Comme chaque pixel est calculé à rebours, il n’y a aucun découpage de polyg
 
 Autour d’un sommet du tétraèdre il n’y a que 180°, alors qu’autour de tout point d’une sphère il y en a 360°. Le voisinage de chacun des 4 sommets doit donc être étiré d’environ 2 fois, quelle que soit la formule. AuthaGraph présente la même distorsion et place ses sommets dans les océans.
 
-## Dépliage dans deux orientations
-
-Puisque la distorsion aux sommets ne peut pas être supprimée, on déplie la sphère **deux fois, dans deux orientations**, pour que les sommets des deux cartes tombent à des endroits différents :
-
-- **Orientation A** : les 4 sommets sont dans le Pacifique, l’Atlantique Nord, l’Atlantique Sud et l’océan Indien.
-- **Orientation B** : le globe est tourné de 180° supplémentaires autour de son axe avant le dépliage.
-
-Les 4 sommets de A sont symétriques par rapport à l’équateur. Après une rotation de 180°, les sommets de B tombent exactement à l’opposé de ceux de A, au centre de chaque face de A, là où A est le moins déformée. Le nord pointe dans le même sens sur les deux cartes, aucune n’est donc à l’envers.
-
-Pour chaque lieu, on utilise la carte où il est le plus loin d’un sommet. Le tableau indique à quelle distance d’un sommet se trouve le lieu le plus défavorisé de la Terre, selon l’angle de rotation de B :
-
-| Rotation de B | Lieu le plus défavorisé, distance à un sommet |
-|---|---|
-| 180° | 35,2° |
-| 150° | 20,3° |
-| 90° | 9,9° |
-| 0° | 0° (cartes identiques, aucun intérêt) |
-
 ## Application : caméras 360°, reconnaissance par IA et attitude des drones
 
 Les caméras 360° exportent généralement des images équirectangulaires (panoramas 2:1). C’est le même format que la texture de la carte du monde utilisée ici ; la méthode fonctionne donc en remplaçant la texture par une photo 360°.
@@ -127,7 +109,7 @@ Comparaison avec les formats courants :
 - Le zénith est au 1/4 et aux 3/4 du bord supérieur, et le nadir aux mêmes endroits du bord inférieur.
 - Les 4 sommets du tétraèdre sont au milieu des bords supérieur et inférieur (54,7° au-dessus et au-dessous de l’horizon, droit devant) et au milieu des bords gauche et droit (sur l’horizon, à 125,3° de chaque côté).
 
-Pour le dépliage dans deux orientations, **B est A tourné de 180°** autour de l’axe vertical. Toute direction est alors à au moins 35,3° d’un sommet dans l’une des deux images, y compris chaque point de l’horizon :
+Comme la distorsion des sommets est inévitable, l’image peut être **dépliée deux fois, dans deux orientations**, et chaque direction est lue dans l’image où elle est la plus éloignée d’un sommet. **B est A tourné de 180°** autour de l’axe vertical. Les 4 sommets de A sont symétriques au-dessus et au-dessous de l’horizon : après la rotation, ceux de B tombent exactement à l’opposé de ceux de A, au centre de chaque face de A, là où A est le moins déformé. Le ciel est en haut dans les deux images. Toute direction est alors à au moins 35,3° d’un sommet dans l’une des deux images, y compris chaque point de l’horizon :
 
 | Rotation de B | Direction la plus défavorisée, distance à un sommet |
 |---|---|

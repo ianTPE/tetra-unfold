@@ -88,24 +88,6 @@ Because every pixel is looked up in reverse, there is no polygon clipping to dea
 
 A tetrahedron vertex has only 180° around it, but every point on a sphere has 360°. The area near each of the 4 vertices must therefore be stretched by about 2×, whatever formula is used. AuthaGraph has the same distortion and places its corners in the oceans.
 
-## Dual-orientation unfolding
-
-Since corner distortion cannot be removed, unfold the sphere **twice, in two orientations**, so the corners of the two maps fall in different places:
-
-- **Orientation A**: the 4 corners sit in the Pacific, the North Atlantic, the South Atlantic and the Indian Ocean.
-- **Orientation B**: the globe is rotated a further 180° about its axis before unfolding.
-
-The 4 corners of A are symmetric about the equator. After a 180° rotation, B's corners land exactly opposite A's corners, at the centre of each of A's faces, where A has the least distortion. North points the same way in both maps, so neither is upside down.
-
-For each place, use whichever map puts it further from a corner. The table shows how far the worst place on Earth is from a corner, depending on how far B is rotated:
-
-| B rotated by | Worst place, distance from a corner |
-|---|---|
-| 180° | 35.2° |
-| 150° | 20.3° |
-| 90° | 9.9° |
-| 0° | 0° (both maps identical, no benefit) |
-
 ## Application: 360° cameras, AI recognition and drone attitude
 
 360° cameras usually export equirectangular images (2:1 panoramas). That is the same format as the world map texture used here, so the method works by swapping the texture for a 360° photo.
@@ -125,7 +107,7 @@ Compared with common formats:
 - The zenith is at 1/4 and 3/4 of the top edge, and the nadir at the same places on the bottom edge.
 - The 4 tetrahedron corners are at the top and bottom centre (54.7° above and below the horizon, straight ahead) and at the midpoints of the left and right edges (on the horizon, 125.3° to either side).
 
-For dual-orientation unfolding, **B is A rotated 180°** about the vertical axis. Every direction is then at least 35.3° from a corner in one of the two images, including every point on the horizon:
+Because the corner distortion cannot be avoided, the image can be **unfolded twice in two orientations**, and each direction is read from whichever image keeps it farther from a corner. **B is A rotated 180°** about the vertical axis. A's 4 corners are symmetric above and below the horizon, so after the rotation B's corners land exactly opposite A's corners, at the centre of each of A's faces, where A has the least distortion. The sky stays at the top in both images. Every direction is then at least 35.3° from a corner in one of the two images, including every point on the horizon:
 
 | B rotated by | Worst direction, distance from a corner |
 |---|---|

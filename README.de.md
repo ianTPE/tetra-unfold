@@ -90,24 +90,6 @@ Da jedes Pixel rückwärts nachgeschlagen wird, ist kein Polygon-Clipping nötig
 
 Um eine Tetraederecke herum liegen nur 180°, um jeden Punkt einer Kugel aber 360°. Die Umgebung jeder der 4 Ecken muss daher um etwa das Doppelte gedehnt werden, gleich mit welcher Formel. AuthaGraph hat dieselbe Verzerrung und legt seine Ecken in die Ozeane.
 
-## Abwicklung in zwei Ausrichtungen
-
-Da sich die Verzerrung an den Ecken nicht beseitigen lässt, wird die Kugel **zweimal in zwei Ausrichtungen** abgewickelt, sodass die Ecken der beiden Karten an verschiedenen Stellen liegen:
-
-- **Ausrichtung A**: Die 4 Ecken liegen im Pazifik, im Nordatlantik, im Südatlantik und im Indischen Ozean.
-- **Ausrichtung B**: Der Globus wird vor dem Abwickeln zusätzlich um 180° um seine Achse gedreht.
-
-Die 4 Ecken von A liegen symmetrisch zum Äquator. Nach einer 180°-Drehung landen die Ecken von B genau gegenüber denen von A, in der Mitte jeder Fläche von A, wo A am wenigsten verzerrt ist. In beiden Karten zeigt Norden in dieselbe Richtung, keine steht also auf dem Kopf.
-
-Für jeden Ort nimmt man die Karte, in der er weiter von einer Ecke entfernt ist. Die Tabelle zeigt, wie weit der ungünstigste Ort der Erde von einer Ecke entfernt ist, je nachdem, wie weit B gedreht wird:
-
-| B gedreht um | Ungünstigster Ort, Abstand zu einer Ecke |
-|---|---|
-| 180° | 35,2° |
-| 150° | 20,3° |
-| 90° | 9,9° |
-| 0° | 0° (beide Karten gleich, kein Nutzen) |
-
 ## Anwendung: 360°-Kameras, KI-Erkennung und Fluglage von Drohnen
 
 360°-Kameras geben meist Bilder in quadratischer Plattkarte aus (Panoramen im Format 2:1). Das ist dasselbe Format wie die hier verwendete Weltkartentextur, die Methode funktioniert also, indem man die Textur durch ein 360°-Foto ersetzt.
@@ -127,7 +109,7 @@ Im Vergleich mit gängigen Formaten:
 - Der Zenit liegt bei 1/4 und 3/4 des oberen Rands, der Nadir an denselben Stellen des unteren Rands.
 - Die 4 Tetraederecken liegen in der Mitte des oberen und unteren Rands (54,7° über und unter dem Horizont, geradeaus) und in der Mitte des linken und rechten Rands (auf dem Horizont, 125,3° zu jeder Seite).
 
-Bei der Abwicklung in zwei Ausrichtungen ist **B gleich A, um 180°** um die senkrechte Achse gedreht. Dann ist jede Richtung in einem der beiden Bilder mindestens 35,3° von einer Ecke entfernt, auch jeder Punkt auf dem Horizont:
+Da sich die Verzerrung an den Ecken nicht vermeiden lässt, kann das Bild **in zwei Ausrichtungen abgewickelt** werden; jede Richtung wird aus dem Bild gelesen, in dem sie weiter von einer Ecke entfernt ist. **B ist A, um 180° um die senkrechte Achse gedreht.** Die 4 Ecken von A liegen symmetrisch über und unter dem Horizont, daher landen die Ecken von B nach der Drehung genau gegenüber denen von A, in der Mitte jeder Fläche von A, wo A am wenigsten verzerrt ist. In beiden Bildern ist der Himmel oben. Dann ist jede Richtung in einem der beiden Bilder mindestens 35,3° von einer Ecke entfernt, auch jeder Punkt auf dem Horizont:
 
 | B gedreht um | Ungünstigste Richtung, Abstand zu einer Ecke |
 |---|---|

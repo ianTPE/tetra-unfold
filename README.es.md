@@ -90,24 +90,6 @@ Como cada píxel se calcula a la inversa, no hace falta recortar polígonos, y e
 
 Alrededor de un vértice del tetraedro solo hay 180°, pero alrededor de cualquier punto de una esfera hay 360°. Por eso la zona cercana a cada uno de los 4 vértices se estira aproximadamente al doble, sea cual sea la fórmula. AuthaGraph tiene la misma distorsión y coloca sus vértices en los océanos.
 
-## Desplegado en dos orientaciones
-
-Como la distorsión en los vértices no se puede eliminar, la esfera se despliega **dos veces, en dos orientaciones**, para que los vértices de los dos mapas caigan en sitios distintos:
-
-- **Orientación A**: los 4 vértices están en el Pacífico, el Atlántico Norte, el Atlántico Sur y el océano Índico.
-- **Orientación B**: antes de desplegar, el globo se gira otros 180° alrededor de su eje.
-
-Los 4 vértices de A son simétricos respecto al ecuador. Tras un giro de 180°, los vértices de B caen justo enfrente de los de A, en el centro de cada cara de A, donde A tiene menos distorsión. El norte apunta en la misma dirección en los dos mapas, así que ninguno queda al revés.
-
-Para cada lugar, se usa el mapa en el que está más lejos de un vértice. La tabla muestra a qué distancia de un vértice queda el lugar más desfavorable de la Tierra, según cuánto se gire B:
-
-| Giro de B | Lugar más desfavorable, distancia a un vértice |
-|---|---|
-| 180° | 35,2° |
-| 150° | 20,3° |
-| 90° | 9,9° |
-| 0° | 0° (mapas idénticos, sin ventaja) |
-
 ## Aplicación: cámaras 360°, reconocimiento con IA y actitud de drones
 
 Las cámaras 360° suelen exportar imágenes equirrectangulares (panorámicas 2:1). Es el mismo formato que la textura del mapa del mundo usada aquí, así que el método funciona sustituyendo la textura por una foto 360°.
@@ -127,7 +109,7 @@ Comparado con los formatos habituales:
 - El cénit está a 1/4 y 3/4 del borde superior, y el nadir en los mismos puntos del borde inferior.
 - Los 4 vértices del tetraedro están en el centro de los bordes superior e inferior (54,7° por encima y por debajo del horizonte, hacia delante) y en el punto medio de los bordes izquierdo y derecho (sobre el horizonte, a 125,3° a cada lado).
 
-En el desplegado en dos orientaciones, **B es A girado 180°** alrededor del eje vertical. Así, toda dirección queda al menos a 35,3° de un vértice en una de las dos imágenes, incluido cada punto del horizonte:
+Como la distorsión de los vértices no se puede evitar, la imagen puede **desplegarse dos veces, en dos orientaciones**, y cada dirección se lee en la imagen en la que queda más lejos de un vértice. **B es A girado 180°** alrededor del eje vertical. Los 4 vértices de A son simétricos por encima y por debajo del horizonte, así que tras el giro los de B caen justo en el lado opuesto a los de A, en el centro de cada cara de A, donde A tiene menos distorsión. En ambas imágenes el cielo queda arriba. Así, toda dirección queda al menos a 35,3° de un vértice en una de las dos imágenes, incluido cada punto del horizonte:
 
 | Giro de B | Dirección más desfavorable, distancia a un vértice |
 |---|---|
