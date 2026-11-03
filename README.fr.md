@@ -16,6 +16,8 @@ La démonstration utilise une carte du monde et s’inspire de la [carte du mond
 
 La carte est disponible en 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch, Français, Español et Русский. Elle choisit automatiquement la langue du navigateur ; on peut en changer avec le menu du panneau, ou ajouter `?lang=` à l’adresse (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`, `es`, `ru`).
 
+L’itinéraire, le rayon de distance, le réseau aérien, la rotation et les réglages sont enregistrés dans l’adresse au fil de vos actions : mettez la page en favori ou envoyez-la, elle s’ouvre exactement dans le même état. **Copier le lien de partage** dans le panneau copie l’adresse. Par exemple, [ce lien](https://iantpe.github.io/tetra-unfold/?lang=fr&trip=TPE,HND,LHR,SIN&range=TPE,5000) ouvre l’itinéraire Taipei → Tokyo → Londres → Singapour avec un rayon de 5 000 km autour de Taipei. Rien n’est stocké sur un serveur : tout est dans l’adresse.
+
 La carte se compose d’un seul fichier HTML, de `i18n.js` (textes de l’interface), de `airports.json` et de `names/<langue>.json` (noms des aéroports et des villes). Rien à installer ni à compiler. Une connexion Internet est nécessaire pour charger D3 et les données des pays.
 
 | Fichier | Contenu |

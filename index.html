@@ -152,6 +152,7 @@
   <h1 data-i18n="title"></h1>
   <div class="sub" data-i18n="sub"></div>
   <div class="row"><span data-i18n="language"></span><select id="lang"></select></div>
+  <div class="btns"><button id="share" data-i18n="share"></button></div>
   <details open>
     <summary data-i18n="settings"></summary>
     <div class="row"><label><input type="checkbox" id="tiled" checked> <span data-i18n="tiled"></span></label></div>
@@ -707,7 +708,9 @@ function drawOverlay() {
 
 // 拖曳中先用低解析度畫，停下來再畫完整的
 let pending = false, interacting = false, settleTimer = 0;
+let urlReady = false, syncTimer = 0;   // 分享網址（見下面「分享」一節）
 function requestDraw() {
+  scheduleSync();
   if (pending) return;
   pending = true;
   requestAnimationFrame(() => {
@@ -1166,6 +1169,7 @@ fetch('airports.json')
       ({ iata, name, city, cc, lat, lon, large: !!large, pax: paxM || 0, v: fromLonLat(lon, lat),
          lname: '', lcity: '', country: data.countries[cc] || cc, keys: { cities: [], countries: [], all: '' } }));
     airports.forEach((a, i) => { apByCode[a.iata] = i; });
+    applyDataFromURL();
     localizeAirports();
   })
   .catch(err => { document.getElementById('tripSummary').textContent = t('apFail', { msg: err.message }); });
@@ -1494,11 +1498,110 @@ document.getElementById('netCenter').onclick = centerHub;
 renderNetwork();
 
 // ---------------------------------------------------------------------------
+// 分享：把目前的設定寫進網址，打開網址就還原同樣的畫面
+//
+//   v=經度,上下,翻轉    地球轉的角度（都是 0 時省略）
+//   eq=1 folds=1 grat=0 tiled=0 limit=0   和預設不同的選項
+//   trip=TPE,HND,LHR    行程；rt=0 表示不回到出發地
+//   range=TPE,5000      範圍圈（公里）；range=TPE,12h 表示飛行小時
+//   hub=DXB&to=SHJ,DOH  航空網路
+// ---------------------------------------------------------------------------
+const TOGGLES = { equal: ['eq', false], folds: ['folds', false], grat: ['grat', true], tiled: ['tiled', true], limit: ['limit', true] };
+const URL_KEYS = ['v', 'trip', 'rt', 'range', 'hub', 'to', ...Object.values(TOGGLES).map(x => x[0])];
+const codes = list => list.map(i => airports[i].iata).join(',');
+const round2 = x => String(Math.round(x * 100) / 100);
+
+function buildURL() {
+  const url = new URL(location.href), q = url.searchParams;
+  URL_KEYS.forEach(k => q.delete(k));
+  if (state.yaw || state.pitch || state.roll) q.set('v', [state.yaw, state.pitch, state.roll].map(round2).join(','));
+  for (const [id, [key, def]] of Object.entries(TOGGLES)) if (state[id] !== def) q.set(key, state[id] ? '1' : '0');
+  if (trip.stops.length) q.set('trip', codes(trip.stops));
+  if (!document.getElementById('roundTrip').checked) q.set('rt', '0');
+  if (rangeOn()) q.set('range', `${airports[range.ap].iata},${round2(range.value)}${range.unit === 'h' ? 'h' : ''}`);
+  if (net.hub >= 0) q.set('hub', airports[net.hub].iata);
+  if (net.hub >= 0 && net.dests.length) q.set('to', codes(net.dests));
+  // 逗號不需要編碼，網址比較好讀
+  return url.toString().replace(/%2C/g, ',');
+}
+// 拖曳時會一直呼叫，稍等一下再寫
+function scheduleSync() {
+  if (!urlReady) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => { try { history.replaceState(null, '', buildURL()); } catch (e) { /* 不能改網址就算了 */ } }, 250);
+}
+
+// 地圖的方向和選項：一開始就能套用
+function applyViewFromURL() {
+  const q = new URLSearchParams(location.search);
+  for (const [id, [key]] of Object.entries(TOGGLES)) {
+    if (!q.has(key)) continue;
+    state[id] = q.get(key) === '1';
+    document.getElementById(id).checked = state[id];
+  }
+  const v = (q.get('v') || '').split(',').map(Number);
+  if (v.length === 3 && v.every(Number.isFinite)) {
+    [state.yaw, state.pitch, state.roll] = v;
+    // 角度超出上下拖曳的限制時，關掉限制，才能還原同樣的畫面
+    if (state.limit && (state.pitch < -1e-6 || state.pitch > SOUTH_PITCH + 1e-6)) {
+      state.limit = false; document.getElementById('limit').checked = false;
+    }
+    rollInput.value = Math.round(state.roll);
+  }
+  if (q.get('rt') === '0') document.getElementById('roundTrip').checked = false;
+}
+
+// 行程、範圍圈、航空網路：機場資料載入後才能套用。找不到的代碼直接略過
+function applyDataFromURL() {
+  const q = new URLSearchParams(location.search);
+  const parse = s => (s || '').split(',').map(c => apByCode[c.trim().toUpperCase()]).filter(i => i !== undefined);
+  trip.stops = parse(q.get('trip')).slice(0, MAX_STOPS);
+  const r = (q.get('range') || '').split(',');
+  if (r.length === 2 && apByCode[r[0].toUpperCase()] !== undefined) {
+    const hours = /h$/i.test(r[1]), val = parseFloat(r[1]);
+    if (val > 0) {
+      range.unit = hours ? 'h' : 'km';
+      for (const b of document.getElementById('rgUnit').children) b.classList.toggle('on', b.dataset.unit === range.unit);
+      rgValue.value = val;
+      readRadius();
+      range.ap = apByCode[r[0].toUpperCase()]; range.v = airports[range.ap].v;
+    }
+  }
+  const hub = parse(q.get('hub'));
+  if (hub.length) {
+    net.hub = hub[0];
+    net.dests = [];
+    addDests(parse(q.get('to')));
+  }
+  trip.legsCache = null;
+  urlReady = true;
+}
+
+// 複製分享連結
+document.getElementById('share').onclick = async () => {
+  const btn = document.getElementById('share'), url = buildURL();
+  try { history.replaceState(null, '', url); } catch (e) { /* 略過 */ }
+  let ok = false;
+  try { await navigator.clipboard.writeText(url); ok = true; } catch (e) { /* 沒有剪貼簿權限，改用舊方法 */ }
+  if (!ok) {
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+  }
+  // 真的複製不了：網址已經更新在網址列，請使用者自己複製
+  btn.textContent = t(ok ? 'copied' : 'copyManually');
+  setTimeout(() => { btn.textContent = t('share'); }, ok ? 1500 : 4000);
+};
+
+// ---------------------------------------------------------------------------
 // 啟動
 // ---------------------------------------------------------------------------
 resize();
 readBg();
 fitView();
+applyViewFromURL();
 updateMatrix();
 fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json')
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })

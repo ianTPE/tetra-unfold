@@ -16,6 +16,8 @@
 
 地图提供繁體中文、简体中文、English、日本語、한국어、Deutsch、Français、Español、Русский 九种语言，会根据浏览器语言自动选择；也可以用面板上的菜单切换，或在网址后加上 `?lang=`（`zh-Hant`、`zh-Hans`、`en`、`ja`、`ko`、`de`、`fr`、`es`、`ru`），例如 <https://iantpe.github.io/tetra-unfold/?lang=zh-Hans>。
 
+行程、距离范围圈、航空网络、地图旋转的角度和各项设置，都会随时保存到网址中。把网址存为书签或发给别人，打开就是一模一样的画面。面板上的 **复制分享链接** 可以直接复制网址。例如[这个链接](https://iantpe.github.io/tetra-unfold/?lang=zh-Hans&trip=TPE,HND,LHR,SIN&range=TPE,5000)会打开台北 → 东京 → 伦敦 → 新加坡的行程，以及以台北为中心、半径 5,000 公里的范围圈。数据不会保存在任何服务器上，全部都在网址里。
+
 地图是一个 HTML 文件，加上 `i18n.js`（界面文字）、`airports.json` 和 `names/<语言>.json`（机场和城市名称），无需安装或构建（需要联网加载 D3 和国界数据）。
 
 | 文件 | 内容 |
