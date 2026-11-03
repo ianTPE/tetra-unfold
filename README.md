@@ -55,6 +55,12 @@ In a test with exactly this trip (fares as shown in November 2026, one adult, ec
 
 So use the map to rule out orders that double back, and let the assistant compare fares for the few orders that are left. The assistant only searches; book and pay yourself. Fares change constantly, and a multi-city ticket can be cheaper than separate one-way tickets, so ask the assistant to check that as well.
 
+### Distance range circles (`index.html`)
+
+Pick a centre (an airport code or city, or the first stop of your trip) and a radius in kilometres or flight hours. The map shades every place within that great-circle distance and lists the cities with large airports inside the circle, nearest first. Hover anywhere to see its distance from the centre.
+
+On the globe the range is a circle, but on this map it is not: within one face it is a smooth oval, and it bends where it crosses a fold line. For example, a 5,000 km circle around Taipei reaches Delhi (4,373 km) and Darwin (4,298 km) but stops just short of Mumbai (5,002 km). Flight hours are converted at an average of 800 km/h, so treat them as a rough guide.
+
 ## How it works
 
 ### Why it tiles seamlessly

@@ -57,6 +57,12 @@ Un test avec exactement ce voyage (prix affichés en novembre 2026, un adulte, c
 
 Utilisez donc la carte pour écarter les ordres qui font des allers-retours, puis laissez l’assistant comparer les prix des quelques ordres restants. L’assistant se contente de chercher ; réservez et payez vous-même. Les prix changent sans cesse, et un billet multidestination peut coûter moins cher que des allers simples séparés : demandez-lui de le vérifier aussi.
 
+### Rayon de distance (`index.html`)
+
+Choisissez un centre (code d’aéroport, ville ou première étape de l’itinéraire) et un rayon en kilomètres ou en heures de vol. La carte colore tous les lieux situés à cette distance orthodromique ou moins, et liste les villes dotées de grands aéroports à l’intérieur du cercle, de la plus proche à la plus éloignée. En survolant la carte, on voit la distance de chaque point au centre.
+
+Sur le globe, la zone est un cercle, mais pas sur cette carte : à l’intérieur d’une face, c’est un ovale régulier, qui se plie en franchissant un pli. Par exemple, un cercle de 5 000 km autour de Taipei atteint Delhi (4 373 km) et Darwin (4 298 km), mais s’arrête juste avant Bombay (5 002 km). Les heures de vol sont converties à une moyenne de 800 km/h ; ce n’est qu’une estimation.
+
 ## Fonctionnement
 
 ### Pourquoi la carte pave le plan sans raccord

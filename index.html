@@ -115,6 +115,18 @@
   #tripSummary { font-size: 13px; margin-top: 8px; }
   #tripSummary b { font-size: 15px; }
   #tripSummary .note { color: var(--muted); font-size: 12px; }
+  .row > span, .seg button { white-space: nowrap; }
+  .row input[type="number"] {
+    width: 0; flex: 1; min-width: 60px; border: 1px solid var(--line); background: transparent; color: var(--text);
+    border-radius: 8px; padding: 4px 8px; font: inherit; font-size: 13px;
+  }
+  #rgSummary { font-size: 13px; margin-top: 8px; }
+  #rgSummary .note { color: var(--muted); font-size: 12px; }
+  #rgList { list-style: none; margin: 6px 0 0; padding: 0; max-height: 180px; overflow-y: auto; }
+  #rgList li { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+  #rgList li { padding-right: 6px; }
+  #rgList li span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #rgList li span:last-child { color: var(--muted); white-space: nowrap; }
   .hint { color: var(--muted); font-size: 12px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
   .hint p { margin: 2px 0; }
   #tip {
@@ -190,6 +202,31 @@
       <p data-i18n="hintClick"></p>
       <p data-i18n="hintOptimize"></p>
       <p data-i18n="hintDistance"></p>
+    </div>
+  </details>
+  <details open>
+    <summary data-i18n="range"></summary>
+    <div class="search">
+      <input type="text" id="rgSearch" list="apList" data-i18n-placeholder="rangeSearch" autocomplete="off">
+      <button id="rgSet" data-i18n="rangeSet"></button>
+    </div>
+    <div class="row">
+      <span data-i18n="radius"></span>
+      <input type="number" id="rgValue" min="1" step="any" value="5000">
+      <div class="seg" id="rgUnit">
+        <button data-unit="km" class="on" data-i18n="unitKm"></button>
+        <button data-unit="h" data-i18n="unitHours"></button>
+      </div>
+    </div>
+    <div class="btns">
+      <button id="rgFromTrip" data-i18n="rangeFromTrip"></button>
+      <button id="rgClear" data-i18n="clear"></button>
+    </div>
+    <div id="rgSummary"></div>
+    <ul id="rgList"></ul>
+    <div class="hint">
+      <p data-i18n="hintRange"></p>
+      <p data-i18n="hintHours"></p>
     </div>
   </details>
 </div>
@@ -558,6 +595,8 @@ function draw(q) {
   const S = state.scale * dpr * q;
   const g = [0, 0, 0];
   const tiled = state.tiled;
+  // 距離範圍圈：圈內的像素混入淡紫色（直接用球面上的距離判斷，跨摺線、拼接都正確）
+  const rc = rangeOn() ? range.v : null, rcos = rc ? Math.cos(rangeAngle()) : 2;
   let k = 0;
   for (let py = 0; py < H; py++) {
     const y = state.cy - (py + 0.5 - H / 2) / S;
@@ -573,7 +612,11 @@ function draw(q) {
       let v = ((0.5 - lat / Math.PI) * TH) | 0;
       if (u >= TW) u = TW - 1;
       if (v >= TH) v = TH - 1;
-      out[k] = (inMain ? tex32 : texDim32)[v * TW + u];
+      const c = (inMain ? tex32 : texDim32)[v * TW + u];
+      if (rc && g[0] * rc[0] + g[1] * rc[1] + g[2] * rc[2] >= rcos) {
+        out[k] = 0xff000000 | ((((c >> 16) & 255) * 0.72 + 208 * 0.28) << 16)
+          | ((((c >> 8) & 255) * 0.72 + 79 * 0.28) << 8) | ((c & 255) * 0.72 + 122 * 0.28);
+      } else out[k] = c;
     }
   }
   bctx.putImageData(img, 0, 0);
@@ -630,6 +673,7 @@ function drawOverlay() {
     ctx.lineWidth = 1.5 * dpr;
     ctx.strokeRect(a[0], a[1], b[0] - a[0], b[1] - a[1]);
   }
+  drawRange(x0, x1, y0, y1);
   drawTrip(x0, x1, y0, y1);
   ctx.restore();
 }
@@ -677,7 +721,7 @@ function showTip(e) {
     const a = airports[ap];
     tip.innerHTML = `<b>${a.iata}　${esc(apName(a))}</b>` +
       (apName(a) !== a.name ? `<span>${esc(a.name)}</span><br>` : '') +
-      `<span>${esc(placeOf(a))}　·　${esc(t('clickToAdd'))}</span>`;
+      `<span>${esc(placeOf(a))}　·　${esc(t('clickToAdd'))}</span>` + rangeTip(a.v);
     canvas.style.cursor = 'pointer';
     placeTip(e);
     return;
@@ -696,7 +740,7 @@ function showTip(e) {
   const alpha = px >>> 24, n = (px & 255) + (((px >> 8) & 255) << 8);
   const f = alpha === 255 && n > 0 && n <= features.length ? features[n - 1] : null;
   const coord = `${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'}　${Math.abs(lon).toFixed(1)}°${lon >= 0 ? 'E' : 'W'}`;
-  tip.innerHTML = `<b>${esc(f ? countryName(f) : t('ocean'))}</b><span>${coord}</span>`;
+  tip.innerHTML = `<b>${esc(f ? countryName(f) : t('ocean'))}</b><span>${coord}</span>` + rangeTip(g);
   placeTip(e);
 }
 
@@ -1067,6 +1111,7 @@ function localizeAirports() {
       `<option value="${a.iata} ${esc(apCity(a) || apName(a))}">${esc(apName(a))}${esc(t('sep'))}${esc(a.country)}</option>`).join('');
     trip.note = '';
     renderTrip();
+    renderRange();
     requestDraw();
   };
   if (namesCache[want]) { apply(namesCache[want]); return; }
@@ -1088,6 +1133,151 @@ fetch('airports.json')
     localizeAirports();
   })
   .catch(err => { document.getElementById('tripSummary').textContent = t('apFail', { msg: err.message }); });
+
+// ---------------------------------------------------------------------------
+// 距離範圍圈：球面上離中心同樣距離的點（小圓）
+// ---------------------------------------------------------------------------
+const CRUISE_KMH = 800;              // 飛行小時換算距離用的平均速度（粗估）
+const MAX_RANGE_KM = Math.PI * EARTH_R;
+const range = { ap: -1, v: null, km: 5000, unit: 'km', ptsCache: null, ptsKey: '', note: '' };
+const rangeOn = () => range.v !== null;
+const rangeAngle = () => Math.min(range.km, MAX_RANGE_KM) / EARTH_R;
+const rgValue = document.getElementById('rgValue');
+
+function rangeTip(g) {
+  if (!rangeOn()) return '';
+  const d = angBetween(range.v, g) * EARTH_R;
+  return `<br><span>${esc(t('fromCenter', { c: airports[range.ap].iata, d: fmtKm(d) }))}</span>`;
+}
+
+// 圈線：沿小圓取點，相鄰的點選同一份拷貝，線才不會跳開
+function rangePoints() {
+  const key = `${geoVersion}|${range.ap}|${range.km}`;
+  if (range.ptsKey === key) return range.ptsCache;
+  const c = range.v, th = rangeAngle();
+  // 和中心垂直的兩個方向
+  const e1 = norm(Math.abs(c[2]) < 0.9 ? cross(c, [0, 0, 1]) : cross(c, [1, 0, 0])), e2 = cross(c, e1);
+  const n = 720, cs = Math.cos(th), sn = Math.sin(th), pts = [];
+  let prev = null;
+  for (let i = 0; i <= n; i++) {
+    const a = i / n * 2 * Math.PI, ca = Math.cos(a) * sn, sa = Math.sin(a) * sn;
+    let P = geoToPlane([c[0] * cs + e1[0] * ca + e2[0] * sa, c[1] * cs + e1[1] * ca + e2[1] * sa, c[2] * cs + e1[2] * ca + e2[2] * sa]);
+    P = nearestCopy(P, prev || [MAP_W / 2, MAP_H / 2]);
+    pts.push(P); prev = P;
+  }
+  range.ptsCache = pts; range.ptsKey = key;
+  return pts;
+}
+
+function drawRange(x0, x1, y0, y1) {
+  if (!rangeOn() || !airports.length) return;
+  ctx.save();
+  if (!state.tiled) {
+    const a = toScreen(0, MAP_H), b = toScreen(MAP_W, 0);
+    ctx.beginPath(); ctx.rect(a[0], a[1], b[0] - a[0], b[1] - a[1]); ctx.clip();
+  }
+  const T = copyTransforms(x0, x1, y0, y1);
+  if (range.km < MAX_RANGE_KM) {
+    const pts = rangePoints();
+    let bx0 = Infinity, bx1 = -Infinity, by0 = Infinity, by1 = -Infinity;
+    for (const [X, Y] of pts) { bx0 = Math.min(bx0, X); bx1 = Math.max(bx1, X); by0 = Math.min(by0, Y); by1 = Math.max(by1, Y); }
+    for (const [lw, color] of [[5, 'rgba(255, 255, 255, 0.8)'], [2, '#7a4fd0']]) {
+      ctx.strokeStyle = color; ctx.lineWidth = lw * dpr; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      for (const [s, ox, oy] of T) {
+        const cx0 = s > 0 ? bx0 + ox : ox - bx1, cx1 = s > 0 ? bx1 + ox : ox - bx0;
+        const cy0 = s > 0 ? by0 + oy : oy - by1, cy1 = s > 0 ? by1 + oy : oy - by0;
+        if (cx1 < x0 || cx0 > x1 || cy1 < y0 || cy0 > y1) continue;
+        pts.forEach(([X, Y], i) => {
+          const p = toScreen(s * X + ox, s * Y + oy);
+          if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]);
+        });
+      }
+      ctx.stroke();
+    }
+  }
+  // 中心：紫色的圈
+  const Q = airportPositions()[range.ap];
+  for (const [s, ox, oy] of T) {
+    const X = s * Q[0] + ox, Y = s * Q[1] + oy;
+    if (X < x0 - 0.05 || X > x1 + 0.05 || Y < y0 - 0.05 || Y > y1 + 0.05) continue;
+    const p = toScreen(X, Y);
+    ctx.lineWidth = 3 * dpr;
+    ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(p[0], p[1], 7 * dpr, 0, 2 * Math.PI); ctx.stroke();
+    ctx.lineWidth = 2 * dpr;
+    ctx.strokeStyle = '#7a4fd0'; ctx.beginPath(); ctx.arc(p[0], p[1], 7 * dpr, 0, 2 * Math.PI); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// 圈內的城市：只算大型機場，同一個城市只列最近的那個機場
+function renderRange() {
+  const sum = document.getElementById('rgSummary'), list = document.getElementById('rgList');
+  const note = range.note ? `<span class="note">${range.note}</span>` : '';
+  if (!rangeOn()) { sum.innerHTML = note || `<span class="note">${esc(t('rangeNeed'))}</span>`; list.innerHTML = ''; return; }
+  const c = airports[range.ap], th = rangeAngle(), cityOf = a => a.lcity || a.city || apName(a);
+  const seen = new Set([cityOf(c)]), rows = [];
+  airports
+    .map((a, i) => [i, angBetween(c.v, a.v)])
+    .filter(([i, d]) => airports[i].large && d <= th)
+    .sort((a, b) => a[1] - b[1])
+    .forEach(([i, d]) => {
+      const a = airports[i], name = cityOf(a);
+      if (seen.has(name)) return;
+      seen.add(name);
+      rows.push(`<li><span>${a.iata} ${esc(name)}${esc(t('sep'))}${esc(a.country)}</span><span>${fmtKm(d * EARTH_R)}</span></li>`);
+    });
+  const radius = range.unit === 'h'
+    ? t('hoursKm', { h: +range.value.toFixed(1), d: fmtKm(range.km) }) : fmtKm(range.km);
+  sum.innerHTML = esc(t('rangeSummary', { c: `${c.iata} ${cityOf(c)}`, r: radius, n: rows.length })) + (note ? '<br>' + note : '');
+  list.innerHTML = rows.join('');
+}
+
+function rangeChanged(note = '') {
+  range.note = note;
+  renderRange();
+  requestDraw();
+}
+function readRadius() {
+  const v = parseFloat(rgValue.value);
+  if (!(v > 0)) return false;
+  range.value = v;
+  range.km = Math.min(MAX_RANGE_KM, range.unit === 'h' ? v * CRUISE_KMH : v);
+  return true;
+}
+function setRangeCenter(i) {
+  range.ap = i; range.v = airports[i].v;
+  readRadius();
+  rangeChanged();
+}
+function setRangeFromSearch() {
+  const input = document.getElementById('rgSearch');
+  const i = findAirport(input.value);
+  if (i < 0) { rangeChanged(esc(t('notFound', { q: input.value.trim() }))); return; }
+  input.value = '';
+  setRangeCenter(i);
+}
+document.getElementById('rgSet').onclick = setRangeFromSearch;
+document.getElementById('rgSearch').addEventListener('keydown', e => { if (e.key === 'Enter') setRangeFromSearch(); });
+document.getElementById('rgFromTrip').onclick = () => {
+  if (!trip.stops.length) { rangeChanged(esc(t('rangeNoTrip'))); return; }
+  setRangeCenter(trip.stops[0]);
+};
+document.getElementById('rgClear').onclick = () => { range.ap = -1; range.v = null; rangeChanged(); };
+rgValue.addEventListener('input', () => { if (readRadius() && rangeOn()) rangeChanged(); });
+document.getElementById('rgUnit').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b || b.dataset.unit === range.unit) return;
+  // 換單位時，把目前的數字換算過去
+  const v = parseFloat(rgValue.value);
+  if (v > 0) rgValue.value = b.dataset.unit === 'h' ? +(v / CRUISE_KMH).toFixed(1) : Math.round(v * CRUISE_KMH);
+  range.unit = b.dataset.unit;
+  for (const x of e.currentTarget.children) x.classList.toggle('on', x === b);
+  readRadius();
+  if (rangeOn()) rangeChanged(); else renderRange();
+});
+range.value = range.km;
+renderRange();
 
 // ---------------------------------------------------------------------------
 // 啟動

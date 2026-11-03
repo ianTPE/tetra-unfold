@@ -57,6 +57,12 @@ Una prueba con exactamente este viaje (precios mostrados en noviembre de 2026, u
 
 Así que usa el mapa para descartar los órdenes que dan vueltas y deja que el asistente compare los precios de los pocos órdenes que quedan. El asistente solo busca; reserva y paga tú. Los precios cambian constantemente, y un billete multidestino puede salir más barato que varios billetes de ida por separado, así que pídele que lo compruebe también.
 
+### Radio de distancia (`index.html`)
+
+Elige un centro (código de aeropuerto, ciudad o la primera parada del itinerario) y un radio en kilómetros u horas de vuelo. El mapa colorea todos los lugares que quedan dentro de esa distancia ortodrómica y enumera las ciudades con aeropuertos grandes dentro del círculo, de la más cercana a la más lejana. Al pasar el ratón por cualquier punto se ve su distancia al centro.
+
+En el globo la zona es un círculo, pero en este mapa no: dentro de una cara es un óvalo suave y se dobla al cruzar un pliegue. Por ejemplo, un círculo de 5.000 km alrededor de Taipéi alcanza Delhi (4.373 km) y Darwin (4.298 km), pero se queda justo antes de Bombay (5.002 km). Las horas de vuelo se convierten con una media de 800 km/h, así que son solo una estimación.
+
 ## Cómo funciona
 
 ### Por qué tesela sin costuras

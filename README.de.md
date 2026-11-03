@@ -57,6 +57,12 @@ Ein Test mit genau dieser Reise (Preise vom November 2026, ein Erwachsener, Econ
 
 Schließen Sie also mit der Karte Reihenfolgen aus, die Umwege machen, und lassen Sie den Assistenten die Preise der wenigen verbleibenden Reihenfolgen vergleichen. Der Assistent sucht nur; buchen und bezahlen Sie selbst. Die Preise ändern sich ständig, und ein Gabelflug- oder Multi-City-Ticket kann günstiger sein als einzelne einfache Flüge. Lassen Sie auch das prüfen.
 
+### Entfernungsradius (`index.html`)
+
+Wähle einen Mittelpunkt (Flughafencode, Stadt oder den ersten Stopp der Reise) und einen Radius in Kilometern oder Flugstunden. Die Karte färbt alle Orte innerhalb dieser Großkreisentfernung ein und listet die Städte mit großen Flughäfen im Kreis auf, die nächsten zuerst. Beim Überfahren mit der Maus wird für jeden Punkt die Entfernung zum Mittelpunkt angezeigt.
+
+Auf dem Globus ist der Bereich ein Kreis, auf dieser Karte aber nicht: Innerhalb einer Fläche ist er ein glattes Oval, und an den Faltlinien knickt er ab. Ein Kreis mit 5.000 km um Taipeh reicht zum Beispiel bis Delhi (4.373 km) und Darwin (4.298 km), endet aber knapp vor Mumbai (5.002 km). Flugstunden werden mit durchschnittlich 800 km/h umgerechnet und sind nur ein grober Richtwert.
+
 ## Funktionsweise
 
 ### Warum sich die Karte nahtlos kacheln lässt
