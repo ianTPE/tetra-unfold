@@ -14,7 +14,7 @@ The demo uses a world map and is inspired by the [AuthaGraph world map](https://
 
 The map is available in 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch, Français, Español and Русский. It picks your browser's language automatically; use the menu in the panel to switch, or add `?lang=` to the address (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`, `es`, `ru`), for example <https://iantpe.github.io/tetra-unfold/?lang=ja>.
 
-Your trip, distance range, rotation and settings are saved in the address as you work, so you can bookmark the page or send it to someone, and it opens exactly as you left it. **Copy share link** in the panel copies the address. For example, [this link](https://iantpe.github.io/tetra-unfold/?lang=en&trip=TPE,HND,LHR,SIN&range=TPE,5000) opens the Taipei → Tokyo → London → Singapore trip with a 5,000 km range around Taipei. Nothing is stored on a server; everything is in the address.
+Your trip, distance range, rotation and settings are saved in the address as you work, so you can bookmark the page or send it to someone, and it opens exactly as you left it. **Copy share link** in the panel copies the address. For example, [this link](https://iantpe.github.io/tetra-unfold/?lang=en&trip=TPE,NRT,LHR,SIN&range=TPE,5000) opens the Taipei → Tokyo → London → Singapore trip with a 5,000 km range around Taipei. Nothing is stored on a server; everything is in the address.
 
 The map is a single HTML file plus `i18n.js` (interface text), `airports.json` and `names/<language>.json` (airport and city names). There is nothing to install or build. An internet connection is needed to load D3 and the country data.
 

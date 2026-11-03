@@ -16,7 +16,7 @@ La demostración usa un mapa del mundo y se inspira en el [mapa del mundo AuthaG
 
 El mapa está disponible en 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch, Français, Español y Русский. Elige automáticamente el idioma del navegador; se puede cambiar con el menú del panel o añadiendo `?lang=` a la dirección (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`, `es`, `ru`).
 
-El itinerario, el radio de distancia, el giro del mapa y los ajustes se guardan en la dirección a medida que trabajas, así que puedes guardar la página en favoritos o enviarla y se abrirá exactamente igual. **Copiar enlace para compartir** en el panel copia la dirección. Por ejemplo, [este enlace](https://iantpe.github.io/tetra-unfold/?lang=es&trip=TPE,HND,LHR,SIN&range=TPE,5000) abre el itinerario Taipéi → Tokio → Londres → Singapur con un radio de 5.000 km alrededor de Taipéi. No se guarda nada en ningún servidor; todo está en la dirección.
+El itinerario, el radio de distancia, el giro del mapa y los ajustes se guardan en la dirección a medida que trabajas, así que puedes guardar la página en favoritos o enviarla y se abrirá exactamente igual. **Copiar enlace para compartir** en el panel copia la dirección. Por ejemplo, [este enlace](https://iantpe.github.io/tetra-unfold/?lang=es&trip=TPE,NRT,LHR,SIN&range=TPE,5000) abre el itinerario Taipéi → Tokio → Londres → Singapur con un radio de 5.000 km alrededor de Taipéi. No se guarda nada en ningún servidor; todo está en la dirección.
 
 El mapa es un solo archivo HTML más `i18n.js` (textos de la interfaz), `airports.json` y `names/<idioma>.json` (nombres de aeropuertos y ciudades). No hay nada que instalar ni compilar. Se necesita conexión a Internet para cargar D3 y los datos de los países.
 
