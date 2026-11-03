@@ -133,27 +133,6 @@ pip install numpy pillow
 python unfold360.py photo.jpg out/
 ```
 
-### Prueba con una foto de interior
-
-Probado con la panorámica [Art Studio](https://polyhaven.com/a/art_studio) de Poly Haven (las líneas rojas son los pliegues del tetraedro):
-
-| Imagen equirrectangular original |
-|---|
-| ![Imagen equirrectangular original](examples/art_studio_equirect.jpg) |
-
-| Orientación A | Orientación B (girada 180°) |
-|---|---|
-| ![Orientación A](examples/art_studio_A.jpg) | ![Orientación B](examples/art_studio_B.jpg) |
-
-Observaciones:
-
-- Toda la habitación cabe en una sola imagen sin cortes. El techo ocupa la mitad superior y el suelo la inferior; el horizonte (a la altura de los ojos) sigue la línea central.
-- Cada cara triangular es una vista en perspectiva distinta, así que las rectas, como las esquinas de las paredes, se quiebran al cruzar un pliegue.
-- En la orientación A, el gran mural queda junto al vértice del borde derecho y aparece estirado. La orientación B lo muestra entero y derecho a la izquierda: justo por eso se usa la imagen en la que un objeto está más lejos de un vértice.
-- La izquierda y la derecha coinciden con la foto original; la imagen no está reflejada.
-
-Proceso sugerido para el reconocimiento de objetos: pasar A y B por el modelo, convertir cada detección de vuelta a coordenadas esféricas y quedarse con el resultado de la imagen en la que el objeto está más lejos de un vértice. La conversión de vuelta aún no está implementada, y la detección de objetos todavía no se ha evaluado con esta disposición. (Una prueba rápida con YOLO en tres panorámicas de interior, con una disposición anterior, no mostró ninguna ventaja frente a la imagen equirrectangular normal: los objetos de interior están cerca del horizonte, donde la imagen equirrectangular apenas se deforma.)
-
 ### Actitud de drones: distinguir el cielo del suelo
 
 Un dron sabe dónde está arriba gracias a su IMU (giroscopio y acelerómetro). Pero el acelerómetro mide la gravedad **más la aceleración propia del dron**, así que durante ráfagas de viento, choques, vuelcos o maniobras bruscas el «abajo» que indica es erróneo, y el giroscopio por sí solo deriva con el tiempo. El magnetómetro también se ve alterado fácilmente por interferencias electromagnéticas.
@@ -252,7 +231,6 @@ Aquí las distancias se calculan sobre una esfera (radio de 6371 km). Difieren e
 - [world-atlas](https://github.com/topojson/world-atlas) 2.0.2: fronteras de los países procedentes de [Natural Earth](https://www.naturalearthdata.com/) (1:50m)
 - [OurAirports](https://ourairports.com/data/): lista de aeropuertos (`airports.json`, aeropuertos con vuelos regulares y código IATA), dominio público
 - [Wikidata](https://www.wikidata.org/): nombres de aeropuertos y ciudades en chino, japonés, coreano, alemán, francés, español y ruso, y número de pasajeros usado para ordenar los resultados de búsqueda, CC0. Los nombres chinos se convirtieron a escritura tradicional (uso de Taiwán) o simplificada con [OpenCC](https://github.com/BYVoid/OpenCC). Los nombres de los países proceden de las traducciones integradas en el navegador (`Intl.DisplayNames`)
-- [Poly Haven](https://polyhaven.com/a/art_studio): foto 360° de prueba «Art Studio» de Oliksiy Yakovlyev, CC0
 - [Wikimedia Commons](https://commons.wikimedia.org/): panorámicas aéreas 360° de Gunther Tschuch (PaulT), CC BY-SA 4.0, usadas en la prueba de drones: [Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg), [Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg), [Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg), [Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg), [Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg), [Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg). `examples/aerial_*.jpg` son adaptaciones de la panorámica Sebnitz Ottendorf y tienen licencia CC BY-SA 4.0
 - AuthaGraph es una obra y marca registrada de Hajime Narukawa. Este proyecto no está afiliado a ella.
 
@@ -262,5 +240,5 @@ Aquí las distancias se calculan sobre una esfera (radio de 6371 km). Difieren e
 
 **El uso comercial requiere una licencia de pago aparte.** Contacto: ertiach@gmail.com.
 
-- La licencia cubre el código de este repositorio. Las bibliotecas y los datos citados arriba (D3, TopoJSON, world-atlas / Natural Earth, OurAirports, Wikidata, la foto de Poly Haven) mantienen sus propias licencias. `examples/aerial_*.jpg` tienen licencia CC BY-SA 4.0 (véase Créditos).
+- La licencia cubre el código de este repositorio. Las bibliotecas y los datos citados arriba (D3, TopoJSON, world-atlas / Natural Earth, OurAirports, Wikidata) mantienen sus propias licencias. `examples/aerial_*.jpg` tienen licencia CC BY-SA 4.0 (véase Créditos).
 - Solo es vinculante el texto en inglés del archivo LICENSE; esta descripción es meramente informativa.

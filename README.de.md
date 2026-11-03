@@ -133,27 +133,6 @@ pip install numpy pillow
 python unfold360.py photo.jpg out/
 ```
 
-### Test mit einem Innenraumfoto
-
-Getestet mit dem Panorama [Art Studio](https://polyhaven.com/a/art_studio) von Poly Haven (die roten Linien sind die Faltlinien des Tetraeders):
-
-| Originalbild in quadratischer Plattkarte |
-|---|
-| ![Originalbild in quadratischer Plattkarte](examples/art_studio_equirect.jpg) |
-
-| Ausrichtung A | Ausrichtung B (um 180° gedreht) |
-|---|---|
-| ![Ausrichtung A](examples/art_studio_A.jpg) | ![Ausrichtung B](examples/art_studio_B.jpg) |
-
-Beobachtungen:
-
-- Der ganze Raum passt ohne Schnitte in ein Bild. Die Decke füllt die obere Hälfte, der Boden die untere; der Horizont (Augenhöhe) verläuft entlang der Mittellinie.
-- Jede Dreiecksfläche ist eine eigene Perspektivansicht, daher knicken Geraden wie Raumecken dort ab, wo sie eine Faltlinie überqueren.
-- In Ausrichtung A liegt das große Wandbild neben der Ecke am rechten Rand und ist gedehnt. Ausrichtung B zeigt es links unversehrt und aufrecht – genau deshalb nimmt man das Bild, in dem ein Objekt weiter von einer Ecke entfernt ist.
-- Links und rechts stimmen mit dem Originalfoto überein; das Bild ist nicht gespiegelt.
-
-Vorgeschlagener Ablauf für die Objekterkennung: das Modell auf A und B anwenden, jede Erkennung in Kugelkoordinaten zurückrechnen und das Ergebnis aus dem Bild behalten, in dem das Objekt weiter von einer Ecke entfernt ist. Die Rückrechnung ist noch nicht implementiert, und die Objekterkennung wurde mit dieser Anordnung noch nicht ausgewertet. (Ein kurzer YOLO-Test an drei Innenraumpanoramen mit einer früheren Anordnung zeigte keinen Vorteil gegenüber dem einfachen Bild in Plattkarte: Objekte in Innenräumen liegen nahe am Horizont, wo die Plattkarte kaum verzerrt.)
-
 ### Fluglage von Drohnen: Himmel und Boden unterscheiden
 
 Eine Drohne weiß über ihre IMU (Gyroskop und Beschleunigungsmesser), wo oben ist. Der Beschleunigungsmesser misst aber die Schwerkraft **plus die eigene Beschleunigung der Drohne**. Bei Böen, Zusammenstößen, Überschlägen oder harten Manövern ist das „Unten“, das er meldet, daher falsch, und das Gyroskop allein driftet mit der Zeit. Auch das Magnetometer lässt sich leicht durch elektromagnetische Störungen beeinflussen.
@@ -252,7 +231,6 @@ Die Entfernungen werden hier auf einer Kugel (Radius 6.371 km) berechnet. Sie we
 - [world-atlas](https://github.com/topojson/world-atlas) 2.0.2: Ländergrenzen aus [Natural Earth](https://www.naturalearthdata.com/) (1:50m)
 - [OurAirports](https://ourairports.com/data/): Flughafenliste (`airports.json`, Flughäfen mit Linienverkehr und IATA-Code), gemeinfrei
 - [Wikidata](https://www.wikidata.org/): Flughafen- und Städtenamen auf Chinesisch, Japanisch, Koreanisch, Deutsch, Französisch, Spanisch und Russisch sowie Passagierzahlen zum Sortieren der Suchergebnisse, CC0. Chinesische Namen wurden mit [OpenCC](https://github.com/BYVoid/OpenCC) in traditionelle (Taiwaner Gebrauch) oder vereinfachte Schrift umgewandelt. Ländernamen stammen aus den eingebauten Übersetzungen des Browsers (`Intl.DisplayNames`)
-- [Poly Haven](https://polyhaven.com/a/art_studio): 360°-Testfoto „Art Studio“ von Oliksiy Yakovlyev, CC0
 - [Wikimedia Commons](https://commons.wikimedia.org/): 360°-Luftpanoramen von Gunther Tschuch (PaulT), CC BY-SA 4.0, für den Drohnentest: [Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg), [Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg), [Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg), [Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg), [Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg), [Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg). `examples/aerial_*.jpg` sind Bearbeitungen des Panoramas Sebnitz Ottendorf und stehen unter CC BY-SA 4.0
 - AuthaGraph ist ein Werk und eingetragenes Markenzeichen von Hajime Narukawa. Dieses Projekt steht in keiner Verbindung dazu.
 
@@ -262,5 +240,5 @@ Die Entfernungen werden hier auf einer Kugel (Radius 6.371 km) berechnet. Sie we
 
 **Für kommerzielle Nutzung ist eine gesonderte, kostenpflichtige Lizenz nötig.** Kontakt: ertiach@gmail.com.
 
-- Die Lizenz gilt für den Code in diesem Repository. Die oben genannten Bibliotheken und Daten (D3, TopoJSON, world-atlas / Natural Earth, OurAirports, Wikidata, das Poly-Haven-Foto) behalten ihre eigenen Lizenzen. `examples/aerial_*.jpg` stehen unter CC BY-SA 4.0 (siehe Quellen).
+- Die Lizenz gilt für den Code in diesem Repository. Die oben genannten Bibliotheken und Daten (D3, TopoJSON, world-atlas / Natural Earth, OurAirports, Wikidata) behalten ihre eigenen Lizenzen. `examples/aerial_*.jpg` stehen unter CC BY-SA 4.0 (siehe Quellen).
 - Maßgeblich ist der englische Wortlaut in der Datei LICENSE; diese Beschreibung dient nur zur Information.

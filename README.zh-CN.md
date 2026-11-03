@@ -133,27 +133,6 @@ pip install numpy pillow
 python unfold360.py photo.jpg out/
 ```
 
-### 室内照片测试
-
-使用 Poly Haven 的 [Art Studio](https://polyhaven.com/a/art_studio) 全景照片测试（红线是四面体折线）：
-
-| 原始等距圆柱图 |
-|---|
-| ![原始等距圆柱图](examples/art_studio_equirect.jpg) |
-
-| 方向 A | 方向 B（旋转 180°） |
-|---|---|
-| ![方向 A](examples/art_studio_A.jpg) | ![方向 B](examples/art_studio_B.jpg) |
-
-观察结果：
-
-- 整个房间都在同一张图里，没有断口。天花板在上半张、地板在下半张，地平线（视线高度）沿着水平中线。
-- 每个三角形面各自是一张透视图，所以墙角这类直线经过折线时会弯折。
-- 方向 A 中的大幅壁画正好在右边中点的角落旁边，被拉伸变形；方向 B 把它完整、端正地显示在左边。这正是「哪张离角落远就用哪张」的用意。
-- 左右方向和原始照片一致，没有镜像。
-
-物体识别的建议流程：A、B 两张都交给模型识别，把每个检测结果换算回球面坐标，保留离角落较远那张的结果。换算回球面的步骤还没有实现，这种布局也还没有用物体识别模型评估过。（之前用旧布局在三张室内全景上快速跑过 YOLO，结果并不比等距圆柱图好：室内物体大多位于地平线附近，而等距圆柱图在那里几乎没有变形。）
-
 ### 无人机姿态：分辨天与地
 
 无人机通过 IMU（陀螺仪和加速度计）知道哪边是上。但加速度计测到的是**重力加上无人机自身的加速度**，所以在阵风、碰撞、翻滚或剧烈机动时，它给出的「下」方向是错的；只靠陀螺仪，时间一长又会漂移。磁力计也很容易受到电磁干扰。
@@ -252,7 +231,6 @@ python unfold360.py photo.jpg out/
 - [world-atlas](https://github.com/topojson/world-atlas) 2.0.2：国界数据，源自 [Natural Earth](https://www.naturalearthdata.com/)（1:50m）
 - [OurAirports](https://ourairports.com/data/)：机场列表（`airports.json`，有定期航班且有 IATA 代码的机场），公有领域
 - [Wikidata](https://www.wikidata.org/)：机场和城市的中文、日文、韩文、德文、法文、西班牙文、俄文名称，以及用于排序搜索结果的客流量，CC0。中文名称用 [OpenCC](https://github.com/BYVoid/OpenCC) 转换为繁体（台湾用语）或简体。国名使用浏览器内置的翻译（`Intl.DisplayNames`）
-- [Poly Haven](https://polyhaven.com/a/art_studio)：测试用 360° 照片「Art Studio」，作者 Oliksiy Yakovlyev，CC0
 - [Wikimedia Commons](https://commons.wikimedia.org/)：无人机测试用的航拍 360° 全景，摄影 Gunther Tschuch（PaulT），CC BY-SA 4.0：[Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg)、[Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg)、[Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg)、[Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg)、[Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg)、[Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg)。`examples/aerial_*.jpg` 改编自 Sebnitz Ottendorf 这张，采用 CC BY-SA 4.0 许可
 - AuthaGraph 是鸣川肇的作品和注册商标，本项目与其无关。
 
@@ -262,5 +240,5 @@ python unfold360.py photo.jpg out/
 
 **商业使用需要另外付费获得许可**，请联系 ertiach@gmail.com。
 
-- 本许可适用于本仓库中的代码。上面列出的库和数据（D3、TopoJSON、world-atlas / Natural Earth、OurAirports、Wikidata、Poly Haven 照片）仍遵循各自的许可。`examples/aerial_*.jpg` 采用 CC BY-SA 4.0 许可（见「使用的资源」）。
+- 本许可适用于本仓库中的代码。上面列出的库和数据（D3、TopoJSON、world-atlas / Natural Earth、OurAirports、Wikidata）仍遵循各自的许可。`examples/aerial_*.jpg` 采用 CC BY-SA 4.0 许可（见「使用的资源」）。
 - LICENSE 文件是英文正式条款，本说明仅供参考，以英文条款为准。

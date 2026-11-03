@@ -131,27 +131,6 @@ pip install numpy pillow
 python unfold360.py photo.jpg out/
 ```
 
-### Test with an indoor photo
-
-Tested with the [Art Studio](https://polyhaven.com/a/art_studio) panorama from Poly Haven (red lines are the tetrahedron fold lines):
-
-| Original equirectangular image |
-|---|
-| ![Original equirectangular image](examples/art_studio_equirect.jpg) |
-
-| Orientation A | Orientation B (rotated 180°) |
-|---|---|
-| ![Orientation A](examples/art_studio_A.jpg) | ![Orientation B](examples/art_studio_B.jpg) |
-
-What we observed:
-
-- The whole room fits in one image with no cuts. The ceiling fills the top half and the floor the bottom half; the horizon (eye level) runs along the centre line.
-- Each triangular face is a separate perspective view, so straight lines such as wall corners bend where they cross a fold line.
-- In orientation A the large mural sits next to the corner at the right edge and is stretched. Orientation B shows it intact and upright on the left, which is the point of using whichever image puts an object further from a corner.
-- Left and right match the original photo; the image is not mirrored.
-
-Suggested pipeline for object recognition: run the model on both A and B, convert each detection back to sphere coordinates, and keep the result from the image where it is further from a corner. The conversion back is not implemented yet, and object detection has not been evaluated with this layout. (A quick YOLO test on three indoor panoramas with an earlier layout found no advantage over the plain equirectangular image: indoor objects sit near the horizon, where equirectangular images are barely distorted.)
-
 ### Drone attitude: telling sky from ground
 
 A drone knows which way is up from its IMU (gyroscope and accelerometer). But the accelerometer measures gravity **plus the drone's own acceleration**, so during gusts, collisions, tumbling or hard manoeuvres the "down" it reports is wrong, and the gyroscope on its own drifts over time. The magnetometer is also easily upset by electromagnetic interference.
@@ -250,7 +229,6 @@ Distances here use a sphere (radius 6,371 km). They differ from ellipsoid distan
 - [world-atlas](https://github.com/topojson/world-atlas) 2.0.2: country boundaries derived from [Natural Earth](https://www.naturalearthdata.com/) (1:50m)
 - [OurAirports](https://ourairports.com/data/): airport list (`airports.json`, airports with scheduled service and an IATA code), public domain
 - [Wikidata](https://www.wikidata.org/): airport and city names in Chinese, Japanese, Korean, German, French, Spanish and Russian, and passenger counts used for ranking search results, CC0. Chinese names were converted to Traditional (Taiwan usage) or Simplified script with [OpenCC](https://github.com/BYVoid/OpenCC); Traditional Chinese names were then checked for Taiwan-standard transliterations. Country names come from the browser's built-in translations (`Intl.DisplayNames`)
-- [Poly Haven](https://polyhaven.com/a/art_studio): test 360° photo "Art Studio" by Oliksiy Yakovlyev, CC0
 - [Wikimedia Commons](https://commons.wikimedia.org/): aerial 360° panoramas by Gunther Tschuch (PaulT), CC BY-SA 4.0, used for the drone test: [Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg), [Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg), [Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg), [Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg), [Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg), [Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg). `examples/aerial_*.jpg` are adapted from the Sebnitz Ottendorf panorama and are licensed CC BY-SA 4.0
 - AuthaGraph is the work and registered trademark of Hajime Narukawa. This project is not affiliated with it.
 
@@ -260,4 +238,4 @@ Distances here use a sphere (radius 6,371 km). They differ from ellipsoid distan
 
 **Commercial use needs a separate paid license.** Contact ertiach@gmail.com.
 
-- The license covers the code in this repository. The libraries and data listed above (D3, TopoJSON, world-atlas / Natural Earth, OurAirports, Wikidata, the Poly Haven photo) keep their own licenses. `examples/aerial_*.jpg` are licensed CC BY-SA 4.0 (see Credits).
+- The license covers the code in this repository. The libraries and data listed above (D3, TopoJSON, world-atlas / Natural Earth, OurAirports, Wikidata) keep their own licenses. `examples/aerial_*.jpg` are licensed CC BY-SA 4.0 (see Credits).

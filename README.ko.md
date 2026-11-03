@@ -133,27 +133,6 @@ pip install numpy pillow
 python unfold360.py photo.jpg out/
 ```
 
-### 실내 사진 테스트
-
-Poly Haven의 [Art Studio](https://polyhaven.com/a/art_studio) 파노라마로 테스트했습니다(빨간 선은 사면체 접는 선):
-
-| 원본 정거 원통 도법 이미지 |
-|---|
-| ![원본 정거 원통 도법 이미지](examples/art_studio_equirect.jpg) |
-
-| 방향 A | 방향 B(180° 회전) |
-|---|---|
-| ![방향 A](examples/art_studio_A.jpg) | ![방향 B](examples/art_studio_B.jpg) |
-
-관찰 결과:
-
-- 방 전체가 끊김 없이 이미지 한 장에 들어갑니다. 천장은 위쪽 절반, 바닥은 아래쪽 절반에 있고, 지평선(눈높이)은 중심선을 따라갑니다.
-- 삼각형 각 면은 별개의 투시도이므로, 벽 모서리 같은 직선은 접는 선을 지날 때 꺾입니다.
-- 방향 A에서는 큰 벽화가 오른쪽 변의 모서리 바로 옆에 있어 늘어나 보입니다. 방향 B에서는 왼쪽에 온전하고 바르게 나옵니다. 이것이 '모서리에서 더 먼 이미지를 쓰는' 이유입니다.
-- 좌우는 원본 사진과 같으며, 거울상이 아닙니다.
-
-물체 인식을 위한 권장 절차: A와 B를 모두 모델에 넣고, 검출 결과를 각각 구면 좌표로 되돌린 뒤, 모서리에서 더 먼 이미지의 결과를 사용합니다. 구면 좌표로 되돌리는 처리는 아직 구현하지 않았고, 이 배치에서의 물체 검출도 아직 평가하지 않았습니다. (이전 배치로 실내 파노라마 3장에 YOLO를 간단히 돌려 본 결과, 일반 정거 원통 도법 이미지보다 나은 점은 없었습니다. 실내 물체는 지평선 근처에 있고, 정거 원통 도법은 그곳에서 거의 왜곡되지 않기 때문입니다.)
-
 ### 드론 자세: 하늘과 땅 구분하기
 
 드론은 IMU(자이로스코프와 가속도계)로 어느 쪽이 위인지 압니다. 하지만 가속도계가 재는 것은 **중력에 드론 자체의 가속도를 더한 값**이므로, 돌풍, 충돌, 뒤집힘, 급격한 기동 중에는 알려 주는 '아래' 방향이 틀리고, 자이로스코프만으로는 시간이 지나며 오차가 쌓입니다. 자기 센서도 전자기 간섭에 쉽게 영향을 받습니다.
@@ -252,7 +231,6 @@ Wikimedia Commons의 항공 360° 파노라마 6장(촬영 Gunther Tschuch, CC B
 - [world-atlas](https://github.com/topojson/world-atlas) 2.0.2: [Natural Earth](https://www.naturalearthdata.com/)(1:50m)에서 가져온 국경 데이터
 - [OurAirports](https://ourairports.com/data/): 공항 목록(`airports.json`, 정기편이 있고 IATA 코드가 있는 공항), 퍼블릭 도메인
 - [Wikidata](https://www.wikidata.org/): 중국어, 일본어, 한국어, 독일어, 프랑스어, 스페인어, 러시아어 공항 이름과 도시 이름, 검색 결과 정렬에 쓰는 이용객 수, CC0. 중국어 이름은 [OpenCC](https://github.com/BYVoid/OpenCC)로 번체(대만 용법) 또는 간체로 변환했습니다. 국가 이름은 브라우저 내장 번역(`Intl.DisplayNames`)을 사용합니다
-- [Poly Haven](https://polyhaven.com/a/art_studio): 테스트용 360° 사진 'Art Studio', 촬영 Oliksiy Yakovlyev, CC0
 - [Wikimedia Commons](https://commons.wikimedia.org/): 드론 테스트에 쓴 항공 360° 파노라마, 촬영 Gunther Tschuch(PaulT), CC BY-SA 4.0: [Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg), [Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg), [Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg), [Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg), [Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg), [Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg). `examples/aerial_*.jpg`는 Sebnitz Ottendorf 파노라마를 변형한 것으로 CC BY-SA 4.0 라이선스입니다
 - AuthaGraph는 나루카와 하지메의 작품이자 등록 상표입니다. 이 프로젝트와는 관련이 없습니다.
 
@@ -262,5 +240,5 @@ Wikimedia Commons의 항공 360° 파노라마 6장(촬영 Gunther Tschuch, CC B
 
 **상업적 사용에는 별도의 유료 라이선스가 필요합니다.** ertiach@gmail.com으로 연락해 주세요.
 
-- 이 라이선스는 이 저장소의 코드에 적용됩니다. 위에 나열한 라이브러리와 데이터(D3, TopoJSON, world-atlas / Natural Earth, OurAirports, Wikidata, Poly Haven 사진)는 각자의 라이선스를 따릅니다. `examples/aerial_*.jpg`는 CC BY-SA 4.0입니다(출처 참고).
+- 이 라이선스는 이 저장소의 코드에 적용됩니다. 위에 나열한 라이브러리와 데이터(D3, TopoJSON, world-atlas / Natural Earth, OurAirports, Wikidata)는 각자의 라이선스를 따릅니다. `examples/aerial_*.jpg`는 CC BY-SA 4.0입니다(출처 참고).
 - 정식 조항은 영어로 된 LICENSE 파일이며, 이 설명은 참고용입니다. 영어 조항이 우선합니다.

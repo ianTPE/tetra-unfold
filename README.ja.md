@@ -133,27 +133,6 @@ pip install numpy pillow
 python unfold360.py photo.jpg out/
 ```
 
-### 室内写真でのテスト
-
-Poly Haven の [Art Studio](https://polyhaven.com/a/art_studio) パノラマでテストしました（赤い線は四面体の折り線）：
-
-| 元の正距円筒図法の画像 |
-|---|
-| ![元の正距円筒図法の画像](examples/art_studio_equirect.jpg) |
-
-| 向き A | 向き B（180° 回転） |
-|---|---|
-| ![向き A](examples/art_studio_A.jpg) | ![向き B](examples/art_studio_B.jpg) |
-
-観察結果：
-
-- 部屋全体が切れ目なく 1 枚の画像に収まっています。天井は上半分、床は下半分にあり、地平線（目の高さ）は中心線に沿っています。
-- 三角形の各面はそれぞれ別の透視図なので、壁の角などの直線は折り線を越えるところで曲がります。
-- 向き A では大きな壁画が右辺の角のすぐそばにあり、引き伸ばされています。向き B では左側に欠けずにまっすぐ写っています。これが「角から遠いほうの画像を使う」理由です。
-- 左右は元の写真と一致しており、鏡像にはなっていません。
-
-物体認識の推奨手順：A と B の両方をモデルに入力し、検出結果をそれぞれ球面座標に戻して、角から遠いほうの画像の結果を採用します。球面座標に戻す処理はまだ実装しておらず、このレイアウトでの物体検出もまだ評価していません。（以前のレイアウトで 3 枚の室内パノラマに YOLO を簡単に試したところ、正距円筒図法の画像より優れた点は見られませんでした。室内の物体は地平線の近くにあり、そこでは正距円筒図法のゆがみがほとんどないためです。）
-
 ### ドローンの姿勢：空と地面を見分ける
 
 ドローンは IMU（ジャイロスコープと加速度計）でどちらが上かを知ります。しかし加速度計が測るのは**重力にドローン自身の加速度を足したもの**なので、突風、衝突、回転、激しい機動の最中には示す「下」の向きが誤り、ジャイロスコープだけでは時間とともにずれていきます。磁気センサーも電磁干渉の影響を受けやすいです。
@@ -252,7 +231,6 @@ Wikimedia Commons の空撮 360° パノラマ 6 枚（撮影 Gunther Tschuch、
 - [world-atlas](https://github.com/topojson/world-atlas) 2.0.2：[Natural Earth](https://www.naturalearthdata.com/)（1:50m）由来の国境データ
 - [OurAirports](https://ourairports.com/data/)：空港一覧（`airports.json`、定期便があり IATA コードを持つ空港）、パブリックドメイン
 - [Wikidata](https://www.wikidata.org/)：中国語、日本語、韓国語、ドイツ語、フランス語、スペイン語、ロシア語の空港名と都市名、および検索結果の並べ替えに使う利用者数、CC0。中国語の名称は [OpenCC](https://github.com/BYVoid/OpenCC) で繁体字（台湾の用法）または簡体字に変換しています。国名はブラウザの組み込み翻訳（`Intl.DisplayNames`）を使っています
-- [Poly Haven](https://polyhaven.com/a/art_studio)：テスト用 360° 写真「Art Studio」、撮影 Oliksiy Yakovlyev、CC0
 - [Wikimedia Commons](https://commons.wikimedia.org/)：ドローンのテストに使った空撮 360° パノラマ、撮影 Gunther Tschuch（PaulT）、CC BY-SA 4.0：[Sebnitz Ottendorf](https://commons.wikimedia.org/wiki/File:Sebnitz_Ottendorf_Aerial_Pan360.jpg)、[Kassel Bad Karlshafen](https://commons.wikimedia.org/wiki/File:Kassel_Bad_Karlshafen_Aerial_Pan360.jpg)、[Hirschhorn (Neckar)](https://commons.wikimedia.org/wiki/File:Hirschhorn_(Neckar)_Aerial_Pan360.jpg)、[Skye Dun Beag](https://commons.wikimedia.org/wiki/File:Skye_Dun_Beag_Aerial_Pan360.jpg)、[Perth and Kinross Loch Tay](https://commons.wikimedia.org/wiki/File:Perth_and_Kinross_Loch_Tay_Aerial_Pan360.jpg)、[Mull Lochbuie](https://commons.wikimedia.org/wiki/File:Mull_Lochbuie_Aerial_Pan360.jpg)。`examples/aerial_*.jpg` は Sebnitz Ottendorf のパノラマを改変したもので、CC BY-SA 4.0 でライセンスされています
 - AuthaGraph は鳴川肇氏の作品および登録商標です。本プロジェクトとは関係ありません。
 
@@ -262,5 +240,5 @@ Wikimedia Commons の空撮 360° パノラマ 6 枚（撮影 Gunther Tschuch、
 
 **商用利用には別途有料のライセンスが必要です。** ertiach@gmail.com までご連絡ください。
 
-- このライセンスはこのリポジトリのコードに適用されます。上に挙げたライブラリとデータ（D3、TopoJSON、world-atlas / Natural Earth、OurAirports、Wikidata、Poly Haven の写真）はそれぞれのライセンスに従います。`examples/aerial_*.jpg` は CC BY-SA 4.0 です（クレジットを参照）。
+- このライセンスはこのリポジトリのコードに適用されます。上に挙げたライブラリとデータ（D3、TopoJSON、world-atlas / Natural Earth、OurAirports、Wikidata）はそれぞれのライセンスに従います。`examples/aerial_*.jpg` は CC BY-SA 4.0 です（クレジットを参照）。
 - 正式な条文は英語の LICENSE ファイルです。この説明は参考用で、英語の条文が優先されます。
