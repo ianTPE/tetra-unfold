@@ -63,6 +63,12 @@ Elige un centro (código de aeropuerto, ciudad o la primera parada del itinerari
 
 En el globo la zona es un círculo, pero en este mapa no: dentro de una cara es un óvalo suave y se dobla al cruzar un pliegue. Por ejemplo, un círculo de 5.000 km alrededor de Taipéi alcanza Delhi (4.373 km) y Darwin (4.298 km), pero se queda justo antes de Bombay (5.002 km). Las horas de vuelo se convierten con una media de 800 km/h, así que son solo una estimación.
 
+### Red de vuelos (`index.html`)
+
+Elige una ciudad hub y añade destinos: uno a uno, todas las ciudades del radio de distancia o los 20 aeropuertos con más pasajeros del mundo (60 como máximo). El mapa traza una ruta ortodrómica del hub a cada destino y los enumera por distancia, con el rumbo inicial desde el hub (norte 0°, en sentido horario). Desde Taipéi, por ejemplo, Shanghái-Pudong está a 677 km con rumbo 5°, Tokio-Haneda a 2.122 km con rumbo 52° y Pekín a 1.723 km con rumbo 347°.
+
+**Hub al centro de una cara** gira el globo para que el hub quede justo en el centro de una cara del tetraedro. Todas las rutas de esa cara pasan a ser rectas, y solo se doblan las que cruzan a otra cara. Esto es difícil de conseguir en la mayoría de los mapas del mundo. Para mantener el norte lo más arriba posible, el mapa suele girar un poco; **Restablecer** o **Polo Norte arriba** devuelve la orientación original.
+
 ## Cómo funciona
 
 ### Por qué tesela sin costuras

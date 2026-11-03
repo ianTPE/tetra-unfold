@@ -63,6 +63,12 @@ Wähle einen Mittelpunkt (Flughafencode, Stadt oder den ersten Stopp der Reise) 
 
 Auf dem Globus ist der Bereich ein Kreis, auf dieser Karte aber nicht: Innerhalb einer Fläche ist er ein glattes Oval, und an den Faltlinien knickt er ab. Ein Kreis mit 5.000 km um Taipeh reicht zum Beispiel bis Delhi (4.373 km) und Darwin (4.298 km), endet aber knapp vor Mumbai (5.002 km). Flugstunden werden mit durchschnittlich 800 km/h umgerechnet und sind nur ein grober Richtwert.
 
+### Flugnetz (`index.html`)
+
+Wähle ein Drehkreuz und füge Ziele hinzu: einzeln, alle Städte im Entfernungsradius oder die 20 verkehrsreichsten Flughäfen der Welt (höchstens 60). Die Karte zeichnet vom Drehkreuz aus eine Großkreisroute zu jedem Ziel und listet die Ziele nach Entfernung auf, jeweils mit dem Anfangskurs ab dem Drehkreuz (Norden 0°, im Uhrzeigersinn). Von Taipeh aus liegt zum Beispiel Shanghai-Pudong 677 km entfernt bei 5°, Tokio-Haneda 2.122 km bei 52° und Peking 1.723 km bei 347°.
+
+**Drehkreuz in Flächenmitte** dreht den Globus so, dass das Drehkreuz genau in der Mitte einer Tetraederfläche liegt. Alle Strecken innerhalb dieser Fläche sind dann gerade Linien; nur Strecken, die in eine andere Fläche übergehen, knicken ab. Auf den meisten Weltkarten ist das kaum möglich. Damit Norden möglichst oben bleibt, wird die Karte meist etwas gedreht; **Zurücksetzen** oder **Nordpol oben** stellt die ursprüngliche Ausrichtung wieder her.
+
 ## Funktionsweise
 
 ### Warum sich die Karte nahtlos kacheln lässt

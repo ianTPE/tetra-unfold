@@ -61,6 +61,12 @@ Pick a centre (an airport code or city, or the first stop of your trip) and a ra
 
 On the globe the range is a circle, but on this map it is not: within one face it is a smooth oval, and it bends where it crosses a fold line. For example, a 5,000 km circle around Taipei reaches Delhi (4,373 km) and Darwin (4,298 km) but stops just short of Mumbai (5,002 km). Flight hours are converted at an average of 800 km/h, so treat them as a rough guide.
 
+### Flight network (`index.html`)
+
+Pick a hub city and add destinations: one at a time, every city in the distance range, or the 20 busiest airports in the world (up to 60). The map draws a great-circle route from the hub to each destination and lists them by distance, with the initial heading from the hub (north is 0°, clockwise). From Taipei, for example, Shanghai Pudong is 677 km at 5°, Tokyo Haneda 2,122 km at 52° and Beijing 1,723 km at 347°.
+
+**Hub to face centre** turns the globe so the hub sits at the centre of a tetrahedron face. Every route within that face is then a straight line, and only the routes that cross into another face bend. The hub needs no special handling, which is hard to do on most world maps. The map is usually rolled a little to keep north as close to up as possible; **Reset** or **North Pole up** brings it back.
+
 ## How it works
 
 ### Why it tiles seamlessly

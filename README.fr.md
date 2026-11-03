@@ -63,6 +63,12 @@ Choisissez un centre (code d’aéroport, ville ou première étape de l’itin�
 
 Sur le globe, la zone est un cercle, mais pas sur cette carte : à l’intérieur d’une face, c’est un ovale régulier, qui se plie en franchissant un pli. Par exemple, un cercle de 5 000 km autour de Taipei atteint Delhi (4 373 km) et Darwin (4 298 km), mais s’arrête juste avant Bombay (5 002 km). Les heures de vol sont converties à une moyenne de 800 km/h ; ce n’est qu’une estimation.
 
+### Réseau aérien (`index.html`)
+
+Choisissez une ville hub et ajoutez des destinations : une par une, toutes les villes du rayon de distance, ou les 20 aéroports les plus fréquentés du monde (60 au maximum). La carte trace une route orthodromique du hub vers chaque destination et les liste par distance, avec le cap initial depuis le hub (nord 0°, sens horaire). Depuis Taipei, par exemple, Shanghai-Pudong est à 677 km au cap 5°, Tokyo-Haneda à 2 122 km au cap 52° et Pékin à 1 723 km au cap 347°.
+
+**Hub au centre d’une face** fait tourner le globe pour placer le hub exactement au centre d’une face du tétraèdre. Toutes les liaisons de cette face deviennent alors des droites ; seules celles qui passent sur une autre face se plient. C’est difficile à obtenir sur la plupart des cartes du monde. Pour garder le nord le plus haut possible, la carte est souvent un peu pivotée ; **Réinitialiser** ou **Pôle Nord en haut** rétablit l’orientation d’origine.
+
 ## Fonctionnement
 
 ### Pourquoi la carte pave le plan sans raccord

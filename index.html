@@ -120,13 +120,14 @@
     width: 0; flex: 1; min-width: 60px; border: 1px solid var(--line); background: transparent; color: var(--text);
     border-radius: 8px; padding: 4px 8px; font: inherit; font-size: 13px;
   }
-  #rgSummary { font-size: 13px; margin-top: 8px; }
-  #rgSummary .note { color: var(--muted); font-size: 12px; }
-  #rgList { list-style: none; margin: 6px 0 0; padding: 0; max-height: 180px; overflow-y: auto; }
-  #rgList li { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
-  #rgList li { padding-right: 6px; }
-  #rgList li span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  #rgList li span:last-child { color: var(--muted); white-space: nowrap; }
+  #rgSummary, #netSummary { font-size: 13px; margin-top: 8px; }
+  #rgSummary .note, #netSummary .note { color: var(--muted); font-size: 12px; }
+  #rgList, #netList { list-style: none; margin: 6px 0 0; padding: 0; max-height: 180px; overflow-y: auto; }
+  #rgList li, #netList li { display: flex; justify-content: space-between; gap: 8px; padding: 2px 6px 2px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+  #rgList li span:first-child, #netList li span:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #rgList li span:last-child, #netList li .leg { color: var(--muted); white-space: nowrap; }
+  #netList button { border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 0 2px; font: inherit; }
+  #netList button:hover { color: var(--text); }
   .hint { color: var(--muted); font-size: 12px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
   .hint p { margin: 2px 0; }
   #tip {
@@ -227,6 +228,31 @@
     <div class="hint">
       <p data-i18n="hintRange"></p>
       <p data-i18n="hintHours"></p>
+    </div>
+  </details>
+  <details open>
+    <summary data-i18n="network"></summary>
+    <div class="search">
+      <input type="text" id="netHubSearch" list="apList" data-i18n-placeholder="netHubSearch" autocomplete="off">
+      <button id="netSetHub" data-i18n="netSetHub"></button>
+    </div>
+    <div class="search">
+      <input type="text" id="netDestSearch" list="apList" data-i18n-placeholder="netDestSearch" autocomplete="off">
+      <button id="netAdd" data-i18n="add"></button>
+    </div>
+    <div class="btns">
+      <button id="netFromRange" data-i18n="netFromRange"></button>
+      <button id="netTop" data-i18n="netTop"></button>
+    </div>
+    <div class="btns">
+      <button id="netCenter" data-i18n="netCenter"></button>
+      <button id="netClear" data-i18n="clear"></button>
+    </div>
+    <div id="netSummary"></div>
+    <ul id="netList"></ul>
+    <div class="hint">
+      <p data-i18n="hintNetwork"></p>
+      <p data-i18n="hintBearing"></p>
     </div>
   </details>
 </div>
@@ -674,6 +700,7 @@ function drawOverlay() {
     ctx.strokeRect(a[0], a[1], b[0] - a[0], b[1] - a[1]);
   }
   drawRange(x0, x1, y0, y1);
+  drawNetwork(x0, x1, y0, y1);
   drawTrip(x0, x1, y0, y1);
   ctx.restore();
 }
@@ -898,28 +925,48 @@ function pickAirport(clientX, clientY) {
   return near.filter(n => n[1] <= d0 + 4).sort((a, b) => airports[b[0]].pax - airports[a[0]].pax)[0][0];
 }
 
-// 每一段航線：沿大圓每 1° 取一點，投到畫面上，並讓相鄰的點選同一份拷貝，線才不會跳開
+// 一段大圓航線：沿大圓每 1° 取一點，投到畫面上，並讓相鄰的點選同一份拷貝，線才不會跳開
+function gcPath(A, B) {
+  const ang = angBetween(A, B), sinA = Math.sin(ang);
+  if (ang < 1e-9 || sinA < 1e-9) return null;
+  const m = Math.max(2, Math.ceil(ang / DEG));
+  const pts = [];
+  let prev = null;
+  for (let i = 0; i <= m; i++) {
+    const t = i / m, wa = Math.sin((1 - t) * ang) / sinA, wb = Math.sin(t * ang) / sinA;
+    let P = geoToPlane([A[0] * wa + B[0] * wb, A[1] * wa + B[1] * wb, A[2] * wa + B[2] * wb]);
+    P = nearestCopy(P, prev || [MAP_W / 2, MAP_H / 2]);
+    pts.push(P); prev = P;
+  }
+  return pts;
+}
 function tripLegs() {
   if (trip.legsVer === geoVersion && trip.legsCache) return trip.legsCache;
   const st = trip.stops, n = st.length, legs = [];
   const count = isRound(n) ? n : n - 1;
   for (let k = 0; k < count; k++) {
-    const A = airports[st[k]].v, B = airports[st[(k + 1) % n]].v;
-    const ang = angBetween(A, B), sinA = Math.sin(ang);
-    if (ang < 1e-9 || sinA < 1e-9) continue;
-    const m = Math.max(2, Math.ceil(ang / DEG));
-    const pts = [];
-    let prev = null;
-    for (let i = 0; i <= m; i++) {
-      const t = i / m, wa = Math.sin((1 - t) * ang) / sinA, wb = Math.sin(t * ang) / sinA;
-      let P = geoToPlane([A[0] * wa + B[0] * wb, A[1] * wa + B[1] * wb, A[2] * wa + B[2] * wb]);
-      P = nearestCopy(P, prev || [MAP_W / 2, MAP_H / 2]);
-      pts.push(P); prev = P;
-    }
-    legs.push(pts);
+    const pts = gcPath(airports[st[k]].v, airports[st[(k + 1) % n]].v);
+    if (pts) legs.push(pts);
   }
   trip.legsCache = legs; trip.legsVer = geoVersion;
   return legs;
+}
+
+// 把幾條折線畫到畫面上所有看得到的拷貝（T 是 copyTransforms 的結果）
+function strokePaths(paths, T, x0, x1, y0, y1) {
+  for (const pts of paths) {
+    let bx0 = Infinity, bx1 = -Infinity, by0 = Infinity, by1 = -Infinity;
+    for (const [X, Y] of pts) { bx0 = Math.min(bx0, X); bx1 = Math.max(bx1, X); by0 = Math.min(by0, Y); by1 = Math.max(by1, Y); }
+    for (const [s, ox, oy] of T) {
+      const cx0 = s > 0 ? bx0 + ox : ox - bx1, cx1 = s > 0 ? bx1 + ox : ox - bx0;
+      const cy0 = s > 0 ? by0 + oy : oy - by1, cy1 = s > 0 ? by1 + oy : oy - by0;
+      if (cx1 < x0 || cx0 > x1 || cy1 < y0 || cy0 > y1) continue;
+      pts.forEach(([X, Y], i) => {
+        const p = toScreen(s * X + ox, s * Y + oy);
+        if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]);
+      });
+    }
+  }
 }
 
 function drawTrip(x0, x1, y0, y1) {
@@ -953,19 +1000,7 @@ function drawTrip(x0, x1, y0, y1) {
   for (const [lw, color] of [[6, 'rgba(255, 255, 255, 0.85)'], [2.6, route]]) {
     ctx.strokeStyle = color; ctx.lineWidth = lw * dpr; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     ctx.beginPath();
-    for (const pts of legs) {
-      let bx0 = Infinity, bx1 = -Infinity, by0 = Infinity, by1 = -Infinity;
-      for (const [X, Y] of pts) { bx0 = Math.min(bx0, X); bx1 = Math.max(bx1, X); by0 = Math.min(by0, Y); by1 = Math.max(by1, Y); }
-      for (const [s, ox, oy] of T) {
-        const cx0 = s > 0 ? bx0 + ox : ox - bx1, cx1 = s > 0 ? bx1 + ox : ox - bx0;
-        const cy0 = s > 0 ? by0 + oy : oy - by1, cy1 = s > 0 ? by1 + oy : oy - by0;
-        if (cx1 < x0 || cx0 > x1 || cy1 < y0 || cy0 > y1) continue;
-        pts.forEach(([X, Y], i) => {
-          const p = toScreen(s * X + ox, s * Y + oy);
-          if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]);
-        });
-      }
-    }
+    strokePaths(legs, T, x0, x1, y0, y1);
     ctx.stroke();
   }
   // 各站編號（同一個機場出現多次時，標第一次的編號）
@@ -1112,6 +1147,7 @@ function localizeAirports() {
     trip.note = '';
     renderTrip();
     renderRange();
+    renderNetwork();
     requestDraw();
   };
   if (namesCache[want]) { apply(namesCache[want]); return; }
@@ -1179,20 +1215,10 @@ function drawRange(x0, x1, y0, y1) {
   const T = copyTransforms(x0, x1, y0, y1);
   if (range.km < MAX_RANGE_KM) {
     const pts = rangePoints();
-    let bx0 = Infinity, bx1 = -Infinity, by0 = Infinity, by1 = -Infinity;
-    for (const [X, Y] of pts) { bx0 = Math.min(bx0, X); bx1 = Math.max(bx1, X); by0 = Math.min(by0, Y); by1 = Math.max(by1, Y); }
     for (const [lw, color] of [[5, 'rgba(255, 255, 255, 0.8)'], [2, '#7a4fd0']]) {
       ctx.strokeStyle = color; ctx.lineWidth = lw * dpr; ctx.lineJoin = 'round';
       ctx.beginPath();
-      for (const [s, ox, oy] of T) {
-        const cx0 = s > 0 ? bx0 + ox : ox - bx1, cx1 = s > 0 ? bx1 + ox : ox - bx0;
-        const cy0 = s > 0 ? by0 + oy : oy - by1, cy1 = s > 0 ? by1 + oy : oy - by0;
-        if (cx1 < x0 || cx0 > x1 || cy1 < y0 || cy0 > y1) continue;
-        pts.forEach(([X, Y], i) => {
-          const p = toScreen(s * X + ox, s * Y + oy);
-          if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]);
-        });
-      }
+      strokePaths([pts], T, x0, x1, y0, y1);
       ctx.stroke();
     }
   }
@@ -1210,23 +1236,31 @@ function drawRange(x0, x1, y0, y1) {
   ctx.restore();
 }
 
-// 圈內的城市：只算大型機場，同一個城市只列最近的那個機場
-function renderRange() {
-  const sum = document.getElementById('rgSummary'), list = document.getElementById('rgList');
-  const note = range.note ? `<span class="note">${range.note}</span>` : '';
-  if (!rangeOn()) { sum.innerHTML = note || `<span class="note">${esc(t('rangeNeed'))}</span>`; list.innerHTML = ''; return; }
-  const c = airports[range.ap], th = rangeAngle(), cityOf = a => a.lcity || a.city || apName(a);
-  const seen = new Set([cityOf(c)]), rows = [];
+// 圈內的城市：只算大型機場，同一個城市只列最近的那個機場。回傳 [機場, 角距離]，由近到遠
+const cityOf = a => a.lcity || a.city || apName(a);
+function rangeCities() {
+  const c = airports[range.ap], th = rangeAngle(), seen = new Set([cityOf(c)]), out = [];
   airports
     .map((a, i) => [i, angBetween(c.v, a.v)])
     .filter(([i, d]) => airports[i].large && d <= th)
     .sort((a, b) => a[1] - b[1])
     .forEach(([i, d]) => {
-      const a = airports[i], name = cityOf(a);
+      const name = cityOf(airports[i]);
       if (seen.has(name)) return;
       seen.add(name);
-      rows.push(`<li><span>${a.iata} ${esc(name)}${esc(t('sep'))}${esc(a.country)}</span><span>${fmtKm(d * EARTH_R)}</span></li>`);
+      out.push([i, d]);
     });
+  return out;
+}
+function renderRange() {
+  const sum = document.getElementById('rgSummary'), list = document.getElementById('rgList');
+  const note = range.note ? `<span class="note">${range.note}</span>` : '';
+  if (!rangeOn()) { sum.innerHTML = note || `<span class="note">${esc(t('rangeNeed'))}</span>`; list.innerHTML = ''; return; }
+  const c = airports[range.ap];
+  const rows = rangeCities().map(([i, d]) => {
+    const a = airports[i];
+    return `<li><span>${a.iata} ${esc(cityOf(a))}${esc(t('sep'))}${esc(a.country)}</span><span>${fmtKm(d * EARTH_R)}</span></li>`;
+  });
   const radius = range.unit === 'h'
     ? t('hoursKm', { h: +range.value.toFixed(1), d: fmtKm(range.km) }) : fmtKm(range.km);
   sum.innerHTML = esc(t('rangeSummary', { c: `${c.iata} ${cityOf(c)}`, r: radius, n: rows.length })) + (note ? '<br>' + note : '');
@@ -1278,6 +1312,186 @@ document.getElementById('rgUnit').addEventListener('click', e => {
 });
 range.value = range.km;
 renderRange();
+
+// ---------------------------------------------------------------------------
+// 航空網路：從一個樞紐放射出去的大圓航線
+// ---------------------------------------------------------------------------
+const MAX_DESTS = 60, NET_TOP = 20, NET_COLOR = '#0e9488';
+const net = { hub: -1, dests: [], note: '', paths: null, key: '' };
+
+// 起飛時的航向：正北 = 0°，順時針
+function bearing(a, b) {
+  const p1 = a.lat * DEG, p2 = b.lat * DEG, dl = (b.lon - a.lon) * DEG;
+  const y = Math.sin(dl) * Math.cos(p2), x = Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl);
+  return (Math.atan2(y, x) / DEG + 360) % 360;
+}
+
+function netPaths() {
+  const key = `${geoVersion}|${net.hub}|${net.dests.join(',')}`;
+  if (net.key === key) return net.paths;
+  net.paths = net.hub < 0 ? [] : net.dests.map(d => gcPath(airports[net.hub].v, airports[d].v)).filter(Boolean);
+  net.key = key;
+  return net.paths;
+}
+
+function drawNetwork(x0, x1, y0, y1) {
+  if (net.hub < 0 || !airports.length) return;
+  ctx.save();
+  if (!state.tiled) {
+    const a = toScreen(0, MAP_H), b = toScreen(MAP_W, 0);
+    ctx.beginPath(); ctx.rect(a[0], a[1], b[0] - a[0], b[1] - a[1]); ctx.clip();
+  }
+  const T = copyTransforms(x0, x1, y0, y1), pos = airportPositions();
+  for (const [lw, color] of [[4, 'rgba(255, 255, 255, 0.75)'], [1.8, NET_COLOR]]) {
+    ctx.strokeStyle = color; ctx.lineWidth = lw * dpr; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.beginPath();
+    strokePaths(netPaths(), T, x0, x1, y0, y1);
+    ctx.stroke();
+  }
+  const marker = (i, r) => {
+    const Q = pos[i];
+    for (const [s, ox, oy] of T) {
+      const X = s * Q[0] + ox, Y = s * Q[1] + oy;
+      if (X < x0 - 0.05 || X > x1 + 0.05 || Y < y0 - 0.05 || Y > y1 + 0.05) continue;
+      const p = toScreen(X, Y);
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p[0], p[1], (r + 1.5) * dpr, 0, 2 * Math.PI); ctx.fill();
+      ctx.fillStyle = NET_COLOR; ctx.beginPath(); ctx.arc(p[0], p[1], r * dpr, 0, 2 * Math.PI); ctx.fill();
+    }
+  };
+  net.dests.forEach(d => marker(d, 3.5));
+  marker(net.hub, 7);
+  ctx.restore();
+}
+
+function renderNetwork() {
+  const sum = document.getElementById('netSummary'), list = document.getElementById('netList');
+  const note = net.note ? `<span class="note">${net.note}</span>` : '';
+  if (net.hub < 0) { sum.innerHTML = note || `<span class="note">${esc(t('netNeedHub'))}</span>`; list.innerHTML = ''; return; }
+  const h = airports[net.hub];
+  const rows = net.dests
+    .map(d => [d, angBetween(h.v, airports[d].v)])
+    .sort((a, b) => a[1] - b[1])
+    .map(([d, ang]) => {
+      const a = airports[d];
+      return `<li><span title="${esc(apName(a))}">${a.iata} ${esc(cityOf(a))}${esc(t('sep'))}${esc(a.country)}</span>` +
+        `<span class="leg">${fmtKm(ang * EARTH_R)} · ${esc(t('bearing', { b: Math.round(bearing(h, a)) }))}</span>` +
+        `<button data-d="${d}" aria-label="${esc(t('remove'))}">×</button></li>`;
+    });
+  sum.innerHTML = esc(t('netSummary', { c: `${h.iata} ${cityOf(h)}`, n: net.dests.length })) + (note ? '<br>' + note : '');
+  list.innerHTML = rows.join('');
+}
+
+function networkChanged(note = '') {
+  net.note = note;
+  renderNetwork();
+  requestDraw();
+}
+function setHub(i) {
+  net.hub = i;
+  net.dests = net.dests.filter(d => d !== i);
+  networkChanged();
+}
+// 加入目的地（略過樞紐本身、已經有的、和樞紐同一個城市的）。回傳是否到了上限
+function addDests(list) {
+  const have = new Set(net.dests), hubCity = net.hub >= 0 ? cityOf(airports[net.hub]) : null;
+  for (const i of list) {
+    if (net.dests.length >= MAX_DESTS) return true;
+    if (i === net.hub || have.has(i) || cityOf(airports[i]) === hubCity) continue;
+    net.dests.push(i); have.add(i);
+  }
+  return false;
+}
+function netSearch(id, then) {
+  const input = document.getElementById(id);
+  const i = findAirport(input.value);
+  if (i < 0) { networkChanged(esc(t('notFound', { q: input.value.trim() }))); return; }
+  input.value = '';
+  then(i);
+}
+const needHub = () => { if (net.hub >= 0) return false; networkChanged(esc(t('netNeedHub'))); return true; };
+const maxNote = full => full ? esc(t('netMax', { n: MAX_DESTS })) : '';
+document.getElementById('netSetHub').onclick = () => netSearch('netHubSearch', setHub);
+document.getElementById('netHubSearch').addEventListener('keydown', e => { if (e.key === 'Enter') netSearch('netHubSearch', setHub); });
+const addOne = i => { if (!needHub()) networkChanged(maxNote(addDests([i]))); };
+document.getElementById('netAdd').onclick = () => netSearch('netDestSearch', addOne);
+document.getElementById('netDestSearch').addEventListener('keydown', e => { if (e.key === 'Enter') netSearch('netDestSearch', addOne); });
+// 範圍圈內的城市：旅客最多的優先。還沒有樞紐時，用範圍圈的中心當樞紐
+document.getElementById('netFromRange').onclick = () => {
+  if (!rangeOn()) { networkChanged(esc(t('netNoRange'))); return; }
+  if (net.hub < 0) net.hub = range.ap;
+  const list = rangeCities().map(([i]) => i).sort((a, b) => airports[b].pax - airports[a].pax);
+  networkChanged(maxNote(addDests(list)));
+};
+// 全球旅客最多的城市（每個城市取最繁忙的機場）
+document.getElementById('netTop').onclick = () => {
+  if (needHub()) return;
+  const seen = new Set([cityOf(airports[net.hub])]), list = [];
+  for (const i of airports.map((a, i) => i).sort((a, b) => airports[b].pax - airports[a].pax)) {
+    const c = cityOf(airports[i]);
+    if (seen.has(c)) continue;
+    seen.add(c); list.push(i);
+    if (list.length >= NET_TOP) break;
+  }
+  networkChanged(maxNote(addDests(list)));
+};
+document.getElementById('netClear').onclick = () => { net.hub = -1; net.dests = []; networkChanged(); };
+document.getElementById('netList').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  net.dests = net.dests.filter(d => d !== +b.dataset.d);
+  networkChanged();
+});
+
+// 把樞紐轉到四面體一個面的中心：那一面內的航線都是直線，而且樞紐附近變形最小。
+// 中央的邊左右兩側各有一個面，面中心在 (√3/3, 1/2) 和 (2√3/3, 1/2)。
+// 繞樞紐還可以轉任意角度，選讓北方最接近畫面正上方、又符合上下拖曳限制的那一個。
+function centerHub() {
+  if (needHub()) return;
+  const h = airports[net.hub], hv = h.v;
+  const body = (X, Y) => {        // 畫面座標 → 四面體本體座標
+    const g = [0, 0, 0]; planeToGeo(X, Y, g);
+    return [M[0][0] * g[0] + M[1][0] * g[1] + M[2][0] * g[2], M[0][1] * g[0] + M[1][1] * g[1] + M[2][1] * g[2], M[0][2] * g[0] + M[1][2] * g[1] + M[2][2] * g[2]];
+  };
+  const lat = h.lat * DEG, lon = h.lon * DEG;
+  let north = [-Math.sin(lat) * Math.cos(lon), -Math.sin(lat) * Math.sin(lon), Math.cos(lat)];
+  let east = [-Math.sin(lon), Math.cos(lon), 0];
+  if (Math.abs(hv[2]) > 0.9999) { north = [-1, 0, 0]; east = [0, 1, 0]; }
+  const solve = fx => {
+    const f = body(fx, 0.5), f2 = body(fx, 0.501);
+    let u = sub(f2, f); const k = dot(u, f); u = norm([u[0] - k * f[0], u[1] - k * f[1], u[2] - k * f[2]]);
+    const B = [f, u, cross(f, u)];
+    for (let psi = 0; psi <= 180; psi++) {
+      for (const sgn of psi ? [1, -1] : [1]) {
+        const a = sgn * psi * DEG;
+        const n = [0, 1, 2].map(r => north[r] * Math.cos(a) + east[r] * Math.sin(a));
+        const W = [hv, n, cross(hv, n)];
+        const Mn = [0, 1, 2].map(r => [0, 1, 2].map(c => W[0][r] * B[0][c] + W[1][r] * B[1][c] + W[2][r] * B[2][c]));
+        const E = matMul(Mn, [[R0[0][0], R0[1][0], R0[2][0]], [R0[0][1], R0[1][1], R0[2][1]], [R0[0][2], R0[1][2], R0[2][2]]]);
+        const pitch = Math.asin(Math.max(-1, Math.min(1, -E[2][0]))) / DEG;
+        if (state.limit && (pitch < -1e-6 || pitch > SOUTH_PITCH + 1e-6)) continue;
+        return { psi, pitch, roll: Math.atan2(E[2][1], E[2][2]) / DEG, yaw: Math.atan2(E[1][0], E[0][0]) / DEG - CENTER_LON };
+      }
+    }
+    return null;
+  };
+  const cands = [solve(ROW * 2 / 3), solve(ROW * 4 / 3)].filter(Boolean).sort((a, b) => a.psi - b.psi);
+  let note = '';
+  let sol = cands[0];
+  if (!sol) {
+    // 限制範圍內做不到：關掉限制再算
+    state.limit = false; document.getElementById('limit').checked = false;
+    sol = [solve(ROW * 2 / 3), solve(ROW * 4 / 3)].filter(Boolean).sort((a, b) => a.psi - b.psi)[0];
+    note = esc(t('netLimitOff'));
+  }
+  state.yaw = ((sol.yaw % 360) + 540) % 360 - 180;
+  state.pitch = sol.pitch;
+  state.roll = ((sol.roll % 360) + 540) % 360 - 180;
+  rollInput.value = Math.round(state.roll);
+  updateMatrix();
+  networkChanged(note);
+}
+document.getElementById('netCenter').onclick = centerHub;
+renderNetwork();
 
 // ---------------------------------------------------------------------------
 // 啟動
