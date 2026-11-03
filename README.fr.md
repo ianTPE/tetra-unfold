@@ -16,7 +16,7 @@ La démonstration utilise une carte du monde et s’inspire de la [carte du mond
 
 La carte est disponible en 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch, Français, Español et Русский. Elle choisit automatiquement la langue du navigateur ; on peut en changer avec le menu du panneau, ou ajouter `?lang=` à l’adresse (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`, `es`, `ru`).
 
-L’itinéraire, le rayon de distance, le réseau aérien, la rotation et les réglages sont enregistrés dans l’adresse au fil de vos actions : mettez la page en favori ou envoyez-la, elle s’ouvre exactement dans le même état. **Copier le lien de partage** dans le panneau copie l’adresse. Par exemple, [ce lien](https://iantpe.github.io/tetra-unfold/?lang=fr&trip=TPE,HND,LHR,SIN&range=TPE,5000) ouvre l’itinéraire Taipei → Tokyo → Londres → Singapour avec un rayon de 5 000 km autour de Taipei. Rien n’est stocké sur un serveur : tout est dans l’adresse.
+L’itinéraire, le rayon de distance, la rotation et les réglages sont enregistrés dans l’adresse au fil de vos actions : mettez la page en favori ou envoyez-la, elle s’ouvre exactement dans le même état. **Copier le lien de partage** dans le panneau copie l’adresse. Par exemple, [ce lien](https://iantpe.github.io/tetra-unfold/?lang=fr&trip=TPE,HND,LHR,SIN&range=TPE,5000) ouvre l’itinéraire Taipei → Tokyo → Londres → Singapour avec un rayon de 5 000 km autour de Taipei. Rien n’est stocké sur un serveur : tout est dans l’adresse.
 
 La carte se compose d’un seul fichier HTML, de `i18n.js` (textes de l’interface), de `airports.json` et de `names/<langue>.json` (noms des aéroports et des villes). Rien à installer ni à compiler. Une connexion Internet est nécessaire pour charger D3 et les données des pays.
 
@@ -64,12 +64,6 @@ Utilisez donc la carte pour écarter les ordres qui font des allers-retours, pui
 Choisissez un centre (code d’aéroport, ville ou première étape de l’itinéraire) et un rayon en kilomètres ou en heures de vol. La carte colore tous les lieux situés à cette distance orthodromique ou moins, et liste les villes dotées de grands aéroports à l’intérieur du cercle, de la plus proche à la plus éloignée. En survolant la carte, on voit la distance de chaque point au centre.
 
 Sur le globe, la zone est un cercle, mais pas sur cette carte : à l’intérieur d’une face, c’est un ovale régulier, qui se plie en franchissant un pli. Par exemple, un cercle de 5 000 km autour de Taipei atteint Delhi (4 373 km) et Darwin (4 298 km), mais s’arrête juste avant Bombay (5 002 km). Les heures de vol sont converties à une moyenne de 800 km/h ; ce n’est qu’une estimation.
-
-### Réseau aérien (`index.html`)
-
-Choisissez une ville hub et ajoutez des destinations : une par une, toutes les villes du rayon de distance, ou les 20 aéroports les plus fréquentés du monde (60 au maximum). La carte trace une route orthodromique du hub vers chaque destination et les liste par distance, avec le cap initial depuis le hub (nord 0°, sens horaire). Depuis Taipei, par exemple, Shanghai-Pudong est à 677 km au cap 5°, Tokyo-Haneda à 2 122 km au cap 52° et Pékin à 1 723 km au cap 347°.
-
-**Hub au centre d’une face** fait tourner le globe pour placer le hub exactement au centre d’une face du tétraèdre. Toutes les liaisons de cette face deviennent alors des droites ; seules celles qui passent sur une autre face se plient. C’est difficile à obtenir sur la plupart des cartes du monde. Pour garder le nord le plus haut possible, la carte est souvent un peu pivotée ; **Réinitialiser** ou **Pôle Nord en haut** rétablit l’orientation d’origine.
 
 ## Fonctionnement
 

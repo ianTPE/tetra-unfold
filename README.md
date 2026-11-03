@@ -14,7 +14,7 @@ The demo uses a world map and is inspired by the [AuthaGraph world map](https://
 
 The map is available in 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch, Français, Español and Русский. It picks your browser's language automatically; use the menu in the panel to switch, or add `?lang=` to the address (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`, `es`, `ru`), for example <https://iantpe.github.io/tetra-unfold/?lang=ja>.
 
-Your trip, distance range, flight network, rotation and settings are saved in the address as you work, so you can bookmark the page or send it to someone, and it opens exactly as you left it. **Copy share link** in the panel copies the address. For example, [this link](https://iantpe.github.io/tetra-unfold/?lang=en&trip=TPE,HND,LHR,SIN&range=TPE,5000) opens the Taipei → Tokyo → London → Singapore trip with a 5,000 km range around Taipei. Nothing is stored on a server; everything is in the address.
+Your trip, distance range, rotation and settings are saved in the address as you work, so you can bookmark the page or send it to someone, and it opens exactly as you left it. **Copy share link** in the panel copies the address. For example, [this link](https://iantpe.github.io/tetra-unfold/?lang=en&trip=TPE,HND,LHR,SIN&range=TPE,5000) opens the Taipei → Tokyo → London → Singapore trip with a 5,000 km range around Taipei. Nothing is stored on a server; everything is in the address.
 
 The map is a single HTML file plus `i18n.js` (interface text), `airports.json` and `names/<language>.json` (airport and city names). There is nothing to install or build. An internet connection is needed to load D3 and the country data.
 
@@ -62,12 +62,6 @@ So use the map to rule out orders that double back, and let the assistant compar
 Pick a centre (an airport code or city, or the first stop of your trip) and a radius in kilometres or flight hours. The map shades every place within that great-circle distance and lists the cities with large airports inside the circle, nearest first. Hover anywhere to see its distance from the centre.
 
 On the globe the range is a circle, but on this map it is not: within one face it is a smooth oval, and it bends where it crosses a fold line. For example, a 5,000 km circle around Taipei reaches Delhi (4,373 km) and Darwin (4,298 km) but stops just short of Mumbai (5,002 km). Flight hours are converted at an average of 800 km/h, so treat them as a rough guide.
-
-### Flight network (`index.html`)
-
-Pick a hub city and add destinations: one at a time, every city in the distance range, or the 20 busiest airports in the world (up to 60). The map draws a great-circle route from the hub to each destination and lists them by distance, with the initial heading from the hub (north is 0°, clockwise). From Taipei, for example, Shanghai Pudong is 677 km at 5°, Tokyo Haneda 2,122 km at 52° and Beijing 1,723 km at 347°.
-
-**Hub to face centre** turns the globe so the hub sits at the centre of a tetrahedron face. Every route within that face is then a straight line, and only the routes that cross into another face bend. The hub needs no special handling, which is hard to do on most world maps. The map is usually rolled a little to keep north as close to up as possible; **Reset** or **North Pole up** brings it back.
 
 ## How it works
 

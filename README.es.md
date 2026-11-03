@@ -16,7 +16,7 @@ La demostración usa un mapa del mundo y se inspira en el [mapa del mundo AuthaG
 
 El mapa está disponible en 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch, Français, Español y Русский. Elige automáticamente el idioma del navegador; se puede cambiar con el menú del panel o añadiendo `?lang=` a la dirección (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`, `es`, `ru`).
 
-El itinerario, el radio de distancia, la red de vuelos, el giro del mapa y los ajustes se guardan en la dirección a medida que trabajas, así que puedes guardar la página en favoritos o enviarla y se abrirá exactamente igual. **Copiar enlace para compartir** en el panel copia la dirección. Por ejemplo, [este enlace](https://iantpe.github.io/tetra-unfold/?lang=es&trip=TPE,HND,LHR,SIN&range=TPE,5000) abre el itinerario Taipéi → Tokio → Londres → Singapur con un radio de 5.000 km alrededor de Taipéi. No se guarda nada en ningún servidor; todo está en la dirección.
+El itinerario, el radio de distancia, el giro del mapa y los ajustes se guardan en la dirección a medida que trabajas, así que puedes guardar la página en favoritos o enviarla y se abrirá exactamente igual. **Copiar enlace para compartir** en el panel copia la dirección. Por ejemplo, [este enlace](https://iantpe.github.io/tetra-unfold/?lang=es&trip=TPE,HND,LHR,SIN&range=TPE,5000) abre el itinerario Taipéi → Tokio → Londres → Singapur con un radio de 5.000 km alrededor de Taipéi. No se guarda nada en ningún servidor; todo está en la dirección.
 
 El mapa es un solo archivo HTML más `i18n.js` (textos de la interfaz), `airports.json` y `names/<idioma>.json` (nombres de aeropuertos y ciudades). No hay nada que instalar ni compilar. Se necesita conexión a Internet para cargar D3 y los datos de los países.
 
@@ -64,12 +64,6 @@ Así que usa el mapa para descartar los órdenes que dan vueltas y deja que el a
 Elige un centro (código de aeropuerto, ciudad o la primera parada del itinerario) y un radio en kilómetros u horas de vuelo. El mapa colorea todos los lugares que quedan dentro de esa distancia ortodrómica y enumera las ciudades con aeropuertos grandes dentro del círculo, de la más cercana a la más lejana. Al pasar el ratón por cualquier punto se ve su distancia al centro.
 
 En el globo la zona es un círculo, pero en este mapa no: dentro de una cara es un óvalo suave y se dobla al cruzar un pliegue. Por ejemplo, un círculo de 5.000 km alrededor de Taipéi alcanza Delhi (4.373 km) y Darwin (4.298 km), pero se queda justo antes de Bombay (5.002 km). Las horas de vuelo se convierten con una media de 800 km/h, así que son solo una estimación.
-
-### Red de vuelos (`index.html`)
-
-Elige una ciudad hub y añade destinos: uno a uno, todas las ciudades del radio de distancia o los 20 aeropuertos con más pasajeros del mundo (60 como máximo). El mapa traza una ruta ortodrómica del hub a cada destino y los enumera por distancia, con el rumbo inicial desde el hub (norte 0°, en sentido horario). Desde Taipéi, por ejemplo, Shanghái-Pudong está a 677 km con rumbo 5°, Tokio-Haneda a 2.122 km con rumbo 52° y Pekín a 1.723 km con rumbo 347°.
-
-**Hub al centro de una cara** gira el globo para que el hub quede justo en el centro de una cara del tetraedro. Todas las rutas de esa cara pasan a ser rectas, y solo se doblan las que cruzan a otra cara. Esto es difícil de conseguir en la mayoría de los mapas del mundo. Para mantener el norte lo más arriba posible, el mapa suele girar un poco; **Restablecer** o **Polo Norte arriba** devuelve la orientación original.
 
 ## Cómo funciona
 

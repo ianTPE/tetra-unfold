@@ -16,7 +16,7 @@ Die Demo verwendet eine Weltkarte und ist von der [AuthaGraph-Weltkarte](https:/
 
 Die Karte gibt es auf 繁體中文, 简体中文, English, 日本語, 한국어, Deutsch, Français, Español und Русский. Die Sprache des Browsers wird automatisch gewählt; über das Menü im Bedienfeld lässt sie sich wechseln, oder man hängt `?lang=` an die Adresse an (`zh-Hant`, `zh-Hans`, `en`, `ja`, `ko`, `de`, `fr`, `es`, `ru`).
 
-Reise, Entfernungsradius, Flugnetz, Drehung und Einstellungen werden laufend in der Adresse gespeichert. Als Lesezeichen oder an andere geschickt, öffnet sich die Seite genau so, wie du sie verlassen hast. **Link zum Teilen kopieren** im Bedienfeld kopiert die Adresse. [Dieser Link](https://iantpe.github.io/tetra-unfold/?lang=de&trip=TPE,HND,LHR,SIN&range=TPE,5000) öffnet zum Beispiel die Reise Taipeh → Tokio → London → Singapur mit einem 5.000-km-Radius um Taipeh. Auf keinem Server wird etwas gespeichert; alles steht in der Adresse.
+Reise, Entfernungsradius, Drehung und Einstellungen werden laufend in der Adresse gespeichert. Als Lesezeichen oder an andere geschickt, öffnet sich die Seite genau so, wie du sie verlassen hast. **Link zum Teilen kopieren** im Bedienfeld kopiert die Adresse. [Dieser Link](https://iantpe.github.io/tetra-unfold/?lang=de&trip=TPE,HND,LHR,SIN&range=TPE,5000) öffnet zum Beispiel die Reise Taipeh → Tokio → London → Singapur mit einem 5.000-km-Radius um Taipeh. Auf keinem Server wird etwas gespeichert; alles steht in der Adresse.
 
 Die Karte besteht aus einer einzigen HTML-Datei sowie `i18n.js` (Oberflächentexte), `airports.json` und `names/<Sprache>.json` (Flughafen- und Städtenamen). Es muss nichts installiert oder gebaut werden. Zum Laden von D3 und den Ländergrenzen ist eine Internetverbindung nötig.
 
@@ -64,12 +64,6 @@ Schließen Sie also mit der Karte Reihenfolgen aus, die Umwege machen, und lasse
 Wähle einen Mittelpunkt (Flughafencode, Stadt oder den ersten Stopp der Reise) und einen Radius in Kilometern oder Flugstunden. Die Karte färbt alle Orte innerhalb dieser Großkreisentfernung ein und listet die Städte mit großen Flughäfen im Kreis auf, die nächsten zuerst. Beim Überfahren mit der Maus wird für jeden Punkt die Entfernung zum Mittelpunkt angezeigt.
 
 Auf dem Globus ist der Bereich ein Kreis, auf dieser Karte aber nicht: Innerhalb einer Fläche ist er ein glattes Oval, und an den Faltlinien knickt er ab. Ein Kreis mit 5.000 km um Taipeh reicht zum Beispiel bis Delhi (4.373 km) und Darwin (4.298 km), endet aber knapp vor Mumbai (5.002 km). Flugstunden werden mit durchschnittlich 800 km/h umgerechnet und sind nur ein grober Richtwert.
-
-### Flugnetz (`index.html`)
-
-Wähle ein Drehkreuz und füge Ziele hinzu: einzeln, alle Städte im Entfernungsradius oder die 20 verkehrsreichsten Flughäfen der Welt (höchstens 60). Die Karte zeichnet vom Drehkreuz aus eine Großkreisroute zu jedem Ziel und listet die Ziele nach Entfernung auf, jeweils mit dem Anfangskurs ab dem Drehkreuz (Norden 0°, im Uhrzeigersinn). Von Taipeh aus liegt zum Beispiel Shanghai-Pudong 677 km entfernt bei 5°, Tokio-Haneda 2.122 km bei 52° und Peking 1.723 km bei 347°.
-
-**Drehkreuz in Flächenmitte** dreht den Globus so, dass das Drehkreuz genau in der Mitte einer Tetraederfläche liegt. Alle Strecken innerhalb dieser Fläche sind dann gerade Linien; nur Strecken, die in eine andere Fläche übergehen, knicken ab. Auf den meisten Weltkarten ist das kaum möglich. Damit Norden möglichst oben bleibt, wird die Karte meist etwas gedreht; **Zurücksetzen** oder **Nordpol oben** stellt die ursprüngliche Ausrichtung wieder her.
 
 ## Funktionsweise
 
