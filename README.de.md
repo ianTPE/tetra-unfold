@@ -37,7 +37,7 @@ Die Karte eignet sich gut, um Flugrichtungen zu prüfen: Bei ausgeschalteter Fl�
 
 - Flughäfen fügt man hinzu, indem man auf die Punkte in der Karte klickt oder einen IATA-Code, eine Stadt, einen Flughafennamen oder ein Land in der gewählten Sprache oder auf Englisch eingibt (zum Beispiel `TPE`, `London`, `München`, `Londres`). Hat eine Stadt mehrere Flughäfen, steht der mit den meisten Passagieren vorn. Beim Hineinzoomen erscheinen auch mittelgroße Flughäfen.
 - Jede Etappe wird als Großkreisroute gezeichnet, mit ihrer Entfernung und der Gesamtstrecke. Mit **Am Ende zum Start zurückkehren** wird eine Rundreise berechnet.
-- **Beste Reihenfolge berechnen** behält den ersten Halt als Start, probiert alle Reihenfolgen der übrigen (bis zu 10 Halte) und wählt die mit der kürzesten Gesamtstrecke.
+- **Beste Reihenfolge berechnen** behält den ersten Halt als Start, und sucht für die übrigen die Reihenfolge mit der kürzesten Gesamtstrecke. Eine Reise kann bis zu 30 Halte haben: Bis 16 Halte ist das Ergebnis wirklich die kürzeste Reihenfolge, darüber eine Näherung, die nicht unbedingt die kürzeste ist.
 - Entfernungen sind Großkreisentfernungen auf einer Kugel mit 6.371 km Radius. Tatsächliche Flugwege sind meist etwas länger.
 
 #### Flugpreise mit einem KI-Browserassistenten vergleichen
@@ -211,7 +211,7 @@ Auch andere Webwerkzeuge zeichnen Flugrouten mit mehreren Stationen und addieren
 | [RapidToolset Multi-City Flight Planner](https://rapidtoolset.com/en/tool/multi-city-flight-planner) | Die ganze Welt auf einer herkömmlichen flachen Karte | Bögen zwischen den Stationen; Routen in hohen Breiten sind gedehnt, ihre wahre Richtung ist schwer einzuschätzen | Entfernungen addieren |
 | Diese Karte | Die ganze Welt auf einer flachen, nahtlos kachelnden Karte | Gerade innerhalb jeder Fläche, Knicke nur an Faltlinien | Die **Reihenfolge** einer komplexen Reise durch mehrere Länder planen |
 
-Ein Globus zeigt Richtungen korrekt, aber nie die ganze Reise auf einmal; eine herkömmliche Karte zeigt die ganze Reise, aber mit irreführenden Richtungen. Diese Karte zeigt die ganze Reise mit nahezu wahren Richtungen und kann alle Besuchsreihenfolgen durchprobieren, um die kürzeste zu finden.
+Ein Globus zeigt Richtungen korrekt, aber nie die ganze Reise auf einmal; eine herkömmliche Karte zeigt die ganze Reise, aber mit irreführenden Richtungen. Diese Karte zeigt die ganze Reise mit nahezu wahren Richtungen und kann die kürzeste Besuchsreihenfolge finden.
 
 Die Entfernungen werden hier auf einer Kugel (Radius 6.371 km) berechnet. Sie weichen von Entfernungen auf dem Ellipsoid, wie bei Great Circle Map, um weniger als 0,4 % ab (zum Beispiel Taipeh–London: 9.783 km gegenüber 9.802 km). Das ist weit weniger als der Unterschied zwischen verschiedenen Reihenfolgen und ändert nicht, welche Reihenfolge die kürzeste ist.
 

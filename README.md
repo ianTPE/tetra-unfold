@@ -35,7 +35,7 @@ The map is handy for checking flight directions: with area correction off (the d
 
 - Add airports by clicking the dots on the map, or by typing an IATA code, a city, an airport name or a country, in the selected language or in English (for example `TPE`, `London`, `ロンドン`, `Londres`). When a city has several airports, the busiest one comes first. Zoom in to also see medium-sized airports.
 - Each leg is drawn as a great-circle route, with its distance and the trip total. Tick **return to the start** for a round trip.
-- **Find the smoothest order** keeps the first stop as the starting point and tries every order of the others (up to 10 stops), then picks the shortest total distance.
+- **Find the smoothest order** keeps the first stop as the starting point and finds the order of the others with the shortest total distance. A trip can have up to 30 stops: up to 16 the result is the true shortest; above that it is approximate and may not be the shortest.
 - Distances are great-circle distances on a sphere of radius 6,371 km. Real flight paths are usually somewhat longer.
 
 #### Checking fares with an AI browser assistant
@@ -209,7 +209,7 @@ Other web tools also draw multi-stop flight routes and add up great-circle dista
 | [RapidToolset Multi-City Flight Planner](https://rapidtoolset.com/en/tool/multi-city-flight-planner) | The whole world on a conventional flat map | Arcs between stops; high-latitude routes are stretched, so their real direction is hard to judge | Adding up distances |
 | This map | The whole world on one flat, seamlessly tiling map | Straight within each face, bending only at fold lines | Planning the **order** of a complex multi-country trip |
 
-A globe shows directions correctly but never the whole trip at once; a conventional map shows the whole trip but with misleading directions. This map shows the whole trip with directions that stay close to true, and can try every visiting order to find the shortest one.
+A globe shows directions correctly but never the whole trip at once; a conventional map shows the whole trip but with misleading directions. This map shows the whole trip with directions that stay close to true, and can find the shortest visiting order.
 
 Distances here use a sphere (radius 6,371 km). They differ from ellipsoid distances, such as Great Circle Map's, by less than 0.4% (for example Taipei–London: 9,783 km vs 9,802 km). That is far smaller than the gap between different visiting orders, so it does not change which order is shortest.
 

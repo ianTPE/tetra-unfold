@@ -37,7 +37,7 @@ El mapa es útil para comprobar las direcciones de vuelo: con la corrección de 
 
 - Los aeropuertos se añaden haciendo clic en los puntos del mapa o escribiendo un código IATA, una ciudad, un nombre de aeropuerto o un país, en el idioma elegido o en inglés (por ejemplo `TPE`, `London`, `Londres`, `ロンドン`). Si una ciudad tiene varios aeropuertos, aparece primero el que tiene más pasajeros. Al acercar el zoom también se ven los aeropuertos medianos.
 - Cada tramo se dibuja como una ruta ortodrómica, con su distancia y el total del viaje. Marca **Volver al punto de partida** para un viaje de ida y vuelta.
-- **Calcular el mejor orden** mantiene la primera parada como salida, prueba todos los órdenes de las demás (hasta 10 paradas) y elige el de menor distancia total.
+- **Calcular el mejor orden** mantiene la primera parada como salida, y busca para las demás el orden de menor distancia total. Un viaje puede tener hasta 30 paradas: hasta 16, el resultado es realmente el más corto; con más, es aproximado y puede no ser el más corto.
 - Las distancias son ortodrómicas, sobre una esfera de 6371 km de radio. Las rutas reales suelen ser algo más largas.
 
 #### Comparar billetes con un asistente de IA en el navegador
@@ -211,7 +211,7 @@ Otras herramientas web también dibujan rutas aéreas con varias paradas y suman
 | [RapidToolset Multi-City Flight Planner](https://rapidtoolset.com/en/tool/multi-city-flight-planner) | Todo el mundo en un mapa plano convencional | Arcos entre las paradas; las rutas de latitudes altas quedan estiradas y cuesta juzgar su dirección real | Sumar distancias |
 | Este mapa | Todo el mundo en un solo mapa plano que tesela sin costuras | Rectas dentro de cada cara, solo se quiebran en los pliegues | Planificar el **orden** de un viaje complejo por varios países |
 
-Un globo muestra bien las direcciones, pero nunca el viaje completo a la vez; un mapa convencional muestra el viaje completo, pero con direcciones engañosas. Este mapa muestra el viaje completo con direcciones cercanas a las reales, y puede probar todos los órdenes de visita para encontrar el más corto.
+Un globo muestra bien las direcciones, pero nunca el viaje completo a la vez; un mapa convencional muestra el viaje completo, pero con direcciones engañosas. Este mapa muestra el viaje completo con direcciones cercanas a las reales, y puede encontrar el orden de visita más corto.
 
 Aquí las distancias se calculan sobre una esfera (radio de 6371 km). Difieren en menos de un 0,4 % de las distancias sobre el elipsoide, como las de Great Circle Map (por ejemplo, Taipéi–Londres: 9783 km frente a 9802 km). Es mucho menos que la diferencia entre órdenes de visita distintos, así que no cambia cuál es el más corto.
 

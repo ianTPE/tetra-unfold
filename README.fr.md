@@ -37,7 +37,7 @@ La carte est pratique pour vérifier les directions de vol : quand la correction
 
 - On ajoute des aéroports en cliquant sur les points de la carte, ou en tapant un code IATA, une ville, un nom d’aéroport ou un pays, dans la langue choisie ou en anglais (par exemple `TPE`, `London`, `Londres`, `ロンドン`). Quand une ville a plusieurs aéroports, le plus fréquenté apparaît en premier. En zoomant, on voit aussi les aéroports de taille moyenne.
 - Chaque étape est tracée comme une route orthodromique, avec sa distance et le total du voyage. Cochez **Revenir au point de départ** pour un aller-retour.
-- **Calculer le meilleur ordre** garde la première étape comme départ, essaie tous les ordres des autres (jusqu’à 10 étapes) et choisit celui dont la distance totale est la plus courte.
+- **Calculer le meilleur ordre** garde la première étape comme départ, et cherche pour les autres l’ordre dont la distance totale est la plus courte. Un voyage peut compter jusqu’à 30 étapes : jusqu’à 16, le résultat est réellement le plus court ; au-delà, il est approché et n’est pas forcément le plus court.
 - Les distances sont orthodromiques, sur une sphère de 6 371 km de rayon. Les trajets réels sont en général un peu plus longs.
 
 #### Comparer les billets avec un assistant IA dans le navigateur
@@ -211,7 +211,7 @@ D’autres outils en ligne tracent aussi des routes aériennes à plusieurs éta
 | [RapidToolset Multi-City Flight Planner](https://rapidtoolset.com/en/tool/multi-city-flight-planner) | Le monde entier sur une carte plane classique | Arcs entre les étapes ; les routes de haute latitude sont étirées, leur vraie direction est difficile à juger | Additionner des distances |
 | Cette carte | Le monde entier sur une seule carte plane qui pave sans raccord | Droites dans chaque face, coudées seulement aux plis | Planifier l’**ordre** d’un voyage complexe dans plusieurs pays |
 
-Un globe montre correctement les directions, mais jamais tout le voyage à la fois ; une carte classique montre tout le voyage, mais avec des directions trompeuses. Cette carte montre tout le voyage avec des directions proches de la réalité, et peut essayer tous les ordres de visite pour trouver le plus court.
+Un globe montre correctement les directions, mais jamais tout le voyage à la fois ; une carte classique montre tout le voyage, mais avec des directions trompeuses. Cette carte montre tout le voyage avec des directions proches de la réalité, et peut trouver l’ordre de visite le plus court.
 
 Les distances sont calculées ici sur une sphère (rayon 6 371 km). Elles diffèrent de moins de 0,4 % des distances sur l’ellipsoïde, comme celles de Great Circle Map (par exemple Taipei–Londres : 9 783 km contre 9 802 km). C’est bien moins que l’écart entre différents ordres de visite, cela ne change donc pas l’ordre le plus court.
 
