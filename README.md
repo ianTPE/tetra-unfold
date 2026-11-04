@@ -36,6 +36,7 @@ The map is handy for checking flight directions: with area correction off (the d
 - Add airports by clicking the dots on the map, or by typing an IATA code, a city, an airport name or a country, in the selected language or in English (for example `TPE`, `London`, `ロンドン`, `Londres`). When a city has several airports, the busiest one comes first. Zoom in to also see medium-sized airports.
 - Each leg is drawn as a great-circle route, with its distance and the trip total. Tick **return to the start** for a round trip.
 - **Find the smoothest order** keeps the first stop as the starting point and finds the order of the others with the shortest total distance. A trip can have up to 30 stops: up to 16 the result is the true shortest; above that it is approximate and may not be the shortest.
+- When part of the route is out of view, the map turns to keep the route together, with north staying up. This happens after you add a stop or find the order, and when you open a link that has no saved rotation. **Centre the route** does the same at any time. A trip that circles the globe can't avoid being cut: its start then appears at both edges of the map.
 - Distances are great-circle distances on a sphere of radius 6,371 km. Real flight paths are usually somewhat longer.
 
 #### Checking fares with an AI browser assistant

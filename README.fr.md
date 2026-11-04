@@ -38,6 +38,7 @@ La carte est pratique pour vérifier les directions de vol : quand la correction
 - On ajoute des aéroports en cliquant sur les points de la carte, ou en tapant un code IATA, une ville, un nom d’aéroport ou un pays, dans la langue choisie ou en anglais (par exemple `TPE`, `London`, `Londres`, `ロンドン`). Quand une ville a plusieurs aéroports, le plus fréquenté apparaît en premier. En zoomant, on voit aussi les aéroports de taille moyenne.
 - Chaque étape est tracée comme une route orthodromique, avec sa distance et le total du voyage. Cochez **Revenir au point de départ** pour un aller-retour.
 - **Calculer le meilleur ordre** garde la première étape comme départ, et cherche pour les autres l’ordre dont la distance totale est la plus courte. Un voyage peut compter jusqu’à 30 étapes : jusqu’à 16, le résultat est réellement le plus court ; au-delà, il est approché et n’est pas forcément le plus court.
+- Quand une partie de l’itinéraire n’est pas visible, la carte tourne pour le regrouper au mieux, le nord restant en haut. Cela se produit après l’ajout d’une étape ou le calcul de l’ordre, et à l’ouverture d’un lien sans rotation enregistrée. **Centrer l’itinéraire** fait de même à tout moment. Un voyage autour du monde ne peut pas éviter d’être coupé : son départ apparaît alors des deux côtés de la carte.
 - Les distances sont orthodromiques, sur une sphère de 6 371 km de rayon. Les trajets réels sont en général un peu plus longs.
 
 #### Comparer les billets avec un assistant IA dans le navigateur

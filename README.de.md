@@ -38,6 +38,7 @@ Die Karte eignet sich gut, um Flugrichtungen zu prüfen: Bei ausgeschalteter Fl�
 - Flughäfen fügt man hinzu, indem man auf die Punkte in der Karte klickt oder einen IATA-Code, eine Stadt, einen Flughafennamen oder ein Land in der gewählten Sprache oder auf Englisch eingibt (zum Beispiel `TPE`, `London`, `München`, `Londres`). Hat eine Stadt mehrere Flughäfen, steht der mit den meisten Passagieren vorn. Beim Hineinzoomen erscheinen auch mittelgroße Flughäfen.
 - Jede Etappe wird als Großkreisroute gezeichnet, mit ihrer Entfernung und der Gesamtstrecke. Mit **Am Ende zum Start zurückkehren** wird eine Rundreise berechnet.
 - **Beste Reihenfolge berechnen** behält den ersten Halt als Start, und sucht für die übrigen die Reihenfolge mit der kürzesten Gesamtstrecke. Eine Reise kann bis zu 30 Halte haben: Bis 16 Halte ist das Ergebnis wirklich die kürzeste Reihenfolge, darüber eine Näherung, die nicht unbedingt die kürzeste ist.
+- Ist ein Teil der Route nicht zu sehen, dreht sich die Karte so, dass die Route möglichst zusammenhängt; Norden bleibt oben. Das geschieht nach dem Hinzufügen eines Halts, nach dem Berechnen der Reihenfolge und beim Öffnen eines Links ohne gespeicherte Drehung. **Route zentrieren** macht dasselbe jederzeit. Eine Reise um die ganze Welt lässt sich nicht ohne Schnitt zeigen: Ihr Start erscheint dann an beiden Kartenrändern.
 - Entfernungen sind Großkreisentfernungen auf einer Kugel mit 6.371 km Radius. Tatsächliche Flugwege sind meist etwas länger.
 
 #### Flugpreise mit einem KI-Browserassistenten vergleichen

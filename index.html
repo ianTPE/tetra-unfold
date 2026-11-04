@@ -246,6 +246,7 @@
       <button id="optimize" data-i18n="optimize"></button>
       <button id="clearTrip" data-i18n="clear"></button>
     </div>
+    <div class="btns"><button id="fitRoute" data-i18n="fitRoute"></button></div>
     <div id="tripSummary"></div>
     <div class="hint">
       <p data-i18n="hintClick" data-i18n-touch="hintClickTouch"></p>
@@ -814,6 +815,7 @@ function pinchState() {
 canvas.addEventListener('pointerdown', e => {
   canvas.setPointerCapture(e.pointerId);
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  flyId++;
   if (e.pointerType !== 'mouse') tip.style.display = 'none';
   if (pointers.size >= 2) {
     drag = null; canvas.classList.remove('dragging');
@@ -876,7 +878,7 @@ canvas.addEventListener('pointerup', e => {
     // 滑鼠點機場直接加入；手指容易點錯，先顯示資訊卡
     if (e.pointerType === 'mouse') {
       const ap = pickAirport(e.clientX, e.clientY);
-      if (ap >= 0) addStop(ap);
+      if (ap >= 0) { addStop(ap); keepRouteInView(true); }
     } else showTip(e);
   }
 });
@@ -888,6 +890,7 @@ tip.addEventListener('click', e => {
   if (!b) return;
   const full = trip.stops.length >= MAX_STOPS;
   addStop(+b.dataset.ap);
+  keepRouteInView(true);
   if (full) tip.textContent = t('maxStops', { n: MAX_STOPS });
   else tip.style.display = 'none';
 });
@@ -903,6 +906,7 @@ function zoomAt(factor, clientX, clientY) {
 }
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
+  flyId++;
   zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX, e.clientY);
 }, { passive: false });
 document.getElementById('zoomIn').onclick = () => zoomAt(1.4, innerWidth / 2, innerHeight / 2);
@@ -1151,6 +1155,113 @@ function addStop(i) {
   st.push(i);
   tripChanged();
 }
+// 把路線轉到畫面中央 ----------------------------------------------------------
+// 整趟路線沿著走一遍（前一點接下一點，不跳到別的拼接拷貝）在平面上的點
+function routePoints() {
+  const st = trip.stops, n = st.length, count = isRound(n) ? n : n - 1, pts = [];
+  let prev = [MAP_W / 2, MAP_H / 2];
+  const add = g => { prev = nearestCopy(geoToPlane(g), prev); pts.push(prev); };
+  add(airports[st[0]].v);
+  for (let k = 0; k < count; k++) {
+    const A = airports[st[k]].v, B = airports[st[(k + 1) % n]].v;
+    const ang = angBetween(A, B), sinA = Math.sin(ang);
+    if (sinA < 1e-9) continue;
+    const m = Math.ceil(ang / (6 * DEG));
+    for (let i = 1; i <= m; i++) {
+      const wa = Math.sin((1 - i / m) * ang) / sinA, wb = Math.sin(i / m * ang) / sinA;
+      add([A[0] * wa + B[0] * wb, A[1] * wa + B[1] * wb, A[2] * wa + B[2] * wb]);
+    }
+  }
+  return pts;
+}
+// 路線離地圖中心多遠，1 是碰到長方形的邊。小於 1 表示整趟都在一份地圖裡，不會被邊界切開
+function routeSpread() {
+  let spread = 0;
+  for (const [x, y] of routePoints()) {
+    spread = Math.max(spread, Math.abs(x - MAP_W / 2) / (MAP_W / 2), Math.abs(y - MAP_H / 2) / (MAP_H / 2));
+  }
+  return spread;
+}
+// 路線是不是整趟都看得到（電腦版左邊有面板蓋著，不算看得到）
+function routeInView() {
+  const w = canvas.clientWidth, h = canvas.clientHeight, S = state.scale, m = 0.03;
+  const covered = sheetMQ.matches ? 0 : document.querySelector('.panel').getBoundingClientRect().right;
+  const x0 = state.cx + (covered - w / 2) / S, x1 = state.cx + w / 2 / S;
+  const y0 = state.cy - h / 2 / S, y1 = state.cy + h / 2 / S;
+  return routePoints().every(([x, y]) => x > x0 + m && x < x1 - m && y > y0 + m && y < y1 - m);
+}
+// 找讓路線最集中的轉法：只左右轉和上下轉（北方維持朝上），先粗略掃過，再在最好的附近細找
+function bestRouteView() {
+  const saved = [state.yaw, state.pitch, state.roll];
+  const score = (yaw, pitch) => { state.yaw = yaw; state.pitch = pitch; updateMatrix(); return routeSpread(); };
+  state.roll = 0;
+  let best = { yaw: saved[0], pitch: saved[1], spread: saved[2] ? Infinity : score(saved[0], saved[1]) };
+  const current = best.spread;
+  const consider = (yaw, pitch) => {
+    pitch = Math.max(0, Math.min(SOUTH_PITCH, pitch));
+    const spread = score(yaw, pitch);
+    if (spread < best.spread) best = { yaw, pitch, spread };
+  };
+  for (let yaw = -180; yaw < 180; yaw += 15) {
+    for (let k = 0; k <= 4; k++) consider(yaw, SOUTH_PITCH * k / 4);
+  }
+  for (const step of [6, 3]) {
+    const { yaw, pitch } = best;
+    for (const dy of [-step, 0, step]) for (const dp of [-step, 0, step]) {
+      if (dy || dp) consider((yaw + dy + 540) % 360 - 180, pitch + dp);
+    }
+  }
+  [state.yaw, state.pitch, state.roll] = saved;
+  updateMatrix();
+  // 差不多的話就不要轉，免得地圖白白動一下
+  if (current - best.spread < 0.02) return { yaw: saved[0], pitch: saved[1], roll: saved[2] };
+  return { yaw: best.yaw, pitch: best.pitch, roll: 0 };
+}
+// 平順地轉過去；碰一下地圖就停
+let flyId = 0;
+function flyTo(view, ms) {
+  const id = ++flyId, start = performance.now();
+  const from = { yaw: state.yaw, pitch: state.pitch, roll: state.roll, scale: state.scale, cx: state.cx, cy: state.cy };
+  const dYaw = ((view.yaw - from.yaw + 540) % 360 + 360) % 360 - 180;
+  const step = now => {
+    if (id !== flyId) return;
+    const u = ms > 0 ? Math.min(1, (now - start) / ms) : 1, e = u * u * (3 - 2 * u);
+    state.yaw = (from.yaw + dYaw * e + 540) % 360 - 180;
+    state.pitch = from.pitch + (view.pitch - from.pitch) * e;
+    state.roll = from.roll + (view.roll - from.roll) * e;
+    state.scale = from.scale + (view.scale - from.scale) * e;
+    state.cx = from.cx + (view.cx - from.cx) * e;
+    state.cy = from.cy + (view.cy - from.cy) * e;
+    if (u === 1) { state.yaw = view.yaw; state.pitch = view.pitch; state.roll = view.roll; }
+    rollInput.value = Math.round(state.roll);
+    updateMatrix();
+    touch();
+    if (u < 1) requestAnimationFrame(step);
+  };
+  if (ms > 0 && !matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(step);
+  else { ms = 0; step(start); }
+}
+function fitRoute(ms = 450) {
+  if (trip.stops.length < 2) return;
+  const view = bestRouteView();
+  // 電腦版左邊有面板，地圖放進面板以外的地方
+  const covered = sheetMQ.matches ? 0 : document.querySelector('.panel').getBoundingClientRect().right;
+  const scale = Math.min((canvas.clientWidth - covered) * 0.9 / MAP_W, canvas.clientHeight * 0.8 / MAP_H);
+  Object.assign(view, { scale, cx: MAP_W / 2 - covered / 2 / scale, cy: MAP_H / 2 });
+  flyTo(view, ms);
+}
+// 路線有一部分看不到時才轉。放大了在點機場的話不動，免得要點的下一個機場跑掉
+function keepRouteInView(fromMap, ms) {
+  if (trip.stops.length < 2) return;
+  const kept = [state.scale, state.cx, state.cy];
+  fitView();
+  const fitScale = state.scale;
+  [state.scale, state.cx, state.cy] = kept;
+  if (fromMap && state.scale > fitScale * 1.05) return;
+  if (!routeInView()) fitRoute(ms);
+}
+document.getElementById('fitRoute').onclick = () => fitRoute();
+
 function tripLength(order) {
   let s = 0;
   for (let k = 0; k + 1 < order.length; k++) s += legKm(order[k], order[k + 1]);
@@ -1290,6 +1401,7 @@ document.getElementById('optimize').onclick = () => {
   if (saved > 1e-9) trip.stops = after;
   const result = saved > 0.5 ? t('reordered', { d: fmtKm(saved) }) : exact ? t('alreadyBest') : t('approxNone');
   tripChanged(esc(exact ? result : result + ' ' + t('approxNote')));
+  keepRouteInView(false);
 };
 
 // 搜尋用的正規化：不分大小寫，「台」「臺」視為相同
@@ -1313,6 +1425,7 @@ function addFromSearch() {
   if (i < 0) { tripChanged(esc(t('notFound', { q: input.value.trim() }))); return; }
   input.value = '';
   addStop(i);
+  keepRouteInView(false);
 }
 document.getElementById('apAdd').onclick = addFromSearch;
 document.getElementById('apSearch').addEventListener('keydown', e => { if (e.key === 'Enter') addFromSearch(); });
@@ -1574,6 +1687,7 @@ function applyDataFromURL() {
   trip.stops = stops.slice(0, MAX_STOPS);
   trip.dropped = stops.slice(MAX_STOPS).map(i => airports[i].iata);
   if (trip.dropped.length) setSheet(true);   // 手機面板收著會看不到提示
+  if (!q.has('v')) keepRouteInView(false, 0);  // 網址沒指定角度，就轉到看得到整趟路線
   const r = (q.get('range') || '').split(',');
   if (r.length === 2 && apByCode[r[0].toUpperCase()] !== undefined) {
     const hours = /h$/i.test(r[1]), val = parseFloat(r[1]);

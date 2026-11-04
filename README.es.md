@@ -38,6 +38,7 @@ El mapa es útil para comprobar las direcciones de vuelo: con la corrección de 
 - Los aeropuertos se añaden haciendo clic en los puntos del mapa o escribiendo un código IATA, una ciudad, un nombre de aeropuerto o un país, en el idioma elegido o en inglés (por ejemplo `TPE`, `London`, `Londres`, `ロンドン`). Si una ciudad tiene varios aeropuertos, aparece primero el que tiene más pasajeros. Al acercar el zoom también se ven los aeropuertos medianos.
 - Cada tramo se dibuja como una ruta ortodrómica, con su distancia y el total del viaje. Marca **Volver al punto de partida** para un viaje de ida y vuelta.
 - **Calcular el mejor orden** mantiene la primera parada como salida, y busca para las demás el orden de menor distancia total. Un viaje puede tener hasta 30 paradas: hasta 16, el resultado es realmente el más corto; con más, es aproximado y puede no ser el más corto.
+- Cuando parte de la ruta no se ve, el mapa gira para agruparla lo mejor posible, con el norte siempre arriba. Ocurre al añadir una parada o calcular el orden, y al abrir un enlace sin un giro guardado. **Centrar la ruta** hace lo mismo en cualquier momento. Un viaje alrededor del mundo no puede evitar cortarse: su salida aparece entonces a ambos lados del mapa.
 - Las distancias son ortodrómicas, sobre una esfera de 6371 km de radio. Las rutas reales suelen ser algo más largas.
 
 #### Comparar billetes con un asistente de IA en el navegador
