@@ -29,6 +29,7 @@ Commandes :
 - Glisser : faire tourner le globe (dans `index.html`, Maj + glisser déplace la vue)
 - Molette : zoom (`index.html`)
 - Survol : afficher le nom du pays et les coordonnées
+- Sur téléphone (`index.html`) : un doigt fait tourner le globe, deux doigts zooment et déplacent la vue. Toucher affiche le nom. Pour ajouter un aéroport, touchez-le puis appuyez sur **Ajouter à l’itinéraire**. Les réglages et l’itinéraire sont dans la barre en bas de l’écran : touchez-la ou balayez vers le haut pour l’ouvrir
 
 ### Planifier un voyage à plusieurs étapes (`index.html`)
 

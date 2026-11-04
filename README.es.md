@@ -29,6 +29,7 @@ Controles:
 - Arrastrar: girar el globo (en `index.html`, Mayús + arrastrar desplaza la vista)
 - Rueda del ratón: zoom (`index.html`)
 - Pasar el ratón: ver el nombre del país y las coordenadas
+- En el móvil (`index.html`): un dedo gira el globo y dos dedos acercan y desplazan la vista. Al tocar se ve el nombre. Para añadir un aeropuerto, tócalo y pulsa **Añadir al itinerario**. Los ajustes y el itinerario están en la barra de la parte inferior de la pantalla: tócala o desliza hacia arriba para abrirla
 
 ### Planificar un viaje con varias paradas (`index.html`)
 

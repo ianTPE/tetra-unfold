@@ -29,6 +29,7 @@ Bedienung:
 - Ziehen: Globus drehen (in `index.html` verschiebt Umschalt + Ziehen die Ansicht)
 - Mausrad: zoomen (`index.html`)
 - Mauszeiger darüber: Ländername und Koordinaten anzeigen
+- Auf dem Smartphone (`index.html`): Mit einem Finger drehst du den Globus, mit zwei Fingern zoomst und verschiebst du. Tippen zeigt den Namen an. Um einen Flughafen hinzuzufügen, tippe ihn an und wähle **Zur Reise hinzufügen**. Einstellungen und Reise liegen in der Leiste unten am Bildschirm; zum Öffnen antippen oder nach oben wischen
 
 ### Eine Reise mit mehreren Stationen planen (`index.html`)
 

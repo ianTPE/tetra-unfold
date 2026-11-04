@@ -27,6 +27,7 @@ Controls:
 - Drag: rotate the globe (in `index.html`, Shift + drag pans the view)
 - Mouse wheel: zoom (`index.html`)
 - Hover: show the country name and coordinates
+- On a phone (`index.html`): one finger rotates the globe; two fingers zoom and pan. Tap to see a name; to add an airport, tap it and press **Add to trip**. Settings and the trip are in the bar at the bottom of the screen: tap it or swipe up to open it
 
 ### Planning a multi-stop trip (`index.html`)
 
