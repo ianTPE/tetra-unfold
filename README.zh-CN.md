@@ -18,7 +18,7 @@
 
 行程、距离范围圈、地图旋转的角度和各项设置，都会随时保存到网址中。把网址存为书签或发给别人，打开就是一模一样的画面。面板上的 **复制分享链接** 可以直接复制网址。例如[这个链接](https://iantpe.github.io/tetra-unfold/?lang=zh-Hans&trip=TPE,NRT,LHR,SIN&range=TPE,5000)会打开台北 → 东京 → 伦敦 → 新加坡的行程，以及以台北为中心、半径 5,000 公里的范围圈。数据不会保存在任何服务器上，全部都在网址里。
 
-地图是一个 HTML 文件，加上 `i18n.js`（界面文字）、`airports.json` 和 `names/<语言>.json`（机场和城市名称），无需安装或构建（需要联网加载 D3 和国界数据）。
+地图是一个 HTML 文件，加上 `i18n.js`（界面文字）、`trip-order.js`（计算最短顺序）、`airports.json` 和 `names/<语言>.json`（机场和城市名称），无需安装或构建（需要联网加载 D3 和国界数据）。
 
 | 文件 | 内容 |
 |---|---|
@@ -66,6 +66,23 @@
 选一个中心（机场代码、城市，或行程的第一站），再设置半径（公里或飞行小时），地图就会把大圆距离在范围内的地方涂上颜色，并按距离列出圈内有大型机场的城市。鼠标移到任何地方，都会显示它离中心多远。
 
 在地球上，范围是一个圆；在这张地图上它不是正圆：同一面内是平滑的椭圆，跨过折线时会转折。例如以台北为中心、半径 5,000 公里的圈，涵盖德里（4,373 公里）和达尔文（4,298 公里），孟买（5,002 公里）则刚好在圈外。飞行小时按平均时速 800 公里换算，只是粗略估计。
+
+## 配合 Claude Code 或 Codex 使用
+
+这个仓库附带了两个编程智能体可以使用的 skill。克隆后在文件夹里启动 [Claude Code](https://code.claude.com/docs/en/skills) 或 [Codex](https://learn.chatgpt.com/docs/build-skills)，直接用自己的话说就可以：
+
+```
+git clone https://github.com/ianTPE/tetra-unfold
+cd tetra-unfold
+claude    # 或 codex
+```
+
+| Skill | 可以这样说 | 需要 |
+|---|---|---|
+| `plan-route` | 帮我排从台北出发去东京、新加坡和伦敦的最短行程，并给我地图链接 | Node.js |
+| `unfold-360` | 把 photo.jpg 展开 | Python、`pip install numpy pillow` |
+
+这些 skill 只有在这个仓库里启动智能体时才会加载。路线工具也可以不通过智能体直接运行：`node plan_route.js TPE Tokyo Singapore London`。它计算的是大圆距离，不包含票价或是否有航班。
 
 ## 原理
 

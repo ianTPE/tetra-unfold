@@ -18,7 +18,7 @@ La carte est disponible en 繁體中文, 简体中文, English, 日本語, 한�
 
 L’itinéraire, le rayon de distance, la rotation et les réglages sont enregistrés dans l’adresse au fil de vos actions : mettez la page en favori ou envoyez-la, elle s’ouvre exactement dans le même état. **Copier le lien de partage** dans le panneau copie l’adresse. Par exemple, [ce lien](https://iantpe.github.io/tetra-unfold/?lang=fr&trip=TPE,NRT,LHR,SIN&range=TPE,5000) ouvre l’itinéraire Taipei → Tokyo → Londres → Singapour avec un rayon de 5 000 km autour de Taipei. Rien n’est stocké sur un serveur : tout est dans l’adresse.
 
-La carte se compose d’un seul fichier HTML, de `i18n.js` (textes de l’interface), de `airports.json` et de `names/<langue>.json` (noms des aéroports et des villes). Rien à installer ni à compiler. Une connexion Internet est nécessaire pour charger D3 et les données des pays.
+La carte se compose d’un seul fichier HTML, de `i18n.js` (textes de l’interface), de `trip-order.js` (calcul de l’ordre le plus court), de `airports.json` et de `names/<langue>.json` (noms des aéroports et des villes). Rien à installer ni à compiler. Une connexion Internet est nécessaire pour charger D3 et les données des pays.
 
 | Fichier | Contenu |
 |---|---|
@@ -66,6 +66,23 @@ Utilisez donc la carte pour écarter les ordres qui font des allers-retours, pui
 Choisissez un centre (code d’aéroport, ville ou première étape de l’itinéraire) et un rayon en kilomètres ou en heures de vol. La carte colore tous les lieux situés à cette distance orthodromique ou moins, et liste les villes dotées de grands aéroports à l’intérieur du cercle, de la plus proche à la plus éloignée. En survolant la carte, on voit la distance de chaque point au centre.
 
 Sur le globe, la zone est un cercle, mais pas sur cette carte : à l’intérieur d’une face, c’est un ovale régulier, qui se plie en franchissant un pli. Par exemple, un cercle de 5 000 km autour de Taipei atteint Delhi (4 373 km) et Darwin (4 298 km), mais s’arrête juste avant Bombay (5 002 km). Les heures de vol sont converties à une moyenne de 800 km/h ; ce n’est qu’une estimation.
+
+## Utilisation avec Claude Code ou Codex
+
+Le dépôt contient deux skills utilisables par des agents de code. Clonez-le, lancez [Claude Code](https://code.claude.com/docs/en/skills) ou [Codex](https://learn.chatgpt.com/docs/build-skills) dans son dossier, puis demandez simplement ce que vous voulez :
+
+```
+git clone https://github.com/ianTPE/tetra-unfold
+cd tetra-unfold
+claude    # ou : codex
+```
+
+| Skill | Exemple de demande | Prérequis |
+|---|---|---|
+| `plan-route` | Prépare le voyage le plus court de Taipei à Tokyo, Singapour et Londres, et donne-moi le lien de la carte | Node.js |
+| `unfold-360` | Déplie photo.jpg | Python, `pip install numpy pillow` |
+
+Les skills ne sont chargés que si l’agent est lancé dans ce dépôt. L’outil d’itinéraire fonctionne aussi sans agent : `node plan_route.js TPE Tokyo Singapore London`. Il donne des distances orthodromiques, ni les tarifs ni la disponibilité des vols.
 
 ## Fonctionnement
 

@@ -285,6 +285,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="i18n.js"></script>
+<script src="trip-order.js"></script>
 <script>
 // ---------------------------------------------------------------------------
 // 語言（翻譯表在 i18n.js）
@@ -993,9 +994,6 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
 // ---------------------------------------------------------------------------
 // 出差路線：機場、大圓航線、距離、最順的順序
 // ---------------------------------------------------------------------------
-const EARTH_R = 6371.0088;           // 地球平均半徑（公里）
-const MAX_STOPS = 30;
-const EXACT_STOPS = 16;               // 這個站數以內算得出真正最短的順序，超過就用近似算法
 let airports = [], apByCode = {}, apCountriesEn = {};
 const namesCache = {};               // 各語言的機場名稱（names/<lang>.json），載入過就留著
 let apPlane = null, apPlaneVer = -1; // 每個機場在畫面上的一份位置，方向改變時重算
@@ -1308,94 +1306,12 @@ document.getElementById('stops').addEventListener('click', e => {
 document.getElementById('roundTrip').addEventListener('change', () => tripChanged());
 document.getElementById('clearTrip').onclick = () => { trip.stops = []; tripChanged(); };
 
-// 最順的順序：第一站固定當出發地。d 是各站之間的距離表，第 0 站是出發地，傳回的順序也從 0 開始
-// 動態規劃（Held-Karp）：記住「走過哪些站、停在哪一站」的最短距離，不必一個一個排法試。
-// 16 站要算約 700 萬步，瞬間完成；只試排法的話要 15! ≈ 1.3 兆種
-function exactOrder(d, round) {
-  const n = d.length - 1, size = 1 << n;
-  const dp = new Float64Array(size * n).fill(Infinity), from = new Int8Array(size * n);
-  for (let j = 0; j < n; j++) dp[(1 << j) * n + j] = d[0][j + 1];
-  for (let mask = 1; mask < size; mask++) {
-    for (let j = 0; j < n; j++) {
-      const cur = dp[mask * n + j];
-      if (cur === Infinity) continue;
-      for (let k = 0; k < n; k++) {
-        if (mask & (1 << k)) continue;
-        const at = (mask | (1 << k)) * n + k, len = cur + d[j + 1][k + 1];
-        if (len < dp[at]) { dp[at] = len; from[at] = j; }
-      }
-    }
-  }
-  let mask = size - 1, end = 0, best = Infinity;
-  for (let j = 0; j < n; j++) {
-    const len = dp[mask * n + j] + (round ? d[j + 1][0] : 0);
-    if (len < best) { best = len; end = j; }
-  }
-  const order = [];
-  while (mask) {
-    order.push(end + 1);
-    const prev = from[mask * n + end];
-    mask ^= 1 << end;
-    end = prev;
-  }
-  order.push(0);
-  return order.reverse();
-}
-
-// 近似算法：從「每次飛最近的一站」開始，反覆翻轉一段（2-opt）、搬動一小段（or-opt），直到改不動。
-// 多試幾個略有不同的起點，取最好的。亂數的種子固定，同一趟每次算出來都一樣
-function approxOrder(d, round) {
-  const m = d.length;
-  const length = o => {
-    let s = round ? d[o[m - 1]][0] : 0;
-    for (let k = 0; k + 1 < m; k++) s += d[o[k]][o[k + 1]];
-    return s;
-  };
-  let seed = 1;
-  const random = () => (seed = seed * 48271 % 2147483647) / 2147483647;
-  let best = null, bestLen = Infinity;
-  for (let run = 0; run < 60; run++) {
-    let o = [0];
-    const left = new Set(d.keys()); left.delete(0);
-    while (left.size) {
-      const last = o[o.length - 1], near = [...left].sort((x, y) => d[last][x] - d[last][y]);
-      const next = run && near.length > 1 && random() < 0.25 ? near[1] : near[0];
-      o.push(next); left.delete(next);
-    }
-    let len = length(o), improved = true;
-    const tryOrder = c => {
-      const l = length(c);
-      if (l < len - 1e-9) { o = c; len = l; improved = true; }
-    };
-    while (improved) {
-      improved = false;
-      for (let i = 1; i < m - 1; i++) {
-        for (let k = i + 1; k < m; k++) {
-          tryOrder([...o.slice(0, i), ...o.slice(i, k + 1).reverse(), ...o.slice(k + 1)]);
-        }
-      }
-      for (let size = 1; size <= 3; size++) {
-        for (let i = 1; i + size <= m; i++) {
-          const piece = o.slice(i, i + size), rest = [...o.slice(0, i), ...o.slice(i + size)];
-          for (let at = 1; at <= rest.length; at++) {
-            if (at !== i) tryOrder([...rest.slice(0, at), ...piece, ...rest.slice(at)]);
-          }
-        }
-      }
-    }
-    if (len < bestLen) { bestLen = len; best = o; }
-  }
-  return best;
-}
-
 document.getElementById('optimize').onclick = () => {
   const st = trip.stops;
   if (st.length < 3) { tripChanged(esc(t('needThree'))); return; }
   const exact = st.length <= EXACT_STOPS;
   const d = st.map(a => st.map(b => legKm(a, b)));
-  const round = isRound(st.length), order = (exact ? exactOrder : approxOrder)(d, round);
-  // 來回行程順著走、反著走一樣長，固定先飛近的那一站，結果才不會時左時右
-  if (round && d[0][order[order.length - 1]] < d[0][order[1]]) order.splice(1, order.length - 1, ...order.slice(1).reverse());
+  const order = bestOrder(d, isRound(st.length));
   const after = order.map(k => st[k]);
   const saved = tripLength(st) - tripLength(after);
   if (saved > 1e-9) trip.stops = after;
@@ -1410,7 +1326,8 @@ function findAirport(text) {
   const t = text.trim();
   if (!t) return -1;
   const code = t.slice(0, 3).toUpperCase();
-  if (code in apByCode && (t.length === 3 || t[3] === ' ')) return apByCode[code];
+  // 「LAX 洛杉磯」是下拉選單的格式。前三碼要大寫才算代碼，不然 Los Angeles 會被當成 LOS（拉哥斯）
+  if (code in apByCode && (t.length === 3 || (t[3] === ' ' && t.startsWith(code)))) return apByCode[code];
   const q = normText(t);
   // 先找城市名完全相同的，再找名稱裡有這幾個字的（清單已經把大型機場排在前面）
   // 依序找：城市名完全相同 → 國家名完全相同 → 名稱裡有這幾個字。同樣符合時，旅客最多的排在前面

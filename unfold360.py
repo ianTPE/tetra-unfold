@@ -124,8 +124,11 @@ def draw_folds(im, x0=0.0, y0=0.0, w=MAP_W, h=MAP_H, color=(255, 60, 60)):
 
 if __name__ == '__main__':
     src, out = sys.argv[1], sys.argv[2]
-    os.makedirs(out, exist_ok=True)
     img = np.asarray(Image.open(src).convert('RGB'))
+    H, W = img.shape[:2]
+    if abs(W / H - 2) > 0.01:
+        sys.exit(f'{src} is {W} x {H}. An equirectangular 360 photo must be 2:1, so this would give a wrong result.')
+    os.makedirs(out, exist_ok=True)
     Image.fromarray(img).resize((2048, 1024), Image.LANCZOS).save(f'{out}/0_equirect.jpg', quality=90)
     for name, Q in (('A', np.eye(3)), ('B', rotZ(np.pi))):
         for mode, eq in (('plain', False), ('equal', True)):

@@ -18,7 +18,7 @@ El mapa está disponible en 繁體中文, 简体中文, English, 日本語, 한�
 
 El itinerario, el radio de distancia, el giro del mapa y los ajustes se guardan en la dirección a medida que trabajas, así que puedes guardar la página en favoritos o enviarla y se abrirá exactamente igual. **Copiar enlace para compartir** en el panel copia la dirección. Por ejemplo, [este enlace](https://iantpe.github.io/tetra-unfold/?lang=es&trip=TPE,NRT,LHR,SIN&range=TPE,5000) abre el itinerario Taipéi → Tokio → Londres → Singapur con un radio de 5.000 km alrededor de Taipéi. No se guarda nada en ningún servidor; todo está en la dirección.
 
-El mapa es un solo archivo HTML más `i18n.js` (textos de la interfaz), `airports.json` y `names/<idioma>.json` (nombres de aeropuertos y ciudades). No hay nada que instalar ni compilar. Se necesita conexión a Internet para cargar D3 y los datos de los países.
+El mapa es un solo archivo HTML más `i18n.js` (textos de la interfaz), `trip-order.js` (cálculo del orden más corto), `airports.json` y `names/<idioma>.json` (nombres de aeropuertos y ciudades). No hay nada que instalar ni compilar. Se necesita conexión a Internet para cargar D3 y los datos de los países.
 
 | Archivo | Contenido |
 |---|---|
@@ -66,6 +66,23 @@ Así que usa el mapa para descartar los órdenes que dan vueltas y deja que el a
 Elige un centro (código de aeropuerto, ciudad o la primera parada del itinerario) y un radio en kilómetros u horas de vuelo. El mapa colorea todos los lugares que quedan dentro de esa distancia ortodrómica y enumera las ciudades con aeropuertos grandes dentro del círculo, de la más cercana a la más lejana. Al pasar el ratón por cualquier punto se ve su distancia al centro.
 
 En el globo la zona es un círculo, pero en este mapa no: dentro de una cara es un óvalo suave y se dobla al cruzar un pliegue. Por ejemplo, un círculo de 5.000 km alrededor de Taipéi alcanza Delhi (4.373 km) y Darwin (4.298 km), pero se queda justo antes de Bombay (5.002 km). Las horas de vuelo se convierten con una media de 800 km/h, así que son solo una estimación.
+
+## Uso con Claude Code o Codex
+
+El repositorio incluye dos skills que pueden usar los agentes de programación. Clónalo, inicia [Claude Code](https://code.claude.com/docs/en/skills) o [Codex](https://learn.chatgpt.com/docs/build-skills) en su carpeta y pide lo que necesites con tus propias palabras:
+
+```
+git clone https://github.com/ianTPE/tetra-unfold
+cd tetra-unfold
+claude    # o: codex
+```
+
+| Skill | Ejemplo de petición | Requisitos |
+|---|---|---|
+| `plan-route` | Planifica el viaje más corto de Taipéi a Tokio, Singapur y Londres, y dame el enlace del mapa | Node.js |
+| `unfold-360` | Despliega photo.jpg | Python, `pip install numpy pillow` |
+
+Los skills solo se cargan si el agente se inicia dentro de este repositorio. La herramienta de rutas también funciona sin agente: `node plan_route.js TPE Tokyo Singapore London`. Da distancias de círculo máximo, no tarifas ni disponibilidad de vuelos.
 
 ## Cómo funciona
 

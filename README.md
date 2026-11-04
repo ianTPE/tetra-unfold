@@ -16,7 +16,7 @@ The map is available in 繁體中文, 简体中文, English, 日本語, 한국�
 
 Your trip, distance range, rotation and settings are saved in the address as you work, so you can bookmark the page or send it to someone, and it opens exactly as you left it. **Copy share link** in the panel copies the address. For example, [this link](https://iantpe.github.io/tetra-unfold/?lang=en&trip=TPE,NRT,LHR,SIN&range=TPE,5000) opens the Taipei → Tokyo → London → Singapore trip with a 5,000 km range around Taipei. Nothing is stored on a server; everything is in the address.
 
-The map is a single HTML file plus `i18n.js` (interface text), `airports.json` and `names/<language>.json` (airport and city names). There is nothing to install or build. An internet connection is needed to load D3 and the country data.
+The map is a single HTML file plus `i18n.js` (interface text), `trip-order.js` (the shortest-order calculation), `airports.json` and `names/<language>.json` (airport and city names). There is nothing to install or build. An internet connection is needed to load D3 and the country data.
 
 | File | What it shows |
 |---|---|
@@ -64,6 +64,23 @@ So use the map to rule out orders that double back, and let the assistant compar
 Pick a centre (an airport code or city, or the first stop of your trip) and a radius in kilometres or flight hours. The map shades every place within that great-circle distance and lists the cities with large airports inside the circle, nearest first. Hover anywhere to see its distance from the centre.
 
 On the globe the range is a circle, but on this map it is not: within one face it is a smooth oval, and it bends where it crosses a fold line. For example, a 5,000 km circle around Taipei reaches Delhi (4,373 km) and Darwin (4,298 km) but stops just short of Mumbai (5,002 km). Flight hours are converted at an average of 800 km/h, so treat them as a rough guide.
+
+## Use it with Claude Code or Codex
+
+The repository includes two skills that coding agents can use. Clone it and start [Claude Code](https://code.claude.com/docs/en/skills) or [Codex](https://learn.chatgpt.com/docs/build-skills) in its folder, then ask in your own words:
+
+```
+git clone https://github.com/ianTPE/tetra-unfold
+cd tetra-unfold
+claude    # or: codex
+```
+
+| Skill | Example request | Needs |
+|---|---|---|
+| `plan-route` | Plan the shortest trip from Taipei to Tokyo, Singapore and London, and give me the map link | Node.js |
+| `unfold-360` | Unfold photo.jpg | Python, `pip install numpy pillow` |
+
+The skills only load when the agent is started inside this repository. You can also run the route tool without an agent: `node plan_route.js TPE Tokyo Singapore London`. It gives great-circle distances, not fares or flight availability.
 
 ## How it works
 
