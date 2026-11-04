@@ -62,7 +62,7 @@
     background: var(--panel); border: 1px solid var(--line);
     border-radius: 12px; box-shadow: var(--shadow);
     padding: 14px 16px; backdrop-filter: blur(6px);
-    max-height: calc(100vh - 32px); overflow-y: auto;
+    max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto;
   }
   .panel details + details { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
   .panel h1 { font-size: 17px; margin: 0; letter-spacing: 0.02em; }
@@ -135,9 +135,57 @@
   }
   #tip b { display: block; font-size: 13px; }
   #tip span { color: var(--muted); }
+  /* 手指點出來的資訊卡：可以按裡面的按鈕，太長時換行 */
+  #tip.tap { pointer-events: auto; white-space: normal; max-width: calc(100vw - 16px); }
+  #tip button {
+    display: block; width: 100%; margin-top: 6px; padding: 8px 12px; border: 0; border-radius: 8px;
+    background: var(--accent); color: var(--accent-text); font: inherit; font-size: 14px; cursor: pointer;
+  }
   #status {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     color: var(--muted); font-size: 15px; pointer-events: none; padding: 16px; text-align: center;
+  }
+  /* 手機：面板收成一條（直拿在下方，橫拿在左上），點一下或往上滑就展開；地圖只占其餘的空間 */
+  #sheetHandle { display: none; }
+  @media (max-width: 700px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape) {
+    #sheetHandle {
+      display: flex; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 1;
+      width: calc(100% + 32px); height: 47px; margin: 0 -16px 8px; padding: 0 16px;
+      border: 0; border-bottom: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(6px);
+      color: var(--text); font: inherit; font-size: 13.5px; cursor: pointer; touch-action: none;
+    }
+    #sheetInfo { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+    #sheetHandle::after { content: "▴"; color: var(--muted); }
+    body.sheet-open #sheetHandle::after { content: "▾"; }
+    .panel { display: flex; flex-direction: column; padding-top: 0; max-height: none; overscroll-behavior: contain; }
+    .panel > * { flex: none; }
+    /* 空間有限：不放標題，語言和分享排到最後，展開就看得到行程 */
+    .panel h1, .panel .sub { display: none; }
+    .panel > .row, .panel > .btns { order: 1; }
+    body:not(.sheet-open) .panel { padding-bottom: 0; overflow: hidden; }
+    body:not(.sheet-open) .panel > :not(#sheetHandle) { display: none; }
+    body:not(.sheet-open) #sheetHandle { margin-bottom: 0; border-bottom: 0; }
+    /* 手指比滑鼠粗，按鈕都放大。輸入框至少 16px，iPhone 點進去才不會自動放大畫面 */
+    .row { margin: 12px 0; }
+    .panel details > summary { padding: 8px 0; font-size: 14px; }
+    input[type="checkbox"] { width: 20px; height: 20px; }
+    .btns button { padding: 10px 0; }
+    .seg button { padding: 8px 12px; }
+    .search button { padding: 0 14px; }
+    .search input, #rgValue { padding: 9px 10px; font-size: 16px; }
+    #lang { padding: 6px 8px; font-size: 16px; }
+    #stops button { padding: 6px 8px; font-size: 16px; }
+  }
+  @media (max-width: 700px) and (orientation: portrait) {
+    .panel { top: auto; left: 0; right: 0; bottom: 0; width: 100%; height: 48px; border-width: 1px 0 0; border-radius: 12px 12px 0 0; }
+    body.sheet-open .panel { height: 50vh; height: 50dvh; }
+    #map { height: calc(100vh - 48px); height: calc(100dvh - 48px); }
+    body.sheet-open #map { height: 50vh; height: 50dvh; }
+  }
+  @media (max-height: 500px) and (orientation: landscape) {
+    .panel { top: 8px; left: 8px; width: 240px; height: 48px; }
+    body.sheet-open .panel { top: 0; left: 0; bottom: 0; width: 300px; height: auto; border-width: 0 1px 0 0; border-radius: 0 12px 12px 0; }
+    body.sheet-open #map { left: 300px; width: calc(100% - 300px); }
   }
 </style>
 </head>
@@ -147,6 +195,7 @@
 <div id="tip"></div>
 
 <div class="panel">
+  <button id="sheetHandle" type="button" aria-expanded="false"><span id="sheetInfo" data-i18n="sheetTitle"></span></button>
   <h1 data-i18n="title"></h1>
   <div class="sub" data-i18n="sub"></div>
   <div class="row"><span data-i18n="language"></span><select id="lang"></select></div>
@@ -179,9 +228,9 @@
       <button id="toSouth" data-i18n="toSouth"></button>
     </div>
     <div class="hint">
-      <p data-i18n="hintDrag"></p>
+      <p data-i18n="hintDrag" data-i18n-touch="hintDragTouch"></p>
       <p data-i18n="hintUpDown"></p>
-      <p data-i18n="hintWheel"></p>
+      <p data-i18n="hintWheel" data-i18n-touch="hintWheelTouch"></p>
     </div>
   </details>
   <details open>
@@ -199,7 +248,7 @@
     </div>
     <div id="tripSummary"></div>
     <div class="hint">
-      <p data-i18n="hintClick"></p>
+      <p data-i18n="hintClick" data-i18n-touch="hintClickTouch"></p>
       <p data-i18n="hintOptimize"></p>
       <p data-i18n="hintDistance"></p>
     </div>
@@ -259,10 +308,12 @@ function regionName(code, fallback) {
   } catch (e) { /* 用 fallback */ }
   return fallback || code || '';
 }
+// 觸控裝置沒有滾輪和滑鼠指標，說明文字換成手指的操作
+const isTouch = matchMedia('(pointer: coarse)').matches;
 function applyTexts() {
   document.documentElement.lang = lang;
   document.title = t('title');
-  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(isTouch && el.dataset.i18nTouch || el.dataset.i18n); });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
   document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
 }
@@ -711,19 +762,24 @@ function screenToPlane(cx, cy) {
 
 function placeTip(e) {
   tip.style.display = 'block';
-  const tw = tip.offsetWidth;
+  const tw = tip.offsetWidth, th = tip.offsetHeight, bottom = canvas.getBoundingClientRect().bottom;
   const left = e.clientX + 14 + tw > window.innerWidth ? e.clientX - 14 - tw : e.clientX + 14;
-  tip.style.left = left + 'px';
-  tip.style.top = (e.clientY + 14) + 'px';
+  const top = e.clientY + 14 + th > bottom ? e.clientY - 14 - th : e.clientY + 14;
+  tip.style.left = Math.max(8, left) + 'px';
+  tip.style.top = Math.max(8, top) + 'px';
 }
 
 function showTip(e) {
-  const ap = pickAirport(e.clientX, e.clientY);
+  // 手指點出來的提示卡，機場要多一顆加入行程的按鈕，可點的範圍也放大
+  const finger = e.pointerType !== 'mouse';
+  tip.classList.toggle('tap', finger);
+  const ap = pickAirport(e.clientX, e.clientY, finger ? 22 : 12);
   if (ap >= 0) {
     const a = airports[ap];
     tip.innerHTML = `<b>${a.iata}　${esc(apName(a))}</b>` +
       (apName(a) !== a.name ? `<span>${esc(a.name)}</span><br>` : '') +
-      `<span>${esc(placeOf(a))}　·　${esc(t('clickToAdd'))}</span>` + rangeTip(a.v);
+      `<span>${esc(placeOf(a))}${finger ? '' : '　·　' + esc(t('clickToAdd'))}</span>` + rangeTip(a.v) +
+      (finger ? `<button data-ap="${ap}">${esc(t('addToTrip'))}</button>` : '');
     canvas.style.cursor = 'pointer';
     placeTip(e);
     return;
@@ -746,17 +802,42 @@ function showTip(e) {
   placeTip(e);
 }
 
+// 正按在地圖上的手指。兩指時用它們的距離縮放、中點平移
+const pointers = new Map();
+let pinch = null;
+function pinchState() {
+  const [a, b] = pointers.values();
+  return { d: Math.hypot(a.x - b.x, a.y - b.y), x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
 canvas.addEventListener('pointerdown', e => {
   canvas.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (e.pointerType !== 'mouse') tip.style.display = 'none';
+  if (pointers.size >= 2) {
+    drag = null; canvas.classList.remove('dragging');
+    pinch = pinchState();
+    return;
+  }
   drag = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, moved: false,
            pan: state.mode === 'pan' || e.shiftKey || e.button === 2 };
   canvas.classList.add('dragging');
   tip.style.display = 'none';
 });
 canvas.addEventListener('pointermove', e => {
+  if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pinch) {
+    const n = pinchState();
+    if (pinch.d > 0 && n.d > 0) zoomAt(n.d / pinch.d, n.x, n.y);
+    state.cx -= (n.x - pinch.x) / state.scale;
+    state.cy += (n.y - pinch.y) / state.scale;
+    pinch = n;
+    touch();
+    return;
+  }
   if (!drag) { if (e.pointerType === 'mouse') showTip(e); return; }
-  // 移動不到 4 像素當作點擊，不轉動地圖
-  if (!drag.moved && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 4) return;
+  // 移動不到 4 像素（手指會抖，放寬到 8）當作點擊，不轉動地圖
+  if (!drag.moved && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < (e.pointerType === 'mouse' ? 4 : 8)) return;
   drag.moved = true;
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   drag.x = e.clientX; drag.y = e.clientY;
@@ -777,14 +858,38 @@ canvas.addEventListener('pointermove', e => {
 const endDrag = () => { drag = null; canvas.classList.remove('dragging'); };
 canvas.addEventListener('pointerup', e => {
   const click = drag && !drag.moved && e.button === 0;
+  pointers.delete(e.pointerId);
+  if (pinch) {
+    if (pointers.size >= 2) { pinch = pinchState(); return; }
+    pinch = null;
+    // 兩指放開一指：剩下那一指接著拖，放開時也不算點擊
+    if (pointers.size === 1) {
+      const [p] = pointers.values();
+      drag = { x: p.x, y: p.y, x0: p.x, y0: p.y, moved: true, pan: state.mode === 'pan' };
+      canvas.classList.add('dragging');
+    }
+    return;
+  }
   endDrag();
   if (click) {
-    const ap = pickAirport(e.clientX, e.clientY);
-    if (ap >= 0) addStop(ap);
+    // 滑鼠點機場直接加入；手指容易點錯，先顯示資訊卡
+    if (e.pointerType === 'mouse') {
+      const ap = pickAirport(e.clientX, e.clientY);
+      if (ap >= 0) addStop(ap);
+    } else showTip(e);
   }
 });
-canvas.addEventListener('pointercancel', endDrag);
-canvas.addEventListener('pointerleave', () => { tip.style.display = 'none'; });
+canvas.addEventListener('pointercancel', e => { pointers.delete(e.pointerId); pinch = null; endDrag(); });
+// 手指放開時也會觸發 pointerleave，不能讓它把剛點出來的資訊卡關掉
+canvas.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') tip.style.display = 'none'; });
+tip.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  const full = trip.stops.length >= MAX_STOPS;
+  addStop(+b.dataset.ap);
+  if (full) tip.textContent = t('maxStops', { n: MAX_STOPS });
+  else tip.style.display = 'none';
+});
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 
 function zoomAt(factor, clientX, clientY) {
@@ -844,7 +949,40 @@ document.getElementById('reset').onclick = () => {
   requestDraw();
 };
 
-window.addEventListener('resize', () => { resize(); requestDraw(); });
+// 面板展開、收起時地圖的大小也會變，不只有視窗縮放
+new ResizeObserver(() => { resize(); requestDraw(); }).observe(canvas);
+// 手機轉向後，重新把整張地圖放進畫面
+matchMedia('(orientation: portrait)').addEventListener('change', () => {
+  if (sheetMQ.matches) { fitView(); requestDraw(); }
+});
+
+// 手機面板：點一下切換，往上滑展開，往下滑收起
+const sheetMQ = matchMedia('(max-width: 700px) and (orientation: portrait), (max-height: 500px) and (orientation: landscape)');
+const sheetHandle = document.getElementById('sheetHandle');
+let handleY = 0, handleSwiped = false;
+function setSheet(open) {
+  document.body.classList.toggle('sheet-open', open);
+  sheetHandle.setAttribute('aria-expanded', open);
+  tip.style.display = 'none';
+}
+sheetHandle.addEventListener('pointerdown', e => {
+  handleY = e.clientY; handleSwiped = false;
+  sheetHandle.setPointerCapture(e.pointerId);
+});
+sheetHandle.addEventListener('pointerup', e => {
+  const dy = e.clientY - handleY;
+  if (Math.abs(dy) > 24) { handleSwiped = true; setSheet(dy < 0); }
+});
+sheetHandle.addEventListener('click', () => {
+  if (handleSwiped) { handleSwiped = false; return; }
+  setSheet(!document.body.classList.contains('sheet-open'));
+});
+// 手機上一開始只展開行程；網址帶了範圍圈就也展開範圍圈
+if (sheetMQ.matches) {
+  const [settings, tripBox, rangeBox] = document.querySelectorAll('.panel details');
+  settings.open = false;
+  rangeBox.open = new URLSearchParams(location.search).has('range');
+}
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readBg(); requestDraw(); });
 
 // ---------------------------------------------------------------------------
@@ -880,11 +1018,11 @@ function airportPositions() {
 }
 
 // 螢幕上離 (clientX, clientY) 12 像素內最近的機場，沒有就回傳 −1
-function pickAirport(clientX, clientY) {
+function pickAirport(clientX, clientY, radius = 12) {
   if (!airports.length) return -1;
   const P = screenToPlane(clientX, clientY);
   if (!state.tiled && !(P[0] >= 0 && P[0] < MAP_W && P[1] >= 0 && P[1] < MAP_H)) return -1;
-  const pos = airportPositions(), lim = 12 / state.scale, med = showMedium();
+  const pos = airportPositions(), lim = radius / state.scale, med = showMedium();
   const T = copyTransforms(P[0] - lim, P[0] + lim, P[1] - lim, P[1] + lim);
   const near = [];                   // [機場, 螢幕上的距離（像素）]
   airports.forEach((a, i) => {
@@ -957,7 +1095,8 @@ function drawTrip(x0, x1, y0, y1) {
   // 機場小圓點
   ctx.fillStyle = 'rgba(30, 45, 60, 0.55)';
   ctx.beginPath();
-  const r = (med ? 2.6 : 2) * dpr;
+  // 手機螢幕小、整張地圖縮得小，圓點也跟著縮，才不會蓋滿大陸
+  const r = (med ? 2.6 : Math.max(1, Math.min(2, state.scale / 300))) * dpr;
   airports.forEach((a, i) => {
     if (!a.large && !med) return;
     const Q = pos[i];
@@ -1018,6 +1157,10 @@ function tripLength(order) {
 }
 function renderTrip() {
   const st = trip.stops, list = document.getElementById('stops');
+  // 手機面板收起時，那一條顯示目前的行程
+  document.getElementById('sheetInfo').textContent = st.length
+    ? (st.length > 1 ? fmtKm(tripLength(st)) + ' · ' : '') + st.map(ap => airports[ap].iata).join(' → ')
+    : t('sheetTitle');
   list.innerHTML = st.map((ap, k) => {
     const a = airports[ap];
     const leg = k ? fmtKm(legKm(st[k - 1], ap)) : esc(t('start'));
