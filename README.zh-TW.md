@@ -78,9 +78,10 @@ claude    # 或 codex
 | Skill | 可以這樣說 | 需要 |
 |---|---|---|
 | `plan-route` | 幫我排從臺北出發去東京、新加坡和倫敦的最短行程，並給我地圖連結 | Node.js |
+| `plan-route` | 幫我在 Google Flights 查這趟行程的實際航班和總價，12 月 7 日出發，每站停 3 天 | Node.js、agent 可操作的瀏覽器 |
 | `unfold-360` | 把 photo.jpg 展開 | Python、`pip install numpy pillow` |
 
-這些 skill 只有在這個 repo 裡啟動 agent 時才會載入。路線工具也可以不透過 agent 直接執行：`node plan_route.js TPE Tokyo Singapore London`。它算的是大圓距離，不包含票價或有沒有航班。
+這些 skill 只有在這個 repo 裡啟動 agent 時才會載入。路線工具也可以不透過 agent 直接執行：`node plan_route.js TPE Tokyo Singapore London`。它算的是大圓距離，不包含票價或有沒有航班。實際航班和票價由 agent 在瀏覽器裡查 Google Flights，不會幫你訂票。
 
 ## 原理
 

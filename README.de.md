@@ -80,9 +80,10 @@ claude    # oder: codex
 | Skill | Beispiel | Voraussetzung |
 |---|---|---|
 | `plan-route` | Plane die kürzeste Reise von Taipeh nach Tokio, Singapur und London und gib mir den Kartenlink | Node.js |
+| `plan-route` | Suche auf Google Flights echte Flüge und den Gesamtpreis für diese Reise, Abflug am 7. Dezember, 3 Tage pro Stopp | Node.js, ein Browser, den der Agent steuern kann |
 | `unfold-360` | Falte photo.jpg auf | Python, `pip install numpy pillow` |
 
-Die Skills werden nur geladen, wenn der Agent in diesem Repository gestartet wird. Das Routenwerkzeug läuft auch ohne Agent: `node plan_route.js TPE Tokyo Singapore London`. Es liefert Großkreisentfernungen, keine Preise und keine Angaben zu verfügbaren Flügen.
+Die Skills werden nur geladen, wenn der Agent in diesem Repository gestartet wird. Das Routenwerkzeug läuft auch ohne Agent: `node plan_route.js TPE Tokyo Singapore London`. Es liefert Großkreisentfernungen, keine Preise und keine Angaben zu verfügbaren Flügen. Echte Flüge und Preise sucht der Agent im Browser auf Google Flights, gebucht wird nichts.
 
 ## Funktionsweise
 

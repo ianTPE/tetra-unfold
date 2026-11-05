@@ -80,9 +80,10 @@ claude    # ou : codex
 | Skill | Exemple de demande | Prérequis |
 |---|---|---|
 | `plan-route` | Prépare le voyage le plus court de Taipei à Tokyo, Singapour et Londres, et donne-moi le lien de la carte | Node.js |
+| `plan-route` | Cherche sur Google Flights les vols réels et le prix total de ce voyage, départ le 7 décembre, 3 jours par étape | Node.js, un navigateur que l’agent peut piloter |
 | `unfold-360` | Déplie photo.jpg | Python, `pip install numpy pillow` |
 
-Les skills ne sont chargés que si l’agent est lancé dans ce dépôt. L’outil d’itinéraire fonctionne aussi sans agent : `node plan_route.js TPE Tokyo Singapore London`. Il donne des distances orthodromiques, ni les tarifs ni la disponibilité des vols.
+Les skills ne sont chargés que si l’agent est lancé dans ce dépôt. L’outil d’itinéraire fonctionne aussi sans agent : `node plan_route.js TPE Tokyo Singapore London`. Il donne des distances orthodromiques, ni les tarifs ni la disponibilité des vols. L’agent cherche les vols réels et les tarifs sur Google Flights dans le navigateur, sans rien réserver.
 
 ## Fonctionnement
 

@@ -78,9 +78,10 @@ claude    # or: codex
 | Skill | Example request | Needs |
 |---|---|---|
 | `plan-route` | Plan the shortest trip from Taipei to Tokyo, Singapore and London, and give me the map link | Node.js |
+| `plan-route` | Find real flights and the total price for this trip on Google Flights, leaving December 7 and staying 3 days at each stop | Node.js, a browser the agent can control |
 | `unfold-360` | Unfold photo.jpg | Python, `pip install numpy pillow` |
 
-The skills only load when the agent is started inside this repository. You can also run the route tool without an agent: `node plan_route.js TPE Tokyo Singapore London`. It gives great-circle distances, not fares or flight availability.
+The skills only load when the agent is started inside this repository. You can also run the route tool without an agent: `node plan_route.js TPE Tokyo Singapore London`. It gives great-circle distances, not fares or flight availability. The agent looks up real flights and fares on Google Flights in the browser, and it does not book anything.
 
 ## How it works
 

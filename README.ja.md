@@ -80,9 +80,10 @@ claude    # または codex
 | スキル | 頼み方の例 | 必要なもの |
 |---|---|---|
 | `plan-route` | 台北から東京、シンガポール、ロンドンを回る最短の旅程を組んで、地図のリンクをください | Node.js |
+| `plan-route` | この旅程の実際の便と合計金額を Google Flights で調べて。12 月 7 日出発、各都市に 3 日滞在 | Node.js、エージェントが操作できるブラウザ |
 | `unfold-360` | photo.jpg を展開して | Python、`pip install numpy pillow` |
 
-スキルが読み込まれるのは、このリポジトリ内でエージェントを起動したときだけです。ルートのツールはエージェントなしでも実行できます：`node plan_route.js TPE Tokyo Singapore London`。求めるのは大圏距離で、運賃や便の有無は含みません。
+スキルが読み込まれるのは、このリポジトリ内でエージェントを起動したときだけです。ルートのツールはエージェントなしでも実行できます：`node plan_route.js TPE Tokyo Singapore London`。求めるのは大圏距離で、運賃や便の有無は含みません。実際の便と運賃は、エージェントがブラウザで Google Flights から調べます。予約はしません。
 
 ## 仕組み
 

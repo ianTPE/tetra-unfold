@@ -80,9 +80,10 @@ claude    # 또는 codex
 | 스킬 | 요청 예시 | 필요한 것 |
 |---|---|---|
 | `plan-route` | 타이베이에서 출발해 도쿄, 싱가포르, 런던을 도는 가장 짧은 여정을 짜고 지도 링크를 줘 | Node.js |
+| `plan-route` | 이 여정의 실제 항공편과 총액을 Google Flights에서 찾아 줘. 12월 7일 출발, 도시마다 3일 체류 | Node.js, 에이전트가 조작할 수 있는 브라우저 |
 | `unfold-360` | photo.jpg를 펼쳐 줘 | Python, `pip install numpy pillow` |
 
-스킬은 이 저장소 안에서 에이전트를 실행할 때만 불러옵니다. 경로 도구는 에이전트 없이도 실행할 수 있습니다: `node plan_route.js TPE Tokyo Singapore London`. 계산 결과는 대권 거리이며 운임이나 항공편 유무는 포함하지 않습니다.
+스킬은 이 저장소 안에서 에이전트를 실행할 때만 불러옵니다. 경로 도구는 에이전트 없이도 실행할 수 있습니다: `node plan_route.js TPE Tokyo Singapore London`. 계산 결과는 대권 거리이며 운임이나 항공편 유무는 포함하지 않습니다. 실제 항공편과 운임은 에이전트가 브라우저에서 Google Flights로 조회하며, 예약은 하지 않습니다.
 
 ## 원리
 

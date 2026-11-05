@@ -80,9 +80,10 @@ claude    # 或 codex
 | Skill | 可以这样说 | 需要 |
 |---|---|---|
 | `plan-route` | 帮我排从台北出发去东京、新加坡和伦敦的最短行程，并给我地图链接 | Node.js |
+| `plan-route` | 帮我在 Google Flights 查这趟行程的实际航班和总价，12 月 7 日出发，每站停 3 天 | Node.js、智能体可操作的浏览器 |
 | `unfold-360` | 把 photo.jpg 展开 | Python、`pip install numpy pillow` |
 
-这些 skill 只有在这个仓库里启动智能体时才会加载。路线工具也可以不通过智能体直接运行：`node plan_route.js TPE Tokyo Singapore London`。它计算的是大圆距离，不包含票价或是否有航班。
+这些 skill 只有在这个仓库里启动智能体时才会加载。路线工具也可以不通过智能体直接运行：`node plan_route.js TPE Tokyo Singapore London`。它计算的是大圆距离，不包含票价或是否有航班。实际航班和票价由智能体在浏览器里查 Google Flights，不会替你订票。
 
 ## 原理
 
