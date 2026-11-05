@@ -2,6 +2,14 @@
 
 **English** | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Deutsch](README.de.md) | [Français](README.fr.md) | [Español](README.es.md) | [Русский](README.ru.md)
 
+**Beijing to London: which countries and cities does the route pass?**
+
+![Great-circle route from Beijing to London on the tetrahedral map](media/beijing-london-en.jpg)
+
+<sub>The map shows the shortest great-circle route between the two cities, not an actual flight track.</sub>
+
+China → Mongolia → Russia → Finland → Sweden → Denmark → United Kingdom, 8,154 km in all. The route passes near Ulaanbaatar, Krasnoyarsk, Surgut, Stockholm and Gothenburg. The bend in the line is a fold of the map, not a turn. [Open this route](https://iantpe.github.io/tetra-unfold/?lang=en&trip=PEK,LHR&rt=0).
+
 **Plan a business trip, compare layovers or see where a flight goes: this world map does all three.** Check that a route makes sense on the map, then compare fares. [Open the map](https://iantpe.github.io/tetra-unfold/?lang=en); there is nothing to install.
 
 For example, Taipei to London is 9,783 km direct, 9,918 km [via Shanghai](https://iantpe.github.io/tetra-unfold/?lang=en&trip=TPE,PVG,LHR&rt=0) (only 135 km more) and 12,160 km [via Doha](https://iantpe.github.io/tetra-unfold/?lang=en&trip=TPE,DOH,LHR&rt=0) (2,377 km more).

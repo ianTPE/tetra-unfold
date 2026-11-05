@@ -4,6 +4,14 @@
 
 > Este documento es una traducción de la versión en inglés. Si hay diferencias, prevalece la [versión en inglés](README.md).
 
+**De Pekín a Londres: ¿qué países y ciudades sobrevuela la ruta?**
+
+![Ruta de círculo máximo de Pekín a Londres en el mapa tetraédrico](media/beijing-london-es.jpg)
+
+<sub>El mapa muestra la ruta de círculo máximo más corta entre las dos ciudades, no la trayectoria real de un vuelo.</sub>
+
+China → Mongolia → Rusia → Finlandia → Suecia → Dinamarca → Reino Unido, 8154 km en total. La ruta pasa cerca de Ulán Bator, Krasnoyarsk, Surgut, Estocolmo y Gotemburgo. El quiebre de la línea es un pliegue del mapa, no un giro del avión. [Abrir esta ruta](https://iantpe.github.io/tetra-unfold/?lang=es&trip=PEK,LHR&rt=0).
+
 **Planificar un viaje de negocios, comparar escalas o ver por dónde pasa un vuelo: para eso sirve este mapa del mundo.** Comprueba primero en el mapa que la ruta tiene sentido y después compara las tarifas. [Abre el mapa](https://iantpe.github.io/tetra-unfold/?lang=es); no hay que instalar nada.
 
 Por ejemplo, de Taipéi a Londres hay 9783 km en vuelo directo, 9918 km [por Shanghái](https://iantpe.github.io/tetra-unfold/?lang=es&trip=TPE,PVG,LHR&rt=0) (solo 135 km más) y 12.160 km [por Doha](https://iantpe.github.io/tetra-unfold/?lang=es&trip=TPE,DOH,LHR&rt=0) (2377 km más).

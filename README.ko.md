@@ -4,6 +4,14 @@
 
 > 이 문서는 영어판의 번역입니다. 내용이 다를 경우 [영어판](README.md)이 우선합니다.
 
+**베이징에서 런던으로 날아가면 어떤 나라와 도시를 지날까요?**
+
+![사면체 지도 위의 베이징–런던 대권 경로](media/beijing-london-ko.jpg)
+
+<sub>그림은 두 지점 사이의 최단 대권 경로이며, 실제 항공편의 비행 경로가 아닙니다.</sub>
+
+중국 → 몽골 → 러시아 → 핀란드 → 스웨덴 → 덴마크 → 영국 순서이며, 전체 8,154 km입니다. 울란바토르, 크라스노야르스크, 수르구트, 스톡홀름, 예테보리 부근을 지납니다. 선이 꺾이는 곳은 지도의 접는 선이며 비행기가 방향을 트는 것이 아닙니다. [이 경로 열기](https://iantpe.github.io/tetra-unfold/?lang=ko&trip=PEK,LHR&rt=0).
+
 **출장 일정을 짜거나, 환승 경로를 비교하거나, 비행기가 어디를 지나는지 알고 싶을 때 쓸 수 있는 세계 지도입니다.** 먼저 지도에서 경로가 효율적인지 확인한 뒤 항공권 가격을 비교하세요. [지도를 열면](https://iantpe.github.io/tetra-unfold/?lang=ko) 바로 쓸 수 있고 설치할 것은 없습니다.
 
 예를 들어 타이베이에서 런던까지는 직항 9,783 km, [상하이 경유](https://iantpe.github.io/tetra-unfold/?lang=ko&trip=TPE,PVG,LHR&rt=0) 9,918 km(135 km 증가에 그침), [도하 경유](https://iantpe.github.io/tetra-unfold/?lang=ko&trip=TPE,DOH,LHR&rt=0) 12,160 km(2,377 km 증가)입니다.

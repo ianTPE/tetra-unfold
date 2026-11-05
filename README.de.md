@@ -4,6 +4,14 @@
 
 > Dies ist eine Übersetzung der englischen Fassung. Bei Abweichungen gilt die [englische Fassung](README.md).
 
+**Von Peking nach London: Über welche Länder und an welchen Städten führt die Route vorbei?**
+
+![Großkreisroute von Peking nach London auf der Tetraederkarte](media/beijing-london-de.jpg)
+
+<sub>Die Karte zeigt die kürzeste Großkreisroute zwischen den beiden Orten, nicht den tatsächlichen Flugweg.</sub>
+
+China → Mongolei → Russland → Finnland → Schweden → Dänemark → Vereinigtes Königreich, insgesamt 8.154 km. Die Route führt nahe an Ulaanbaatar, Krasnojarsk, Surgut, Stockholm und Göteborg vorbei. Der Knick in der Linie ist eine Faltkante der Karte, keine Kurve des Flugzeugs. [Diese Route öffnen](https://iantpe.github.io/tetra-unfold/?lang=de&trip=PEK,LHR&rt=0).
+
 **Dienstreisen planen, Umsteigeverbindungen vergleichen oder sehen, wo ein Flug entlangführt: Dafür ist diese Weltkarte gedacht.** Prüfe zuerst auf der Karte, ob eine Route sinnvoll ist, und vergleiche dann die Preise. [Karte öffnen](https://iantpe.github.io/tetra-unfold/?lang=de); eine Installation ist nicht nötig.
 
 Zum Beispiel sind es von Taipeh nach London direkt 9.783 km, [über Shanghai](https://iantpe.github.io/tetra-unfold/?lang=de&trip=TPE,PVG,LHR&rt=0) 9.918 km (nur 135 km mehr) und [über Doha](https://iantpe.github.io/tetra-unfold/?lang=de&trip=TPE,DOH,LHR&rt=0) 12.160 km (2.377 km mehr).

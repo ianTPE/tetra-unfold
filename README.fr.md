@@ -4,6 +4,14 @@
 
 > Ce document est une traduction de la version anglaise. En cas de différence, la [version anglaise](README.md) fait foi.
 
+**De Pékin à Londres : quels pays et quelles villes la route survole-t-elle ?**
+
+![Route orthodromique de Pékin à Londres sur la carte tétraédrique](media/beijing-london-fr.jpg)
+
+<sub>La carte montre la route orthodromique la plus courte entre les deux villes, et non la trajectoire réelle d’un vol.</sub>
+
+Chine → Mongolie → Russie → Finlande → Suède → Danemark → Royaume-Uni, soit 8 154 km au total. La route passe près d’Oulan-Bator, de Krasnoïarsk, de Sourgout, de Stockholm et de Göteborg. Le coude de la ligne est un pli de la carte, pas un virage. [Ouvrir cette route](https://iantpe.github.io/tetra-unfold/?lang=fr&trip=PEK,LHR&rt=0).
+
 **Préparer un voyage d’affaires, comparer des correspondances ou voir où passe un vol : cette carte du monde sert à tout cela.** Vérifiez d’abord sur la carte que l’itinéraire est logique, puis comparez les tarifs. [Ouvrez la carte](https://iantpe.github.io/tetra-unfold/?lang=fr) ; rien à installer.
 
 Par exemple, de Taipei à Londres, il y a 9 783 km en direct, 9 918 km [via Shanghai](https://iantpe.github.io/tetra-unfold/?lang=fr&trip=TPE,PVG,LHR&rt=0) (seulement 135 km de plus) et 12 160 km [via Doha](https://iantpe.github.io/tetra-unfold/?lang=fr&trip=TPE,DOH,LHR&rt=0) (2 377 km de plus).

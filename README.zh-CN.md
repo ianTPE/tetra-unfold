@@ -4,6 +4,14 @@
 
 > 本文是英文版的翻译；如有出入，以[英文版](README.md)为准。
 
+**北京飞伦敦，途中经过哪些国家和城市？**
+
+![四面体地图上北京到伦敦的大圆路线](media/beijing-london-zh-Hans.jpg)
+
+<sub>图中显示两地之间的大圆最短路线，并非实际航班航迹。</sub>
+
+中国 → 蒙古 → 俄罗斯 → 芬兰 → 瑞典 → 丹麦 → 英国，全长 8,154 千米。沿途靠近乌兰巴托、克拉斯诺亚尔斯克、苏尔古特、斯德哥尔摩和哥德堡。线上的折角是地图的折线，不是飞机转弯。[打开这条航线](https://iantpe.github.io/tetra-unfold/?lang=zh-Hans&trip=PEK,LHR&rt=0)。
+
 **出差排行程、比较转机路线，或想知道飞机经过哪里，都可以用这张世界地图。** 先用地图看路线顺不顺，再去比机票价格。[打开地图](https://iantpe.github.io/tetra-unfold/?lang=zh-Hans)就能用，无需安装。
 
 例如台北飞伦敦：直飞 9,783 千米；[经上海](https://iantpe.github.io/tetra-unfold/?lang=zh-Hans&trip=TPE,PVG,LHR&rt=0) 9,918 千米，只多 135 千米；[经多哈](https://iantpe.github.io/tetra-unfold/?lang=zh-Hans&trip=TPE,DOH,LHR&rt=0) 12,160 千米，多 2,377 千米。
