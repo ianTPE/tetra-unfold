@@ -2,7 +2,11 @@
 
 [English](README.md) | **繁體中文** | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Deutsch](README.de.md) | [Français](README.fr.md) | [Español](README.es.md) | [Русский](README.ru.md)
 
-把整個球面展開到**正四面體**上，再攤平成一張可以**無縫拼接**的長方形平面圖。
+**出差排行程、比較轉機路線，或想知道飛機經過哪裡，都可以用這張世界地圖。** 先用地圖看路線順不順，再去比機票價格。[打開地圖](https://iantpe.github.io/tetra-unfold/?lang=zh-Hant)就能用，不用安裝。
+
+例如臺北飛倫敦：直飛 9,783 公里；[經上海](https://iantpe.github.io/tetra-unfold/?lang=zh-Hant&trip=TPE,PVG,LHR&rt=0) 9,918 公里，只多 135 公里；[經杜哈](https://iantpe.github.io/tetra-unfold/?lang=zh-Hant&trip=TPE,DOH,LHR&rt=0) 12,160 公里，多 2,377 公里。
+
+這張地圖的做法，是把整個球面展開到**正四面體**上，再攤平成一張可以**無縫拼接**的長方形平面圖。
 
 這個專案以世界地圖為例，受 [AuthaGraph 世界地圖](https://www.authagraph.com/)（鳴川肇設計）啟發，但不是它的實作：AuthaGraph 的精確演算法有專利且未公開，這裡用的是自己推導的近似做法。同樣的方法也可以用在 **360 相機影像**上，讓 AI 在一張平面圖裡辨識整個球面的內容。
 

@@ -2,7 +2,11 @@
 
 **English** | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Deutsch](README.de.md) | [Français](README.fr.md) | [Español](README.es.md) | [Русский](README.ru.md)
 
-Unfold the whole sphere onto a **regular tetrahedron**, then flatten it into a rectangle that **tiles the plane seamlessly**.
+**Plan a business trip, compare layovers or see where a flight goes: this world map does all three.** Check that a route makes sense on the map, then compare fares. [Open the map](https://iantpe.github.io/tetra-unfold/?lang=en); there is nothing to install.
+
+For example, Taipei to London is 9,783 km direct, 9,918 km [via Shanghai](https://iantpe.github.io/tetra-unfold/?lang=en&trip=TPE,PVG,LHR&rt=0) (only 135 km more) and 12,160 km [via Doha](https://iantpe.github.io/tetra-unfold/?lang=en&trip=TPE,DOH,LHR&rt=0) (2,377 km more).
+
+To make the map, the whole sphere is unfolded onto a **regular tetrahedron**, then flattened into a rectangle that **tiles the plane seamlessly**.
 
 The demo uses a world map and is inspired by the [AuthaGraph world map](https://www.authagraph.com/) by Hajime Narukawa. It is not an implementation of AuthaGraph: that algorithm is patented and unpublished, so this project uses its own approximation. The same method can also be applied to **360° camera images**, so that an AI model can see the entire sphere in a single flat image.
 

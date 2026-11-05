@@ -4,7 +4,11 @@
 
 > Este documento es una traducción de la versión en inglés. Si hay diferencias, prevalece la [versión en inglés](README.md).
 
-Desplegar toda la esfera sobre un **tetraedro regular** y aplanarla en un rectángulo que **tesela el plano sin costuras**.
+**Planificar un viaje de negocios, comparar escalas o ver por dónde pasa un vuelo: para eso sirve este mapa del mundo.** Comprueba primero en el mapa que la ruta tiene sentido y después compara las tarifas. [Abre el mapa](https://iantpe.github.io/tetra-unfold/?lang=es); no hay que instalar nada.
+
+Por ejemplo, de Taipéi a Londres hay 9783 km en vuelo directo, 9918 km [por Shanghái](https://iantpe.github.io/tetra-unfold/?lang=es&trip=TPE,PVG,LHR&rt=0) (solo 135 km más) y 12.160 km [por Doha](https://iantpe.github.io/tetra-unfold/?lang=es&trip=TPE,DOH,LHR&rt=0) (2377 km más).
+
+El mapa se obtiene desplegando toda la esfera sobre un **tetraedro regular** y aplanándola en un rectángulo que **tesela el plano sin costuras**.
 
 La demostración usa un mapa del mundo y se inspira en el [mapa del mundo AuthaGraph](https://www.authagraph.com/) de Hajime Narukawa. No es una implementación de AuthaGraph: su algoritmo está patentado y no se ha publicado, así que este proyecto usa su propia aproximación. El mismo método también sirve para **imágenes de cámaras 360°**, de modo que un modelo de IA pueda ver toda la esfera en una sola imagen plana.
 

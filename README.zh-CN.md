@@ -4,7 +4,11 @@
 
 > 本文是英文版的翻译；如有出入，以[英文版](README.md)为准。
 
-把整个球面展开到**正四面体**上，再摊平成一个可以**无缝拼接**的矩形平面图。
+**出差排行程、比较转机路线，或想知道飞机经过哪里，都可以用这张世界地图。** 先用地图看路线顺不顺，再去比机票价格。[打开地图](https://iantpe.github.io/tetra-unfold/?lang=zh-Hans)就能用，无需安装。
+
+例如台北飞伦敦：直飞 9,783 千米；[经上海](https://iantpe.github.io/tetra-unfold/?lang=zh-Hans&trip=TPE,PVG,LHR&rt=0) 9,918 千米，只多 135 千米；[经多哈](https://iantpe.github.io/tetra-unfold/?lang=zh-Hans&trip=TPE,DOH,LHR&rt=0) 12,160 千米，多 2,377 千米。
+
+这张地图的做法，是把整个球面展开到**正四面体**上，再摊平成一个可以**无缝拼接**的矩形平面图。
 
 这个项目以世界地图为例，受 [AuthaGraph 世界地图](https://www.authagraph.com/)（鸣川肇设计）启发，但并不是它的实现：AuthaGraph 的精确算法有专利且没有公开，这里用的是自己推导的近似方法。同样的方法也可以用在 **360° 相机图像**上，让 AI 模型在一张平面图里看到整个球面。
 

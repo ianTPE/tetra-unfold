@@ -4,7 +4,11 @@
 
 > Dies ist eine Übersetzung der englischen Fassung. Bei Abweichungen gilt die [englische Fassung](README.md).
 
-Die gesamte Kugeloberfläche wird auf ein **regelmäßiges Tetraeder** abgewickelt und dann zu einem Rechteck ausgebreitet, mit dem sich die Ebene **nahtlos kacheln** lässt.
+**Dienstreisen planen, Umsteigeverbindungen vergleichen oder sehen, wo ein Flug entlangführt: Dafür ist diese Weltkarte gedacht.** Prüfe zuerst auf der Karte, ob eine Route sinnvoll ist, und vergleiche dann die Preise. [Karte öffnen](https://iantpe.github.io/tetra-unfold/?lang=de); eine Installation ist nicht nötig.
+
+Zum Beispiel sind es von Taipeh nach London direkt 9.783 km, [über Shanghai](https://iantpe.github.io/tetra-unfold/?lang=de&trip=TPE,PVG,LHR&rt=0) 9.918 km (nur 135 km mehr) und [über Doha](https://iantpe.github.io/tetra-unfold/?lang=de&trip=TPE,DOH,LHR&rt=0) 12.160 km (2.377 km mehr).
+
+Für die Karte wird die gesamte Kugeloberfläche auf ein **regelmäßiges Tetraeder** abgewickelt und dann zu einem Rechteck ausgebreitet, mit dem sich die Ebene **nahtlos kacheln** lässt.
 
 Die Demo verwendet eine Weltkarte und ist von der [AuthaGraph-Weltkarte](https://www.authagraph.com/) von Hajime Narukawa inspiriert. Sie ist keine Implementierung von AuthaGraph: Dessen Algorithmus ist patentiert und nicht veröffentlicht, daher verwendet dieses Projekt eine eigene Annäherung. Dieselbe Methode lässt sich auch auf **Bilder von 360°-Kameras** anwenden, sodass ein KI-Modell die gesamte Kugel in einem einzigen flachen Bild sieht.
 

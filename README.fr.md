@@ -4,7 +4,11 @@
 
 > Ce document est une traduction de la version anglaise. En cas de différence, la [version anglaise](README.md) fait foi.
 
-Déplier toute la sphère sur un **tétraèdre régulier**, puis l’aplatir en un rectangle qui **pave le plan sans raccord**.
+**Préparer un voyage d’affaires, comparer des correspondances ou voir où passe un vol : cette carte du monde sert à tout cela.** Vérifiez d’abord sur la carte que l’itinéraire est logique, puis comparez les tarifs. [Ouvrez la carte](https://iantpe.github.io/tetra-unfold/?lang=fr) ; rien à installer.
+
+Par exemple, de Taipei à Londres, il y a 9 783 km en direct, 9 918 km [via Shanghai](https://iantpe.github.io/tetra-unfold/?lang=fr&trip=TPE,PVG,LHR&rt=0) (seulement 135 km de plus) et 12 160 km [via Doha](https://iantpe.github.io/tetra-unfold/?lang=fr&trip=TPE,DOH,LHR&rt=0) (2 377 km de plus).
+
+La carte est obtenue en dépliant toute la sphère sur un **tétraèdre régulier**, puis en l’aplatissant en un rectangle qui **pave le plan sans raccord**.
 
 La démonstration utilise une carte du monde et s’inspire de la [carte du monde AuthaGraph](https://www.authagraph.com/) de Hajime Narukawa. Ce n’est pas une implémentation d’AuthaGraph : son algorithme est breveté et non publié, ce projet utilise donc sa propre approximation. La même méthode s’applique aussi aux **images de caméras 360°**, pour qu’un modèle d’IA voie toute la sphère dans une seule image plane.
 
