@@ -65,9 +65,9 @@
 
 在地球上，範圍是一個圓；在這張地圖上它不是正圓：同一面內是平滑的橢圓，跨過摺線時會轉折。例如以臺北為中心、半徑 5,000 公里的圈，涵蓋德里（4,373 公里）和達爾文（4,298 公里），孟買（5,002 公里）則剛好在圈外。飛行小時以平均時速 800 公里換算，只是粗估。
 
-## 搭配 Claude Code 或 Codex 使用
+## 搭配 Claude Code、Codex 或 Antigravity 使用
 
-這個 repo 附了兩個 coding agent 可以用的 skill。clone 下來，在資料夾裡啟動 [Claude Code](https://code.claude.com/docs/en/skills) 或 [Codex](https://learn.chatgpt.com/docs/build-skills)，直接用自己的話說就可以：
+這個 repo 附了兩個 coding agent 可以用的 skill。clone 下來，在資料夾裡啟動 [Claude Code](https://code.claude.com/docs/en/skills) 或 [Codex](https://learn.chatgpt.com/docs/build-skills)，或用 [Antigravity](https://antigravity.google/docs/skills) 打開資料夾，直接用自己的話說就可以：
 
 ```
 git clone https://github.com/ianTPE/tetra-unfold
@@ -81,7 +81,7 @@ claude    # 或 codex
 | `plan-route` | 幫我在 Google Flights 查這趟行程的實際航班和總價，12 月 7 日出發，每站停 3 天 | Node.js、agent 可操作的瀏覽器 |
 | `unfold-360` | 把 photo.jpg 展開 | Python、`pip install numpy pillow` |
 
-這些 skill 只有在這個 repo 裡啟動 agent 時才會載入。路線工具也可以不透過 agent 直接執行：`node plan_route.js TPE Tokyo Singapore London`。它算的是大圓距離，不包含票價或有沒有航班。實際航班和票價由 agent 在瀏覽器裡查 Google Flights，不會幫你訂票。
+這些 skill 只有在這個 repo 裡使用 agent 時才會載入。路線工具也可以不透過 agent 直接執行：`node plan_route.js TPE Tokyo Singapore London`。它算的是大圓距離，不包含票價或有沒有航班。實際航班和票價由 agent 在瀏覽器裡查 Google Flights，不會幫你訂票。
 
 ## 原理
 
@@ -163,7 +163,7 @@ python unfold360.py photo.jpg out/
 
 使用 Wikimedia Commons 上的 6 張空拍 360 全景（攝影 Gunther Tschuch，CC BY-SA 4.0）：
 
-| 地形 | 上下判斷錯誤 | 誤差（中位數） | 誤差（90%） | 最差 | 每次耗時 |
+| 地形 | 上下判斷錯誤 | 誤差（中位數） | 誤差（90%） | 最差 | 估計耗時（不含展開） |
 |---|---|---|---|---|---|
 | 農田（Sebnitz） | 0 / 300 | 5.4° | 8.5° | 10.7° | 0.9 毫秒 |
 | 城鎮（Bad Karlshafen） | 0 / 300 | 6.6° | 10.7° | 13.9° | 0.9 毫秒 |
@@ -178,7 +178,7 @@ python unfold360.py photo.jpg out/
 
 觀察到的結果：
 
-- **1,800 個隨機姿態裡，沒有一次把天地判斷反過來**。方向誤差的中位數是 5–14°，最差 22°；在桌上型電腦的 CPU 上用 Python 計算，每次不到 1 毫秒。
+- **1,800 個隨機姿態裡，沒有一次把天地判斷反過來**。方向誤差的中位數是 5–14°，最差 22°。在桌上型電腦的 CPU 上用 Python 計算，估計這一步約 1 毫秒；展開 2048 × 1024 的影像另外約 12 毫秒，每張畫面合計約 13 毫秒。
 - 會反射天空的水面（湖泊、海岸）誤差最大。
 - **相機必須看得到天空**。這些全景照在仰角約 25° 以上是全黑的，因為相機掛在機身下方。還沒排除黑色區域時，大多數姿態都判反了。實際使用時，無人機也需要能拍到上半球的鏡頭，例如機身上下各一顆鏡頭的 360 相機。
 - 人站在地上（離地 1.5 公尺）拍的全景照不能代表飛行中的無人機：樹和建築會擋住大半天空。

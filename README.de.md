@@ -67,9 +67,9 @@ Wähle einen Mittelpunkt (Flughafencode, Stadt oder den ersten Stopp der Reise) 
 
 Auf dem Globus ist der Bereich ein Kreis, auf dieser Karte aber nicht: Innerhalb einer Fläche ist er ein glattes Oval, und an den Faltlinien knickt er ab. Ein Kreis mit 5.000 km um Taipeh reicht zum Beispiel bis Delhi (4.373 km) und Darwin (4.298 km), endet aber knapp vor Mumbai (5.002 km). Flugstunden werden mit durchschnittlich 800 km/h umgerechnet und sind nur ein grober Richtwert.
 
-## Mit Claude Code oder Codex verwenden
+## Mit Claude Code, Codex oder Antigravity verwenden
 
-Das Repository enthält zwei Skills für Coding-Agenten. Klone es, starte [Claude Code](https://code.claude.com/docs/en/skills) oder [Codex](https://learn.chatgpt.com/docs/build-skills) im Ordner und formuliere deine Bitte einfach in eigenen Worten:
+Das Repository enthält zwei Skills für Coding-Agenten. Klone es, starte [Claude Code](https://code.claude.com/docs/en/skills) oder [Codex](https://learn.chatgpt.com/docs/build-skills) im Ordner oder öffne den Ordner in [Antigravity](https://antigravity.google/docs/skills) und formuliere deine Bitte einfach in eigenen Worten:
 
 ```
 git clone https://github.com/ianTPE/tetra-unfold
@@ -83,7 +83,7 @@ claude    # oder: codex
 | `plan-route` | Suche auf Google Flights echte Flüge und den Gesamtpreis für diese Reise, Abflug am 7. Dezember, 3 Tage pro Stopp | Node.js, ein Browser, den der Agent steuern kann |
 | `unfold-360` | Falte photo.jpg auf | Python, `pip install numpy pillow` |
 
-Die Skills werden nur geladen, wenn der Agent in diesem Repository gestartet wird. Das Routenwerkzeug läuft auch ohne Agent: `node plan_route.js TPE Tokyo Singapore London`. Es liefert Großkreisentfernungen, keine Preise und keine Angaben zu verfügbaren Flügen. Echte Flüge und Preise sucht der Agent im Browser auf Google Flights, gebucht wird nichts.
+Die Skills werden nur geladen, wenn der Agent in diesem Repository arbeitet. Das Routenwerkzeug läuft auch ohne Agent: `node plan_route.js TPE Tokyo Singapore London`. Es liefert Großkreisentfernungen, keine Preise und keine Angaben zu verfügbaren Flügen. Echte Flüge und Preise sucht der Agent im Browser auf Google Flights, gebucht wird nichts.
 
 ## Funktionsweise
 
@@ -165,7 +165,7 @@ Die Horizont-Anordnung eignet sich dafür:
 
 Getestet wurde mit sechs 360°-Luftpanoramen von Wikimedia Commons (von Gunther Tschuch, CC BY-SA 4.0):
 
-| Gelände | Kopfüber | Fehler (Median) | Fehler (90 %) | Größter | Zeit pro Schätzung |
+| Gelände | Kopfüber | Fehler (Median) | Fehler (90 %) | Größter | Schätzschritt (ohne Abwicklung) |
 |---|---|---|---|---|---|
 | Ackerland (Sebnitz) | 0 / 300 | 5,4° | 8,5° | 10,7° | 0,9 ms |
 | Stadt (Bad Karlshafen) | 0 / 300 | 6,6° | 10,7° | 13,9° | 0,9 ms |
@@ -180,7 +180,7 @@ Getestet wurde mit sechs 360°-Luftpanoramen von Wikimedia Commons (von Gunther 
 
 Ergebnisse:
 
-- **In 1.800 zufälligen Lagen wurden Himmel und Boden nie vertauscht.** Die Richtung lag im Median 5–14° daneben, höchstens 22°, und jede Schätzung dauerte in Python auf einer Desktop-CPU weniger als 1 ms.
+- **In 1.800 zufälligen Lagen wurden Himmel und Boden nie vertauscht.** Die Richtung lag im Median 5–14° daneben, höchstens 22°. In Python auf einer Desktop-CPU dauerte der Schätzschritt etwa 1 ms; das Abwickeln eines Bildes mit 2048 × 1024 Pixeln kostet weitere etwa 12 ms, insgesamt also etwa 13 ms pro Bild.
 - Wasser, das den Himmel spiegelt (Seen, Küsten), verursacht die größten Fehler.
 - **Die Kamera muss den Himmel sehen können.** Diese Panoramen sind oberhalb von etwa 25° Höhe schwarz, weil die Kamera unter der Drohne hängt. Bevor die schwarzen Bereiche ausgeschlossen wurden, kamen die meisten Lagen kopfüber heraus. Eine Drohne, die das nutzt, braucht Kameras, die auch die obere Halbkugel abdecken, zum Beispiel eine 360°-Kamera mit Objektiven über und unter dem Rumpf.
 - Vom Boden aus (1,5 m) aufgenommene Panoramen sind für eine fliegende Drohne nicht repräsentativ: Bäume und Gebäude verdecken einen großen Teil des Himmels.

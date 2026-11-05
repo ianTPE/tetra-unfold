@@ -67,9 +67,9 @@ Elige un centro (código de aeropuerto, ciudad o la primera parada del itinerari
 
 En el globo la zona es un círculo, pero en este mapa no: dentro de una cara es un óvalo suave y se dobla al cruzar un pliegue. Por ejemplo, un círculo de 5.000 km alrededor de Taipéi alcanza Delhi (4.373 km) y Darwin (4.298 km), pero se queda justo antes de Bombay (5.002 km). Las horas de vuelo se convierten con una media de 800 km/h, así que son solo una estimación.
 
-## Uso con Claude Code o Codex
+## Uso con Claude Code, Codex o Antigravity
 
-El repositorio incluye dos skills que pueden usar los agentes de programación. Clónalo, inicia [Claude Code](https://code.claude.com/docs/en/skills) o [Codex](https://learn.chatgpt.com/docs/build-skills) en su carpeta y pide lo que necesites con tus propias palabras:
+El repositorio incluye dos skills que pueden usar los agentes de programación. Clónalo, inicia [Claude Code](https://code.claude.com/docs/en/skills) o [Codex](https://learn.chatgpt.com/docs/build-skills) en su carpeta, o abre la carpeta en [Antigravity](https://antigravity.google/docs/skills), y pide lo que necesites con tus propias palabras:
 
 ```
 git clone https://github.com/ianTPE/tetra-unfold
@@ -83,7 +83,7 @@ claude    # o: codex
 | `plan-route` | Busca en Google Flights los vuelos reales y el precio total de este viaje, saliendo el 7 de diciembre y con 3 días en cada parada | Node.js, un navegador que el agente pueda controlar |
 | `unfold-360` | Despliega photo.jpg | Python, `pip install numpy pillow` |
 
-Los skills solo se cargan si el agente se inicia dentro de este repositorio. La herramienta de rutas también funciona sin agente: `node plan_route.js TPE Tokyo Singapore London`. Da distancias de círculo máximo, no tarifas ni disponibilidad de vuelos. El agente consulta los vuelos reales y las tarifas en Google Flights desde el navegador, y no reserva nada.
+Los skills solo se cargan si el agente trabaja dentro de este repositorio. La herramienta de rutas también funciona sin agente: `node plan_route.js TPE Tokyo Singapore London`. Da distancias de círculo máximo, no tarifas ni disponibilidad de vuelos. El agente consulta los vuelos reales y las tarifas en Google Flights desde el navegador, y no reserva nada.
 
 ## Cómo funciona
 
@@ -165,7 +165,7 @@ La disposición de horizonte se presta a ello:
 
 Se probó con seis panorámicas aéreas 360° de Wikimedia Commons (de Gunther Tschuch, CC BY-SA 4.0):
 
-| Terreno | Boca abajo | Error (mediana) | Error (90 %) | Peor | Tiempo por estimación |
+| Terreno | Boca abajo | Error (mediana) | Error (90 %) | Peor | Paso de estimación (sin desplegar) |
 |---|---|---|---|---|---|
 | Tierras de cultivo (Sebnitz) | 0 / 300 | 5,4° | 8,5° | 10,7° | 0,9 ms |
 | Ciudad (Bad Karlshafen) | 0 / 300 | 6,6° | 10,7° | 13,9° | 0,9 ms |
@@ -180,7 +180,7 @@ Se probó con seis panorámicas aéreas 360° de Wikimedia Commons (de Gunther T
 
 Resultados:
 
-- **En 1800 actitudes aleatorias, el cielo y el suelo nunca se invirtieron.** La dirección se desvió entre 5 y 14° (mediana), como máximo 22°, y cada estimación tardó menos de 1 ms en Python en la CPU de un ordenador de sobremesa.
+- **En 1800 actitudes aleatorias, el cielo y el suelo nunca se invirtieron.** La dirección se desvió entre 5 y 14° (mediana), como máximo 22°. En Python en la CPU de un ordenador de sobremesa, el paso de estimación tardó cerca de 1 ms; desplegar una imagen de 2048 × 1024 píxeles añade cerca de 12 ms, unos 13 ms por imagen en total.
 - El agua que refleja el cielo (lagos, costas) produce los mayores errores.
 - **La cámara tiene que poder ver el cielo.** Estas panorámicas son negras por encima de unos 25° de elevación, porque la cámara cuelga debajo del dron. Antes de excluir las zonas negras, la mayoría de las actitudes salían boca abajo. Un dron que use este método necesita cámaras que cubran también el hemisferio superior, por ejemplo una cámara 360° con objetivos por encima y por debajo del fuselaje.
 - Las panorámicas tomadas desde el suelo (1,5 m) no son representativas de un dron en vuelo: los árboles y los edificios tapan gran parte del cielo.

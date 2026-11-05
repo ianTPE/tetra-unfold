@@ -67,9 +67,9 @@
 
 在地球上，范围是一个圆；在这张地图上它不是正圆：同一面内是平滑的椭圆，跨过折线时会转折。例如以台北为中心、半径 5,000 公里的圈，涵盖德里（4,373 公里）和达尔文（4,298 公里），孟买（5,002 公里）则刚好在圈外。飞行小时按平均时速 800 公里换算，只是粗略估计。
 
-## 配合 Claude Code 或 Codex 使用
+## 配合 Claude Code、Codex 或 Antigravity 使用
 
-这个仓库附带了两个编程智能体可以使用的 skill。克隆后在文件夹里启动 [Claude Code](https://code.claude.com/docs/en/skills) 或 [Codex](https://learn.chatgpt.com/docs/build-skills)，直接用自己的话说就可以：
+这个仓库附带了两个编程智能体可以使用的 skill。克隆后在文件夹里启动 [Claude Code](https://code.claude.com/docs/en/skills) 或 [Codex](https://learn.chatgpt.com/docs/build-skills)，或用 [Antigravity](https://antigravity.google/docs/skills) 打开文件夹，直接用自己的话说就可以：
 
 ```
 git clone https://github.com/ianTPE/tetra-unfold
@@ -83,7 +83,7 @@ claude    # 或 codex
 | `plan-route` | 帮我在 Google Flights 查这趟行程的实际航班和总价，12 月 7 日出发，每站停 3 天 | Node.js、智能体可操作的浏览器 |
 | `unfold-360` | 把 photo.jpg 展开 | Python、`pip install numpy pillow` |
 
-这些 skill 只有在这个仓库里启动智能体时才会加载。路线工具也可以不通过智能体直接运行：`node plan_route.js TPE Tokyo Singapore London`。它计算的是大圆距离，不包含票价或是否有航班。实际航班和票价由智能体在浏览器里查 Google Flights，不会替你订票。
+这些 skill 只有在这个仓库里使用智能体时才会加载。路线工具也可以不通过智能体直接运行：`node plan_route.js TPE Tokyo Singapore London`。它计算的是大圆距离，不包含票价或是否有航班。实际航班和票价由智能体在浏览器里查 Google Flights，不会替你订票。
 
 ## 原理
 
@@ -165,7 +165,7 @@ python unfold360.py photo.jpg out/
 
 使用 Wikimedia Commons 上的 6 张航拍 360° 全景（摄影 Gunther Tschuch，CC BY-SA 4.0）：
 
-| 地形 | 上下颠倒 | 误差（中位数） | 误差（90%） | 最差 | 每次耗时 |
+| 地形 | 上下颠倒 | 误差（中位数） | 误差（90%） | 最差 | 估计耗时（不含展开） |
 |---|---|---|---|---|---|
 | 农田（Sebnitz） | 0 / 300 | 5.4° | 8.5° | 10.7° | 0.9 毫秒 |
 | 城镇（Bad Karlshafen） | 0 / 300 | 6.6° | 10.7° | 13.9° | 0.9 毫秒 |
@@ -180,7 +180,7 @@ python unfold360.py photo.jpg out/
 
 结果：
 
-- **1,800 个随机姿态中，天与地一次都没有判断反。** 方向误差的中位数为 5–14°，最大 22°；在台式机 CPU 上用 Python 计算，每次不到 1 毫秒。
+- **1,800 个随机姿态中，天与地一次都没有判断反。** 方向误差的中位数为 5–14°，最大 22°。在台式机 CPU 上用 Python 计算，估计这一步约 1 毫秒；展开 2048 × 1024 的图像另需约 12 毫秒，每帧合计约 13 毫秒。
 - 会反射天空的水面（湖泊、海岸）误差最大。
 - **相机必须能看到天空。** 这些全景照在仰角约 25° 以上是全黑的，因为相机挂在机身下方。排除黑色区域之前，大多数姿态都判断反了。实际使用时，无人机也需要能拍到上半球的镜头，例如机身上下各有一个镜头的 360° 相机。
 - 在地面（离地 1.5 米）拍摄的全景照不能代表飞行中的无人机：树木和建筑会挡住大半天空。

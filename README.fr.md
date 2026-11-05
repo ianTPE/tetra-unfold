@@ -67,9 +67,9 @@ Choisissez un centre (code d’aéroport, ville ou première étape de l’itin�
 
 Sur le globe, la zone est un cercle, mais pas sur cette carte : à l’intérieur d’une face, c’est un ovale régulier, qui se plie en franchissant un pli. Par exemple, un cercle de 5 000 km autour de Taipei atteint Delhi (4 373 km) et Darwin (4 298 km), mais s’arrête juste avant Bombay (5 002 km). Les heures de vol sont converties à une moyenne de 800 km/h ; ce n’est qu’une estimation.
 
-## Utilisation avec Claude Code ou Codex
+## Utilisation avec Claude Code, Codex ou Antigravity
 
-Le dépôt contient deux skills utilisables par des agents de code. Clonez-le, lancez [Claude Code](https://code.claude.com/docs/en/skills) ou [Codex](https://learn.chatgpt.com/docs/build-skills) dans son dossier, puis demandez simplement ce que vous voulez :
+Le dépôt contient deux skills utilisables par des agents de code. Clonez-le, lancez [Claude Code](https://code.claude.com/docs/en/skills) ou [Codex](https://learn.chatgpt.com/docs/build-skills) dans son dossier, ou ouvrez le dossier dans [Antigravity](https://antigravity.google/docs/skills), puis demandez simplement ce que vous voulez :
 
 ```
 git clone https://github.com/ianTPE/tetra-unfold
@@ -83,7 +83,7 @@ claude    # ou : codex
 | `plan-route` | Cherche sur Google Flights les vols réels et le prix total de ce voyage, départ le 7 décembre, 3 jours par étape | Node.js, un navigateur que l’agent peut piloter |
 | `unfold-360` | Déplie photo.jpg | Python, `pip install numpy pillow` |
 
-Les skills ne sont chargés que si l’agent est lancé dans ce dépôt. L’outil d’itinéraire fonctionne aussi sans agent : `node plan_route.js TPE Tokyo Singapore London`. Il donne des distances orthodromiques, ni les tarifs ni la disponibilité des vols. L’agent cherche les vols réels et les tarifs sur Google Flights dans le navigateur, sans rien réserver.
+Les skills ne sont chargés que si l’agent travaille dans ce dépôt. L’outil d’itinéraire fonctionne aussi sans agent : `node plan_route.js TPE Tokyo Singapore London`. Il donne des distances orthodromiques, ni les tarifs ni la disponibilité des vols. L’agent cherche les vols réels et les tarifs sur Google Flights dans le navigateur, sans rien réserver.
 
 ## Fonctionnement
 
@@ -165,7 +165,7 @@ La disposition « horizon » s’y prête bien :
 
 Le test a porté sur six panoramas aériens 360° de Wikimedia Commons (de Gunther Tschuch, CC BY-SA 4.0) :
 
-| Terrain | À l’envers | Erreur (médiane) | Erreur (90 %) | Pire | Temps par estimation |
+| Terrain | À l’envers | Erreur (médiane) | Erreur (90 %) | Pire | Étape d’estimation (hors dépliage) |
 |---|---|---|---|---|---|
 | Terres agricoles (Sebnitz) | 0 / 300 | 5,4° | 8,5° | 10,7° | 0,9 ms |
 | Ville (Bad Karlshafen) | 0 / 300 | 6,6° | 10,7° | 13,9° | 0,9 ms |
@@ -180,7 +180,7 @@ Le test a porté sur six panoramas aériens 360° de Wikimedia Commons (de Gunth
 
 Constats :
 
-- **Sur 1 800 attitudes aléatoires, le ciel et le sol n’ont jamais été inversés.** La direction était fausse de 5 à 14° (médiane), 22° au plus, et chaque estimation prenait moins de 1 ms en Python sur un processeur d’ordinateur de bureau.
+- **Sur 1 800 attitudes aléatoires, le ciel et le sol n’ont jamais été inversés.** La direction était fausse de 5 à 14° (médiane), 22° au plus. En Python sur un processeur d’ordinateur de bureau, l’étape d’estimation prenait environ 1 ms ; le dépliage d’une image de 2048 × 1024 pixels ajoute environ 12 ms, soit environ 13 ms par image au total.
 - L’eau qui reflète le ciel (lacs, côtes) produit les plus grandes erreurs.
 - **La caméra doit pouvoir voir le ciel.** Ces panoramas sont noirs au-dessus d’environ 25° d’élévation, car la caméra est suspendue sous le drone. Avant d’exclure les zones noires, la plupart des attitudes étaient estimées à l’envers. Un drone qui utilise cette méthode a aussi besoin de caméras couvrant l’hémisphère supérieur, par exemple une caméra 360° avec des objectifs au-dessus et au-dessous du fuselage.
 - Les panoramas pris depuis le sol (1,5 m) ne sont pas représentatifs d’un drone en vol : les arbres et les bâtiments cachent une grande partie du ciel.

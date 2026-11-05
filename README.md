@@ -65,9 +65,9 @@ Pick a centre (an airport code or city, or the first stop of your trip) and a ra
 
 On the globe the range is a circle, but on this map it is not: within one face it is a smooth oval, and it bends where it crosses a fold line. For example, a 5,000 km circle around Taipei reaches Delhi (4,373 km) and Darwin (4,298 km) but stops just short of Mumbai (5,002 km). Flight hours are converted at an average of 800 km/h, so treat them as a rough guide.
 
-## Use it with Claude Code or Codex
+## Use it with Claude Code, Codex or Antigravity
 
-The repository includes two skills that coding agents can use. Clone it and start [Claude Code](https://code.claude.com/docs/en/skills) or [Codex](https://learn.chatgpt.com/docs/build-skills) in its folder, then ask in your own words:
+The repository includes two skills that coding agents can use. Clone it and start [Claude Code](https://code.claude.com/docs/en/skills) or [Codex](https://learn.chatgpt.com/docs/build-skills) in its folder, or open the folder in [Antigravity](https://antigravity.google/docs/skills), then ask in your own words:
 
 ```
 git clone https://github.com/ianTPE/tetra-unfold
@@ -81,7 +81,7 @@ claude    # or: codex
 | `plan-route` | Find real flights and the total price for this trip on Google Flights, leaving December 7 and staying 3 days at each stop | Node.js, a browser the agent can control |
 | `unfold-360` | Unfold photo.jpg | Python, `pip install numpy pillow` |
 
-The skills only load when the agent is started inside this repository. You can also run the route tool without an agent: `node plan_route.js TPE Tokyo Singapore London`. It gives great-circle distances, not fares or flight availability. The agent looks up real flights and fares on Google Flights in the browser, and it does not book anything.
+The skills only load when the agent is working in this repository. You can also run the route tool without an agent: `node plan_route.js TPE Tokyo Singapore London`. It gives great-circle distances, not fares or flight availability. The agent looks up real flights and fares on Google Flights in the browser, and it does not book anything.
 
 ## How it works
 
@@ -163,7 +163,7 @@ The horizon layout suits this:
 
 It was run on six aerial 360° panoramas from Wikimedia Commons (by Gunther Tschuch, CC BY-SA 4.0):
 
-| Terrain | Upside down | Error (median) | Error (90%) | Worst | Time per estimate |
+| Terrain | Upside down | Error (median) | Error (90%) | Worst | Estimate step (excludes unfolding) |
 |---|---|---|---|---|---|
 | Farmland (Sebnitz) | 0 / 300 | 5.4° | 8.5° | 10.7° | 0.9 ms |
 | Town (Bad Karlshafen) | 0 / 300 | 6.6° | 10.7° | 13.9° | 0.9 ms |
@@ -178,7 +178,7 @@ It was run on six aerial 360° panoramas from Wikimedia Commons (by Gunther Tsch
 
 What we found:
 
-- **In 1,800 random attitudes the sky and ground were never swapped.** The direction was off by 5–14° (median) and at most 22°, and each estimate took under 1 ms in Python on a desktop CPU.
+- **In 1,800 random attitudes the sky and ground were never swapped.** The direction was off by 5–14° (median) and at most 22°. In Python on a desktop CPU, the estimate step took about 1 ms; unfolding a 2048 × 1024 image adds about 12 ms, for about 13 ms per frame in total.
 - Water that reflects the sky (lakes, coasts) gives the largest errors.
 - **The camera must be able to see the sky.** These panoramas are black above about 25° elevation, because the camera hangs under the drone. Before the black areas were excluded, most attitudes came out upside down. A drone using this needs cameras covering the upper hemisphere too, for example a 360° camera with lenses above and below the body.
 - Panoramas taken from the ground (1.5 m) are not representative of a flying drone: trees and buildings hide much of the sky.

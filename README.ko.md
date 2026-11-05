@@ -67,9 +67,9 @@
 
 지구에서는 범위가 원이지만, 이 지도에서는 정원이 아닙니다. 한 면 안에서는 매끄러운 타원이고, 접는 선을 지날 때 꺾입니다. 예를 들어 타이베이를 중심으로 한 반경 5,000 km 원에는 델리(4,373 km)와 다윈(4,298 km)이 들어가고, 뭄바이(5,002 km)는 아슬아슬하게 밖에 있습니다. 비행 시간은 평균 시속 800 km로 환산한 대략적인 값입니다.
 
-## Claude Code 또는 Codex에서 사용하기
+## Claude Code, Codex 또는 Antigravity에서 사용하기
 
-이 저장소에는 코딩 에이전트가 쓸 수 있는 스킬 두 개가 들어 있습니다. 클론한 뒤 폴더 안에서 [Claude Code](https://code.claude.com/docs/en/skills) 또는 [Codex](https://learn.chatgpt.com/docs/build-skills)를 실행하고 평소 말하듯 요청하면 됩니다.
+이 저장소에는 코딩 에이전트가 쓸 수 있는 스킬 두 개가 들어 있습니다. 클론한 뒤 폴더 안에서 [Claude Code](https://code.claude.com/docs/en/skills) 또는 [Codex](https://learn.chatgpt.com/docs/build-skills)를 실행하거나 [Antigravity](https://antigravity.google/docs/skills)에서 폴더를 열고 평소 말하듯 요청하면 됩니다.
 
 ```
 git clone https://github.com/ianTPE/tetra-unfold
@@ -83,7 +83,7 @@ claude    # 또는 codex
 | `plan-route` | 이 여정의 실제 항공편과 총액을 Google Flights에서 찾아 줘. 12월 7일 출발, 도시마다 3일 체류 | Node.js, 에이전트가 조작할 수 있는 브라우저 |
 | `unfold-360` | photo.jpg를 펼쳐 줘 | Python, `pip install numpy pillow` |
 
-스킬은 이 저장소 안에서 에이전트를 실행할 때만 불러옵니다. 경로 도구는 에이전트 없이도 실행할 수 있습니다: `node plan_route.js TPE Tokyo Singapore London`. 계산 결과는 대권 거리이며 운임이나 항공편 유무는 포함하지 않습니다. 실제 항공편과 운임은 에이전트가 브라우저에서 Google Flights로 조회하며, 예약은 하지 않습니다.
+스킬은 이 저장소 안에서 에이전트를 사용할 때만 불러옵니다. 경로 도구는 에이전트 없이도 실행할 수 있습니다: `node plan_route.js TPE Tokyo Singapore London`. 계산 결과는 대권 거리이며 운임이나 항공편 유무는 포함하지 않습니다. 실제 항공편과 운임은 에이전트가 브라우저에서 Google Flights로 조회하며, 예약은 하지 않습니다.
 
 ## 원리
 
@@ -165,7 +165,7 @@ python unfold360.py photo.jpg out/
 
 Wikimedia Commons의 항공 360° 파노라마 6장(촬영 Gunther Tschuch, CC BY-SA 4.0)으로 실행했습니다:
 
-| 지형 | 위아래 오판 | 오차(중앙값) | 오차(90%) | 최대 | 추정 1회 시간 |
+| 지형 | 위아래 오판 | 오차(중앙값) | 오차(90%) | 최대 | 추정 시간(펼침 제외) |
 |---|---|---|---|---|---|
 | 농경지(Sebnitz) | 0 / 300 | 5.4° | 8.5° | 10.7° | 0.9 ms |
 | 마을(Bad Karlshafen) | 0 / 300 | 6.6° | 10.7° | 13.9° | 0.9 ms |
@@ -180,7 +180,7 @@ Wikimedia Commons의 항공 360° 파노라마 6장(촬영 Gunther Tschuch, CC B
 
 알게 된 점:
 
-- **무작위 자세 1,800가지에서 하늘과 땅을 뒤바꾼 경우는 한 번도 없었습니다.** 방향 오차는 중앙값 5–14°, 최대 22°였고, 데스크톱 CPU에서 Python으로 추정 1회에 1 ms가 걸리지 않았습니다.
+- **무작위 자세 1,800가지에서 하늘과 땅을 뒤바꾼 경우는 한 번도 없었습니다.** 방향 오차는 중앙값 5–14°, 최대 22°였습니다. 데스크톱 CPU에서 Python으로 추정 단계는 약 1 ms 걸렸고, 2048 × 1024 이미지를 펼치는 데 약 12 ms가 더 들어 프레임당 합계 약 13 ms입니다.
 - 하늘을 비추는 수면(호수, 해안)에서 오차가 가장 큽니다.
 - **카메라가 하늘을 볼 수 있어야 합니다.** 이 파노라마들은 고도각 약 25° 위가 새까맣습니다. 카메라가 드론 아래에 달려 있기 때문입니다. 검은 영역을 제외하기 전에는 대부분의 자세에서 위아래를 반대로 판단했습니다. 실제로 쓰려면 위쪽 반구도 찍을 수 있는 카메라, 예를 들어 기체 위아래에 렌즈가 있는 360° 카메라가 필요합니다.
 - 지상(높이 1.5 m)에서 찍은 파노라마는 비행 중인 드론을 대표하지 못합니다. 나무와 건물이 하늘의 상당 부분을 가리기 때문입니다.
