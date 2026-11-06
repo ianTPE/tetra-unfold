@@ -95,6 +95,10 @@ La página también reproduce un vuelo de largo alcance **medido**: [el Global H
 
 `yaw` es la longitud de la línea central menos 90 (si el resultado es menor que −180, suma 360). `pitch` va de 0 a 70,5; cuanto más al sur esté la ruta, mayor suele ser el valor. Mantén la ruta lejos de los puntos de colores de los vértices, o se doblará en una V aguda.
 
+### Trayectos de onda corta en círculo máximo (`radio.html`)
+
+[`radio.html`](radio.html) · [en línea](https://iantpe.github.io/tetra-unfold/radio.html) muestra el trayecto corto y el largo entre Taipéi y Londres como un círculo máximo casi recto, con la distancia, el rumbo de antena desde cada extremo y qué parte de cada trayecto está a oscuras a una hora UTC elegida. La página solo muestra la geometría y no predice la propagación. Para otros lugares, cambia `A`, `B` y `CIRCLE_VIEW` al principio del archivo; `CIRCLE_VIEW` funciona como `view` en la repetición de vuelos.
+
 ## Uso con Claude Code, Codex o Antigravity
 
 El repositorio incluye dos skills que pueden usar los agentes de programación. Clónalo, inicia [Claude Code](https://code.claude.com/docs/en/skills) o [Codex](https://learn.chatgpt.com/docs/build-skills) en su carpeta, o abre la carpeta en [Antigravity](https://antigravity.google/docs/skills), y pide lo que necesites con tus propias palabras:

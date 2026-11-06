@@ -93,6 +93,10 @@ The page also replays a **measured** long-range flight: [NASA's Global Hawk on 6
 
 `yaw` is the longitude on the central line minus 90 (add 360 if the result is below −180). `pitch` runs from 0 to 70.5, and a route further south usually needs a larger value. Keep the route away from the coloured corner dots, or it folds into a sharp V.
 
+### Short-wave great-circle paths (`radio.html`)
+
+[`radio.html`](radio.html) · [live](https://iantpe.github.io/tetra-unfold/radio.html) shows the short and long path between Taipei and London as one nearly straight great circle, with the distance, the antenna bearing from each end and which share of each path is in darkness at a chosen UTC time. It shows geometry only and does not predict propagation. To use other places, change `A`, `B` and `CIRCLE_VIEW` at the top of the file; `CIRCLE_VIEW` works like `view` in the flight replay.
+
 ## Use it with Claude Code, Codex or Antigravity
 
 The repository includes two skills that coding agents can use. Clone it and start [Claude Code](https://code.claude.com/docs/en/skills) or [Codex](https://learn.chatgpt.com/docs/build-skills) in its folder, or open the folder in [Antigravity](https://antigravity.google/docs/skills), then ask in your own words:

@@ -95,6 +95,10 @@ La page rejoue aussi un vol long-courrier **mesuré** : [le Global Hawk de la NA
 
 `yaw` est la longitude sur la ligne centrale moins 90 (ajoutez 360 si le résultat est inférieur à −180). `pitch` va de 0 à 70,5 ; plus la route est au sud, plus la valeur est en général élevée. Gardez la route à l’écart des points colorés des sommets, sinon elle se plie en un V aigu.
 
+### Trajets ondes courtes en grand cercle (`radio.html`)
+
+[`radio.html`](radio.html) · [en ligne](https://iantpe.github.io/tetra-unfold/radio.html) montre le trajet court et le trajet long entre Taipei et Londres comme un grand cercle presque droit, avec la distance, l’azimut d’antenne depuis chaque extrémité et la part de chaque trajet dans l’obscurité à une heure UTC choisie. La page montre seulement la géométrie et ne prédit pas la propagation. Pour d’autres lieux, modifiez `A`, `B` et `CIRCLE_VIEW` en tête du fichier ; `CIRCLE_VIEW` fonctionne comme `view` dans le rejeu de vol.
+
 ## Utilisation avec Claude Code, Codex ou Antigravity
 
 Le dépôt contient deux skills utilisables par des agents de code. Clonez-le, lancez [Claude Code](https://code.claude.com/docs/en/skills) ou [Codex](https://learn.chatgpt.com/docs/build-skills) dans son dossier, ou ouvrez le dossier dans [Antigravity](https://antigravity.google/docs/skills), puis demandez simplement ce que vous voulez :

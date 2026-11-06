@@ -95,6 +95,10 @@
 
 `yaw`는 중앙선의 경도에서 90을 뺀 값입니다(−180보다 작으면 360을 더합니다). `pitch`의 범위는 0~70.5이며, 경로가 남쪽에 있을수록 보통 더 큰 값이 필요합니다. 경로가 색깔 있는 꼭짓점에 너무 가까우면 날카로운 V자로 꺾입니다.
 
+### 단파 대권 경로(`radio.html`)
+
+[`radio.html`](radio.html) · [온라인 버전](https://iantpe.github.io/tetra-unfold/radio.html)은 타이베이와 런던 사이의 단경로와 장경로를 거의 일직선인 대권으로 그리고, 거리, 양쪽 끝의 안테나 방위, 지정한 UTC 시각에 각 경로의 어느 정도가 밤 쪽에 있는지를 보여 줍니다. 기하 관계만 나타내며 전파 예측이 아닙니다. 장소를 바꾸려면 파일 앞부분의 `A`, `B`, `CIRCLE_VIEW`를 수정하세요. `CIRCLE_VIEW`는 비행 재생의 `view`와 같은 방법으로 조정합니다.
+
 ## Claude Code, Codex 또는 Antigravity에서 사용하기
 
 이 저장소에는 코딩 에이전트가 쓸 수 있는 스킬 두 개가 들어 있습니다. 클론한 뒤 폴더 안에서 [Claude Code](https://code.claude.com/docs/en/skills) 또는 [Codex](https://learn.chatgpt.com/docs/build-skills)를 실행하거나 [Antigravity](https://antigravity.google/docs/skills)에서 폴더를 열고 평소 말하듯 요청하면 됩니다.

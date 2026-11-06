@@ -93,6 +93,10 @@
 
 `yaw` 是中央垂線的經度減 90（結果小於 −180 就加 360）。`pitch` 的範圍是 0 到 70.5，路線越偏南，通常要調越大。路線不要太靠近彩色的頂點，否則會折成尖銳的 V 字。
 
+### 短波大圓路徑（`radio.html`）
+
+[`radio.html`](radio.html) · [線上版](https://iantpe.github.io/tetra-unfold/radio.html) 把臺北和倫敦之間的短徑和長徑畫成一條幾乎筆直的大圓，並顯示距離、兩端的天線方位，以及在指定的 UTC 時間，每條路徑有多少比例在夜側。這裡只有幾何關係，不是傳播預測。要換地點，改檔案開頭的 `A`、`B` 和 `CIRCLE_VIEW`；`CIRCLE_VIEW` 的調法和飛行重播的 `view` 相同。
+
 ## 搭配 Claude Code、Codex 或 Antigravity 使用
 
 這個 repo 附了兩個 coding agent 可以用的 skill。clone 下來，在資料夾裡啟動 [Claude Code](https://code.claude.com/docs/en/skills) 或 [Codex](https://learn.chatgpt.com/docs/build-skills)，或用 [Antigravity](https://antigravity.google/docs/skills) 打開資料夾，直接用自己的話說就可以：

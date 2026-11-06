@@ -2,7 +2,7 @@
 
 // 頁面用這兩個掛鉤加上自己的內容
 const mapHooks = {
-  // 要標示圓形範圍時傳回 { v: 圓心的單位向量, cos: 半徑的 cos }
+  // 要標示圓形範圍時傳回 { v: 圓心的單位向量, cos: 半徑的 cos }。可以另外給 rgb 和 mix（0 到 1）改變顏色和濃度
   tint: () => null,
   // 畫在地圖上面的圖層，參數是畫面涵蓋的平面範圍
   layers: (x0, x1, y0, y1) => {},
@@ -322,6 +322,8 @@ function draw(q) {
   const tiled = state.tiled;
   // 圈內的像素混入淡紫色（直接用球面上的距離判斷，跨摺線、拼接都正確）
   const tint = mapHooks.tint(), rc = tint ? tint.v : null, rcos = tint ? tint.cos : 2;
+  const rgb = tint && tint.rgb || [122, 79, 208], mix = tint && tint.mix || 0.28, keep = 1 - mix;
+  const addR = rgb[0] * mix, addG = rgb[1] * mix, addB = rgb[2] * mix;
   let k = 0;
   for (let py = 0; py < H; py++) {
     const y = state.cy - (py + 0.5 - H / 2) / S;
@@ -339,8 +341,8 @@ function draw(q) {
       if (v >= TH) v = TH - 1;
       const c = (inMain ? tex32 : texDim32)[v * TW + u];
       if (rc && g[0] * rc[0] + g[1] * rc[1] + g[2] * rc[2] >= rcos) {
-        out[k] = 0xff000000 | ((((c >> 16) & 255) * 0.72 + 208 * 0.28) << 16)
-          | ((((c >> 8) & 255) * 0.72 + 79 * 0.28) << 8) | ((c & 255) * 0.72 + 122 * 0.28);
+        out[k] = 0xff000000 | ((((c >> 16) & 255) * keep + addB) << 16)
+          | ((((c >> 8) & 255) * keep + addG) << 8) | ((c & 255) * keep + addR);
       } else out[k] = c;
     }
   }

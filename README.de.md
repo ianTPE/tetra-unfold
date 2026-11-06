@@ -95,6 +95,10 @@ Die Seite spielt auch einen **gemessenen** Langstreckenflug ab: [NASAs Global Ha
 
 `yaw` ist der Längengrad auf der Mittellinie minus 90 (liegt das Ergebnis unter −180, addiere 360). `pitch` reicht von 0 bis 70,5; je weiter südlich die Route liegt, desto größer ist meist der Wert. Halte die Route von den farbigen Eckpunkten fern, sonst knickt sie zu einem spitzen V ab.
 
+### Kurzwellen-Großkreiswege (`radio.html`)
+
+[`radio.html`](radio.html) · [online](https://iantpe.github.io/tetra-unfold/radio.html) zeigt den kurzen und den langen Weg zwischen Taipeh und London als fast geraden Großkreis, dazu die Entfernung, die Antennenrichtung von beiden Enden und welcher Anteil jedes Wegs zu einer gewählten UTC-Zeit im Dunkeln liegt. Die Seite zeigt nur die Geometrie und sagt keine Ausbreitung voraus. Für andere Orte ändere `A`, `B` und `CIRCLE_VIEW` am Anfang der Datei; `CIRCLE_VIEW` funktioniert wie `view` in der Flugwiedergabe.
+
 ## Mit Claude Code, Codex oder Antigravity verwenden
 
 Das Repository enthält zwei Skills für Coding-Agenten. Klone es, starte [Claude Code](https://code.claude.com/docs/en/skills) oder [Codex](https://learn.chatgpt.com/docs/build-skills) im Ordner oder öffne den Ordner in [Antigravity](https://antigravity.google/docs/skills) und formuliere deine Bitte einfach in eigenen Worten:

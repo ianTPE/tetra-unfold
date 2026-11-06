@@ -95,6 +95,10 @@
 
 `yaw` は中央線の経度から 90 を引いた値です（−180 より小さければ 360 を足します）。`pitch` の範囲は 0〜70.5 で、ルートが南にあるほど大きな値が必要になります。ルートを色付きの頂点に近づけすぎると、鋭い V 字に折れます。
 
+### 短波の大圏経路（`radio.html`）
+
+[`radio.html`](radio.html) · [オンライン版](https://iantpe.github.io/tetra-unfold/radio.html) は、台北とロンドンを結ぶショートパスとロングパスをほぼ一直線の大圏として描き、距離、両端からのアンテナ方位、指定した UTC 時刻に各経路のどれだけが夜側にあるかを表示します。幾何的な関係だけを示すもので、伝搬の予測ではありません。場所を変えるには、ファイル冒頭の `A`、`B`、`CIRCLE_VIEW` を変更します。`CIRCLE_VIEW` の調整方法は飛行リプレイの `view` と同じです。
+
 ## Claude Code、Codex、Antigravity で使う
 
 このリポジトリには、コーディングエージェントが使えるスキルが 2 つ入っています。クローンしてフォルダ内で [Claude Code](https://code.claude.com/docs/en/skills) または [Codex](https://learn.chatgpt.com/docs/build-skills) を起動するか、[Antigravity](https://antigravity.google/docs/skills) でフォルダを開き、普段の言葉で頼むだけです。

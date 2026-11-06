@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Short-wave Paths · 短波大圓路徑</title>
+<style>
+  :root { --bg: #cfe9f0; --panel: rgba(255,255,255,.96); --text: #1d3340; --muted: #5b7380; --line: #d3e2e8; --accent: #1f8fbf; --field: #fff; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0f1a20; --panel: rgba(18,30,38,.96); --text: #e3eef2; --muted: #96aeb9; --line: #2c4250; --accent: #5cc0e8; --field: #1b2c36; }
+  }
+  :root[data-theme="dark"] { --bg: #0f1a20; --panel: rgba(18,30,38,.96); --text: #e3eef2; --muted: #96aeb9; --line: #2c4250; --accent: #5cc0e8; --field: #1b2c36; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif; }
+  a { color: var(--accent); }
+  #map { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+  #map.dragging { cursor: grabbing; }
+  #dock { position: fixed; left: 0; right: 0; bottom: 0; background: var(--panel); border-top: 1px solid var(--line); display: grid; grid-template-columns: 230px 1fr 1fr 310px; gap: 18px; padding: 10px 16px; }
+  h1 { font-size: 15px; margin: 0; }
+  .tag { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .path h2 { font-size: 13.5px; margin: 0 0 3px; display: flex; align-items: center; gap: 7px; }
+  .swatch { width: 24px; height: 0; border-top: 3.5px solid; flex: none; }
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; }
+  .stats div { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .stats small { display: block; font-weight: 400; font-size: 11px; color: var(--muted); }
+  label { font-size: 12px; color: var(--muted); }
+  input[type="date"], button, select { font: inherit; font-size: 13px; color: var(--text); background: var(--field); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; }
+  button, select { cursor: pointer; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); margin: 3px 0 0; display: block; }
+  .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  #utc { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .note { grid-column: 1 / -1; margin: -6px 0 0; font-size: 11.5px; color: var(--muted); }
+  @media (max-width: 1100px) { #dock { grid-template-columns: minmax(0, 1fr); gap: 7px; max-height: 50dvh; overflow-y: auto; padding: 8px 12px; } .note { margin: 0; } }
+</style>
+</head>
+<body>
+<canvas id="map"></canvas>
+<div id="dock">
+  <div>
+    <h1 id="title"></h1>
+    <div class="tag" data-t="tag"></div>
+    <div class="row" style="margin-top:8px">
+      <button id="toCircle" data-t="toCircle"></button>
+      <button id="toNorth" data-t="toNorth"></button>
+      <select id="lang" aria-label="Language"><option value="zh-Hant">繁體中文</option><option value="en">English</option></select>
+    </div>
+  </div>
+  <div class="path">
+    <h2><span class="swatch" style="color:#d9381e"></span><span data-t="short"></span></h2>
+    <div class="stats">
+      <div><small data-t="distance"></small><span id="sKm"></span></div>
+      <div><small id="fromA1"></small><span id="sBa"></span></div>
+      <div><small id="fromB1"></small><span id="sBb"></span></div>
+      <div><small data-t="dark"></small><span id="sN"></span></div>
+    </div>
+  </div>
+  <div class="path">
+    <h2><span class="swatch" style="color:#1457b8"></span><span data-t="long"></span></h2>
+    <div class="stats">
+      <div><small data-t="distance"></small><span id="lKm"></span></div>
+      <div><small id="fromA2"></small><span id="lBa"></span></div>
+      <div><small id="fromB2"></small><span id="lBb"></span></div>
+      <div><small data-t="dark"></small><span id="lN"></span></div>
+    </div>
+  </div>
+  <div>
+    <div class="row"><label for="date" data-t="date"></label><input type="date" id="date"><span id="utc"></span><button id="now" data-t="now"></button></div>
+    <input type="range" id="hour" min="0" max="24" step="0.25" aria-label="UTC">
+  </div>
+  <p class="note"><span data-t="note"></span> <a id="back" data-t="back"></a></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="tetra-map.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+// 兩個地點和地圖方向。換地點時，CIRCLE_VIEW 也要重選（見 README）
+const A = { name: { 'zh-Hant': '臺北', en: 'Taipei' }, lat: 25.0777, lon: 121.233 };   // TPE
+const B = { name: { 'zh-Hant': '倫敦', en: 'London' }, lat: 51.4707, lon: -0.4599 };   // LHR
+// 維持世界地圖的南北方向（pitch 0），整個大圓幾乎一直線，最尖的折角約 8°
+const CIRCLE_VIEW = { yaw: -104, pitch: 0 };
+const R_KM = 6371.0088;
+
+const TEXT = {
+  'zh-Hant': {
+    pageTitle: '短波大圓路徑', tag: '短徑、長徑和日夜區', toCircle: '整條大圓', toNorth: '北極在上', short: '短徑', long: '長徑',
+    distance: '距離', from: n => `${n}的方位`, dark: '在夜側', date: '日期（UTC）', now: '現在', north: '↑ 北', south: '↓ 南', back: '回世界地圖',
+    note: '較暗的區域是夜側。大圓只是方向參考，不是傳播預測：能不能通聯還要看頻段、電離層和太陽活動。拖曳可轉動地球，上下移動南北；Shift + 拖曳平移，滾輪縮放。',
+  },
+  en: {
+    pageTitle: 'Short-wave Paths', tag: 'Short path, long path, day and night', toCircle: 'Whole circle', toNorth: 'North Pole up', short: 'Short path', long: 'Long path',
+    distance: 'Distance', from: n => `From ${n}`, dark: 'In darkness', date: 'Date (UTC)', now: 'Now', north: '↑ N', south: '↓ S', back: 'Back to the world map',
+    note: 'Darker areas are in night. The great circle is a guide to direction, not a propagation prediction: whether a contact works also depends on the band, the ionosphere and solar activity. Drag to turn the globe and move north or south; Shift + drag pans; the wheel zooms.',
+  },
+};
+const params = new URLSearchParams(location.search);
+const browserLang = (navigator.language || '').toLowerCase().startsWith('zh') ? 'zh-Hant' : 'en';
+let lang = TEXT[params.get('lang')] ? params.get('lang') : browserLang;
+const t = key => TEXT[lang][key];
+const nameOf = p => p.name[lang];
+
+const a = fromLonLat(A.lon, A.lat), b = fromLonLat(B.lon, B.lat);
+const omega = Math.acos(dot(a, b));                         // 短徑的圓心角
+const tangent = norm([b[0] - a[0] * Math.cos(omega), b[1] - a[1] * Math.cos(omega), b[2] - a[2] * Math.cos(omega)]);
+const onCircle = th => [a[0] * Math.cos(th) + tangent[0] * Math.sin(th), a[1] * Math.cos(th) + tangent[1] * Math.sin(th), a[2] * Math.cos(th) + tangent[2] * Math.sin(th)];
+
+// 從 p 看 q 的方位角（度，正北為 0，順時針）
+function bearing(p, q) {
+  const f1 = p.lat * DEG, f2 = q.lat * DEG, dl = (q.lon - p.lon) * DEG;
+  const y = Math.sin(dl) * Math.cos(f2), x = Math.cos(f1) * Math.sin(f2) - Math.sin(f1) * Math.cos(f2) * Math.cos(dl);
+  return (Math.atan2(y, x) / DEG + 360) % 360;
+}
+
+// 太陽直射點（近似公式，精度約 1°，畫日夜區足夠）
+function subsolar(date) {
+  const d = (date.getTime() - Date.UTC(2000, 0, 1, 12)) / 86400000;
+  const g = (357.529 + 0.98560028 * d) * DEG, q = 280.459 + 0.98564736 * d;
+  const L = (q + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * DEG, e = (23.439 - 0.00000036 * d) * DEG;
+  const ra = Math.atan2(Math.cos(e) * Math.sin(L), Math.cos(L)) / DEG, dec = Math.asin(Math.sin(e) * Math.sin(L)) / DEG;
+  const gmst = (18.697374558 + 24.06570982441908 * d) * 15;
+  const lon = ((ra - gmst) % 360 + 540) % 360 - 180;
+  return { lat: dec, lon, v: fromLonLat(lon, dec) };
+}
+
+let when = new Date(params.get('t') || Date.now());
+if (Number.isNaN(when.getTime())) when = new Date();
+let sun = subsolar(when), path = [], kBreak = 0;
+
+// 從整圈的中點往兩端接，同一份拷貝連到底
+function buildPath() {
+  const n = 720, list = [];
+  for (let i = 0; i <= n; i++) list.push(i / n * 2 * Math.PI);
+  list.push(omega); list.sort((x, y) => x - y);
+  const mid = list.findIndex(th => th >= Math.PI);
+  const pts = new Array(list.length);
+  pts[mid] = nearestCopy(geoToPlane(onCircle(list[mid])), [MAP_W / 2, MAP_H / 2]);
+  for (let i = mid + 1; i < list.length; i++) pts[i] = nearestCopy(geoToPlane(onCircle(list[i])), pts[i - 1]);
+  for (let i = mid - 1; i >= 0; i--) pts[i] = nearestCopy(geoToPlane(onCircle(list[i])), pts[i + 1]);
+  path = pts; kBreak = list.indexOf(omega);
+}
+const visibleH = () => canvas.clientHeight - $('dock').offsetHeight;
+// 中央垂線固定在畫面正中，只用經度和南北轉動
+function fitTo(pts) {
+  const w = canvas.clientWidth, vh = visibleH();
+  let half = 0.02, y0 = Infinity, y1 = -Infinity;
+  for (const P of pts) { half = Math.max(half, Math.abs(P[0] - MAP_W / 2)); y0 = Math.min(y0, P[1]); y1 = Math.max(y1, P[1]); }
+  const scale = Math.min((w / 2 - 34) / half, (vh - 60) / Math.max(0.02, y1 - y0));
+  return { scale, cx: MAP_W / 2, cy: (y0 + y1) / 2 - (canvas.clientHeight - vh) / 2 / scale };
+}
+function fitWholeMap() {
+  const w = canvas.clientWidth, vh = visibleH(), scale = Math.min(w * 0.96 / MAP_W, vh * 0.94 / MAP_H);
+  return { scale, cx: MAP_W / 2, cy: MAP_H / 2 - (canvas.clientHeight - vh) / 2 / scale };
+}
+function setView(yaw, pitch, whole) {
+  state.yaw = yaw; state.pitch = pitch; state.roll = 0;
+  updateMatrix(); buildPath();
+  Object.assign(state, whole ? fitWholeMap() : fitTo(path));
+  requestDraw();
+}
+
+// ---- 夜側：太陽對面的半球
+mapHooks.tint = () => ({ v: [-sun.v[0], -sun.v[1], -sun.v[2]], cos: 0, rgb: [14, 28, 70], mix: 0.38 });
+function stroke(pts, color, width) {
+  ctx.strokeStyle = color; ctx.lineWidth = width * dpr; ctx.beginPath();
+  pts.forEach((P, i) => { const p = toScreen(P[0], P[1]); i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); });
+  ctx.stroke();
+}
+function tag(P, text, color, dy = 0) {
+  const p = toScreen(P[0], P[1]);
+  ctx.font = `700 ${12.5 * dpr}px system-ui, "Microsoft JhengHei", sans-serif`;
+  const w = ctx.measureText(text).width, flip = p[0] + 12 * dpr + w > canvas.width - 6 * dpr;
+  const x = flip ? p[0] - 12 * dpr : p[0] + 12 * dpr, y = p[1] + dy * dpr;
+  ctx.textAlign = flip ? 'right' : 'left'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  ctx.lineWidth = 4 * dpr; ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.strokeText(text, x, y);
+  ctx.fillStyle = color; ctx.fillText(text, x, y);
+}
+function pin(P, fill) {
+  const p = toScreen(P[0], P[1]);
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p[0], p[1], 7 * dpr, 0, 7); ctx.fill();
+  ctx.fillStyle = fill; ctx.beginPath(); ctx.arc(p[0], p[1], 5 * dpr, 0, 7); ctx.fill();
+}
+function northSouth() {
+  const x = toScreen(MAP_W / 2, 0)[0];
+  ctx.font = `700 ${13 * dpr}px system-ui, "Microsoft JhengHei", sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  for (const [text, y] of [[t('north'), 14], [t('south'), visibleH() - 14]]) {
+    ctx.lineWidth = 4 * dpr; ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.strokeText(text, x, y * dpr);
+    ctx.fillStyle = '#1d3340'; ctx.fillText(text, x, y * dpr);
+  }
+}
+const SHORT = '#d9381e', LONG = '#1457b8';
+mapHooks.layers = () => {
+  if (!path.length) return;
+  northSouth();
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const s = path.slice(0, kBreak + 1), l = path.slice(kBreak);
+  stroke(l, 'rgba(255,255,255,.9)', 6); stroke(l, LONG, 3);
+  stroke(s, 'rgba(255,255,255,.9)', 6.5); stroke(s, SHORT, 3.4);
+  pin(path[0], '#1d3340'); pin(path[kBreak], '#1d3340'); pin(path[path.length - 1], '#1d3340');
+  tag(path[0], nameOf(A), '#1d3340'); tag(path[kBreak], nameOf(B), '#1d3340'); tag(path[path.length - 1], nameOf(A), '#1d3340');
+  tag(s[Math.floor(s.length / 2)], t('short'), SHORT, -14);
+  tag(l[Math.floor(l.length * 0.72)], t('long'), LONG, -14);
+};
+
+let pending = false, interacting = false, settle = 0;
+function requestDraw() {
+  if (pending) return;
+  pending = true;
+  requestAnimationFrame(() => { pending = false; draw(interacting ? 0.4 : 1); });
+}
+function touched() {
+  interacting = true; requestDraw(); clearTimeout(settle);
+  settle = setTimeout(() => { interacting = false; requestDraw(); }, 150);
+}
+
+// ---- 數據
+function nightShare(from, to) {
+  const n = 400;
+  let dark = 0;
+  for (let i = 0; i < n; i++) if (dot(onCircle(from + (i + .5) / n * (to - from)), sun.v) < 0) dark++;
+  return dark / n * 100;
+}
+const km = x => `${Math.round(x).toLocaleString('en-US')} km`, deg = x => `${x.toFixed(1)}°`;
+function applyTexts() {
+  document.documentElement.lang = lang;
+  document.title = `${nameOf(A)} ↔ ${nameOf(B)} · ${t('pageTitle')}`;
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+  $('title').textContent = `${nameOf(A)} ↔ ${nameOf(B)}`;
+  for (const k of ['fromA1', 'fromA2']) $(k).textContent = t('from')(nameOf(A));
+  for (const k of ['fromB1', 'fromB2']) $(k).textContent = t('from')(nameOf(B));
+  $('back').href = `./?lang=${lang}`;
+  $('lang').value = lang;
+}
+function renderFixed() {
+  const ab = bearing(A, B), ba = bearing(B, A);
+  $('sKm').textContent = km(omega * R_KM); $('lKm').textContent = km((2 * Math.PI - omega) * R_KM);
+  $('sBa').textContent = deg(ab); $('lBa').textContent = deg((ab + 180) % 360);
+  $('sBb').textContent = deg(ba); $('lBb').textContent = deg((ba + 180) % 360);
+}
+function renderTime() {
+  sun = subsolar(when);
+  const iso = when.toISOString();
+  $('date').value = iso.slice(0, 10);
+  $('hour').value = when.getUTCHours() + when.getUTCMinutes() / 60;
+  $('utc').textContent = `${iso.slice(11, 16)} UTC`;
+  $('sN').textContent = `${Math.round(nightShare(0, omega))}%`;
+  $('lN').textContent = `${Math.round(nightShare(omega, 2 * Math.PI))}%`;
+}
+// 網址帶著語言和時間，分享時別人看到的是同一個畫面
+function syncURL() {
+  const q = new URLSearchParams({ lang, t: when.toISOString().slice(0, 16) + 'Z' });
+  history.replaceState(null, '', `?${q}`);
+}
+$('hour').addEventListener('input', e => {
+  const h = +e.target.value, d = $('date').value.split('-').map(Number);
+  when = new Date(Date.UTC(d[0], d[1] - 1, d[2], Math.floor(h), Math.round((h % 1) * 60)));
+  renderTime(); syncURL(); touched();
+});
+$('date').addEventListener('change', e => {
+  const d = e.target.value.split('-').map(Number);
+  if (d.length !== 3 || d.some(Number.isNaN)) return;
+  when = new Date(Date.UTC(d[0], d[1] - 1, d[2], when.getUTCHours(), when.getUTCMinutes()));
+  renderTime(); syncURL(); requestDraw();
+});
+$('now').addEventListener('click', () => { when = new Date(); renderTime(); syncURL(); requestDraw(); });
+$('toCircle').addEventListener('click', () => setView(CIRCLE_VIEW.yaw, CIRCLE_VIEW.pitch, false));
+$('toNorth').addEventListener('click', () => setView(0, 0, true));
+$('lang').addEventListener('change', e => { lang = e.target.value; applyTexts(); syncURL(); requestDraw(); });
+
+// ---- 拖曳：只轉經度和南北，中央垂線不動；Shift 或右鍵才平移
+const pointers = new Map();
+let drag = null, pinch = 0;
+const zoom = (f, sy) => {
+  const r = canvas.getBoundingClientRect(), dy = sy - r.top - r.height / 2, next = Math.min(20000, Math.max(40, state.scale * f));
+  state.cy -= dy / state.scale - dy / next; state.scale = next; touched();
+};
+canvas.addEventListener('pointerdown', e => {
+  canvas.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); canvas.classList.add('dragging'); pinch = 0;
+  drag = pointers.size === 1 ? { x: e.clientX, y: e.clientY, pan: e.shiftKey || e.button === 2 } : null;
+});
+canvas.addEventListener('pointermove', e => {
+  if (!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pointers.size === 2) {
+    const [p, q] = [...pointers.values()], d = Math.hypot(p[0] - q[0], p[1] - q[1]);
+    if (pinch) zoom(d / pinch, (p[1] + q[1]) / 2);
+    pinch = d; return;
+  }
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  drag.x = e.clientX; drag.y = e.clientY;
+  if (drag.pan) { state.cx -= dx / state.scale; state.cy += dy / state.scale; }
+  else {
+    const k = 90 / state.scale;
+    state.yaw = (state.yaw - dx * k + 540) % 360 - 180;
+    state.pitch = Math.max(0, Math.min(SOUTH_PITCH, state.pitch - dy * k));
+    updateMatrix(); buildPath();
+  }
+  touched();
+});
+const end = e => { pointers.delete(e.pointerId); pinch = 0; drag = null; if (!pointers.size) canvas.classList.remove('dragging'); };
+canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+canvas.addEventListener('wheel', e => { e.preventDefault(); zoom(Math.exp(-e.deltaY * .0015), e.clientY); }, { passive: false });
+addEventListener('resize', () => { resize(); readBg(); Object.assign(state, fitTo(path)); requestDraw(); });
+
+// ---- 啟動：打開時就看到整條大圓
+applyTexts(); renderFixed(); renderTime();
+resize(); readBg(); state.folds = true; updateMatrix();
+fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(data => {
+  topo = data;
+  features = topojson.feature(topo, topo.objects.countries).features;
+  assignColors(); buildTexture();
+  setView(CIRCLE_VIEW.yaw, CIRCLE_VIEW.pitch, false);
+}).catch(err => { $('utc').textContent = String(err.message); console.error(err); });
+</script>
+</body>
+</html>
