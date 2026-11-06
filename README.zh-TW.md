@@ -77,11 +77,13 @@
 
 在地球上，範圍是一個圓；在這張地圖上它不是正圓：同一面內是平滑的橢圓，跨過摺線時會轉折。例如以臺北為中心、半徑 5,000 公里的圈，涵蓋德里（4,373 公里）和達爾文（4,298 公里），孟買（5,002 公里）則剛好在圈外。飛行小時以平均時速 800 公里換算，只是粗估。
 
-### Starship 飛行重播（`launch.html`）
+### 飛行重播（`launch.html`）
 
 [`launch.html`](launch.html) · [線上版](https://iantpe.github.io/tetra-unfold/launch.html) 在四面體地圖上重播 Starship 第 11 次試飛，並顯示時間、高度、速度、高度圖，以及同一條路線在傳統地圖上的樣子。中央的邊固定在畫面正中且保持垂直，南北方向一看就懂。**這是重建示意，不是實測遙測。** 路線由發射場、落點、公開時間表和地球自轉重建；上升段和再入段的高度、速度是假設值。這一頁只播放資料檔，不計算軌跡。
 
-**要換一次飛行，** 替換 [`flights/starship-11.json`](flights/starship-11.json)，或把 `launch.html` 裡的 `DATA_FILE` 指向新檔案。`rows` 每一欄是一個陣列：`t`（升空後秒數）、`lat`、`lon`（度）、`alt`（公里）、`speed`（公里／小時）和 `dist`（地面距離，公里）。列與列之間的數值由頁面內插。標題、標籤、事件、來源和地圖方向也都在這個檔案裡。
+這一頁也能重播**實測**的長程飛行：[NASA Global Hawk 在 2012 年 9 月 6–7 日的飛行](https://iantpe.github.io/tetra-unfold/launch.html?flight=global-hawk-hs3)，從加州 Dryden 飛到維吉尼亞州 Wallops，途中繞過 Leslie 颶風東側（19.2 小時、11,576 公里）。[`flights/global-hawk-hs3.json`](flights/global-hawk-hs3.json) 從 NASA 導航檔每分鐘取一筆。紀錄有 12 分鐘和 4 分鐘兩段空白，以直線連接。這個檔案適用 NASA 的資料條款，不適用本 repo 的授權。引用：Sorenson, C. (2025). *Hurricane and Severe Storm Sentinel (HS3) Global Hawk Navigation* [Data set]. NASA GHRC DAAC. https://doi.org/10.5067/HS3/NAV/DATA201
+
+**要換一次飛行，** 在 `flights/` 新增資料檔（可以用 [`flights/starship-11.json`](flights/starship-11.json) 當範本），再加到 `launch.html` 的 `FLIGHTS`。`rows` 每一欄是一個陣列：`t`（升空後秒數）、`lat`、`lon`（度）、`alt`（公里）、`speed`（公里／小時）和 `dist`（地面距離，公里）。列與列之間的數值由頁面內插。標題、標籤、事件、來源和地圖方向也都在這個檔案裡。
 
 **要替新路線設定地圖方向，** 只要改資料檔裡的 `view`，縮放會自動計算。
 

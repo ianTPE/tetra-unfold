@@ -79,11 +79,13 @@
 
 지구에서는 범위가 원이지만, 이 지도에서는 정원이 아닙니다. 한 면 안에서는 매끄러운 타원이고, 접는 선을 지날 때 꺾입니다. 예를 들어 타이베이를 중심으로 한 반경 5,000 km 원에는 델리(4,373 km)와 다윈(4,298 km)이 들어가고, 뭄바이(5,002 km)는 아슬아슬하게 밖에 있습니다. 비행 시간은 평균 시속 800 km로 환산한 대략적인 값입니다.
 
-### Starship 비행 재생(`launch.html`)
+### 비행 재생(`launch.html`)
 
 [`launch.html`](launch.html) · [온라인 버전](https://iantpe.github.io/tetra-unfold/launch.html)은 Starship 11차 시험 비행을 사면체 지도에서 재생하고, 시간, 고도, 속도, 고도 그래프, 일반 지도 위의 같은 경로를 보여 줍니다. 중앙 모서리가 화면 가운데에 수직으로 고정되어 남북을 쉽게 알 수 있습니다. **이것은 설명을 위해 재구성한 것이며 실측 원격 측정 자료가 아닙니다.** 발사장, 착수 지점, 공개된 일정, 지구 자전으로 재구성했습니다. 상승 구간과 재진입 구간의 고도와 속도는 가정한 값입니다. 이 페이지는 데이터 파일을 재생할 뿐 궤도를 계산하지 않습니다.
 
-**다른 비행을 보여 주려면** [`flights/starship-11.json`](flights/starship-11.json)을 바꾸거나 `launch.html`의 `DATA_FILE`을 새 파일로 지정하세요. `rows`는 열마다 배열 하나입니다: `t`(발사 후 초), `lat`, `lon`(도), `alt`(km), `speed`(km/h), `dist`(지상 거리, km). 행 사이의 값은 페이지가 보간합니다. 제목, 라벨, 이벤트, 출처, 지도 방향도 같은 파일에 있습니다.
+이 페이지는 **실측** 장거리 비행도 재생합니다. [2012년 9월 6~7일 NASA Global Hawk 비행](https://iantpe.github.io/tetra-unfold/launch.html?flight=global-hawk-hs3)으로, 캘리포니아주 Dryden에서 버지니아주 Wallops까지 허리케인 Leslie의 동쪽을 돌아 날았습니다(19.2시간, 11,576 km). [`flights/global-hawk-hs3.json`](flights/global-hawk-hs3.json)는 NASA 항법 파일에서 1분마다 한 행을 뽑은 것입니다. 기록이 없는 12분과 4분 구간은 직선으로 이었습니다. 이 파일에는 이 저장소의 라이선스가 아니라 NASA 데이터 조건이 적용됩니다. 인용: Sorenson, C. (2025). *Hurricane and Severe Storm Sentinel (HS3) Global Hawk Navigation* [Data set]. NASA GHRC DAAC. https://doi.org/10.5067/HS3/NAV/DATA201
+
+**다른 비행을 보여 주려면** `flights/`에 데이터 파일을 추가하고([`flights/starship-11.json`](flights/starship-11.json)을 틀로 쓸 수 있습니다) `launch.html`의 `FLIGHTS`에 넣으세요. `rows`는 열마다 배열 하나입니다: `t`(발사 후 초), `lat`, `lon`(도), `alt`(km), `speed`(km/h), `dist`(지상 거리, km). 행 사이의 값은 페이지가 보간합니다. 제목, 라벨, 이벤트, 출처, 지도 방향도 같은 파일에 있습니다.
 
 **새 경로에 맞게 지도 방향을 정하려면** 데이터 파일의 `view`만 바꾸면 됩니다. 확대 비율은 자동으로 계산됩니다.
 

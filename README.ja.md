@@ -79,11 +79,13 @@
 
 地球上では範囲は円ですが、この地図では正円になりません。同じ面の中ではなめらかな楕円になり、折り目を越えるところで曲がります。たとえば台北を中心とする半径 5,000 km の円には、デリー（4,373 km）とダーウィン（4,298 km）が入り、ムンバイ（5,002 km）はわずかに外れます。飛行時間は平均時速 800 km で換算した目安です。
 
-### Starship の飛行リプレイ（`launch.html`）
+### 飛行リプレイ（`launch.html`）
 
 [`launch.html`](launch.html) · [オンライン版](https://iantpe.github.io/tetra-unfold/launch.html) は、Starship の第 11 回飛行試験を四面体地図で再生し、時間、高度、速度、高度グラフ、通常の地図上の同じルートを表示します。中央の辺は画面の真ん中で垂直に保たれるので、南北がすぐに分かります。**これは説明用の再構成で、実測テレメトリではありません。** 発射場、着水点、公開された時系列、地球の自転から再構成しました。上昇段と再突入段の高度と速度は仮定の値です。このページはデータファイルを再生するだけで、軌道は計算しません。
 
-**別の飛行を表示するには、** [`flights/starship-11.json`](flights/starship-11.json) を置き換えるか、`launch.html` の `DATA_FILE` を新しいファイルに向けます。`rows` は列ごとの配列です：`t`（打ち上げ後の秒数）、`lat`、`lon`（度）、`alt`（km）、`speed`（km/h）、`dist`（地上距離、km）。行の間の値はページが補間します。タイトル、ラベル、イベント、出典、地図の向きも同じファイルにあります。
+このページは**実測**の長距離飛行も再生できます：[2012 年 9 月 6〜7 日の NASA Global Hawk の飛行](https://iantpe.github.io/tetra-unfold/launch.html?flight=global-hawk-hs3)で、カリフォルニア州 Dryden からバージニア州 Wallops まで、ハリケーン Leslie の東側を回って飛びました（19.2 時間、11,576 km）。[`flights/global-hawk-hs3.json`](flights/global-hawk-hs3.json) は NASA の航法ファイルから 1 分ごとに 1 行を取り出したものです。12 分間と 4 分間の記録の空白は直線でつないでいます。このファイルには本リポジトリのライセンスではなく NASA のデータ条件が適用されます。引用：Sorenson, C. (2025). *Hurricane and Severe Storm Sentinel (HS3) Global Hawk Navigation* [Data set]. NASA GHRC DAAC. https://doi.org/10.5067/HS3/NAV/DATA201
+
+**別の飛行を表示するには、** `flights/` にデータファイルを追加し（[`flights/starship-11.json`](flights/starship-11.json) をひな形にできます）、`launch.html` の `FLIGHTS` に加えます。`rows` は列ごとの配列です：`t`（打ち上げ後の秒数）、`lat`、`lon`（度）、`alt`（km）、`speed`（km/h）、`dist`（地上距離、km）。行の間の値はページが補間します。タイトル、ラベル、イベント、出典、地図の向きも同じファイルにあります。
 
 **新しいルートに地図の向きを合わせるには、** データファイルの `view` だけを変更します。拡大率は自動で計算されます。
 

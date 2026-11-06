@@ -37,9 +37,10 @@
   button.main { background: var(--accent); color: #fff; border-color: var(--accent); min-width: 58px; }
   input[type="range"] { width: 100%; accent-color: var(--accent); margin: 3px 0 0; display: block; }
   .note { color: var(--muted); font-size: 11px; margin: 5px 0 0; line-height: 1.35; }
+  .note.wide { grid-column: 1 / -1; margin: -6px 0 0; }
   #tip { position: fixed; display: none; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; font-size: 12px; z-index: 5; font-variant-numeric: tabular-nums; white-space: nowrap; }
   @media (max-width: 1050px) {
-    #dock { grid-template-columns: 1fr; gap: 6px; padding: 8px 12px; max-height: 50dvh; overflow-y: auto; }
+    #dock { grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 8px 12px; max-height: 50dvh; overflow-y: auto; }
     .flatbox { display: none; }
   }
 </style>
@@ -68,10 +69,11 @@
     <canvas class="inset" id="flat"></canvas>
   </div>
   <div>
+    <div class="controls"><select id="flight" data-a="flightAria"></select></div>
     <div class="controls">
       <button class="main" id="play"></button>
       <select id="rate" data-a="rateAria">
-        <option value="10">×10</option><option value="30">×30</option><option value="60" selected>×60</option><option value="120">×120</option>
+        <option value="10">×10</option><option value="30">×30</option><option value="60" selected>×60</option><option value="120">×120</option><option value="600">×600</option><option value="1800">×1800</option>
       </select>
       <select id="lang" aria-label="Language">
         <option value="zh-Hant">繁體中文</option><option value="en">English</option>
@@ -83,8 +85,8 @@
       <button id="toSouth" data-t="toSouth"></button>
     </div>
     <p class="note"><span data-t="hint"></span> <a id="back" data-t="back"></a></p>
-    <p class="note"><span id="note"></span> <span id="sources"></span></p>
   </div>
+  <p class="note wide"><span id="note"></span> <span id="sources"></span></p>
 </div>
 <div id="tip"></div>
 
@@ -92,21 +94,24 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="tetra-map.js"></script>
 <script>
-// 這一頁只播放資料檔，不計算軌跡。要換一次飛行，改這個路徑，或直接替換資料檔（格式見 README）
-const DATA_FILE = 'flights/starship-11.json';
+// 這一頁只播放資料檔，不計算軌跡。要加一次飛行，在 flights/ 放一個資料檔，再加到這個清單（格式見 README）
+const FLIGHTS = [
+  { id: 'starship-11', name: { 'zh-Hant': 'Starship 第 11 次試飛（重建）', en: 'Starship Flight 11 (reconstruction)' } },
+  { id: 'global-hawk-hs3', name: { 'zh-Hant': 'NASA Global Hawk（實測）', en: 'NASA Global Hawk (measured)' } },
+];
 
 const TEXT = {
   'zh-Hant': {
     pageTitle: '飛行重播', altitude: '高度', speed: '速度', distance: '地面距離', chartCap: '高度與飛行時間',
     flatCap: '同一條路線，傳統經緯度地圖', toRoute: '整段行程', toNorth: '北極在上', toSouth: '南極在下',
     play: '播放', pause: '暫停', replay: '重播', north: '↑ 北', south: '↓ 南', pole: ['北極', '南極'], ocean: '海洋', min: '分',
-    hint: '上下拖曳：北極、南極沿中央的邊移動。左右拖曳：轉動經度。', back: '回世界地圖', timeAria: '飛行時間', rateAria: '播放速度', fail: '載入失敗',
+    hint: '上下拖曳：北極、南極沿中央的邊移動。左右拖曳：轉動經度。', back: '回世界地圖', timeAria: '飛行時間', rateAria: '播放速度', flightAria: '選擇飛行', fail: '載入失敗', hr: '小時',
   },
   en: {
     pageTitle: 'Flight Replay', altitude: 'Altitude', speed: 'Speed', distance: 'Ground distance', chartCap: 'Altitude and flight time',
     flatCap: 'The same route on an ordinary map', toRoute: 'Whole route', toNorth: 'North Pole up', toSouth: 'South Pole down',
     play: 'Play', pause: 'Pause', replay: 'Replay', north: '↑ N', south: '↓ S', pole: ['North Pole', 'South Pole'], ocean: 'Ocean', min: 'min',
-    hint: 'Drag up and down to slide the poles along the central edge. Drag sideways to turn the longitude.', back: 'Back to the world map', timeAria: 'Flight time', rateAria: 'Playback speed', fail: 'Could not load',
+    hint: 'Drag up and down to slide the poles along the central edge. Drag sideways to turn the longitude.', back: 'Back to the world map', timeAria: 'Flight time', rateAria: 'Playback speed', flightAria: 'Choose a flight', fail: 'Could not load', hr: 'h',
   },
 };
 const $ = id => document.getElementById(id);
@@ -118,6 +123,7 @@ const pick = o => o[lang] ?? o.en ?? Object.values(o)[0];   // 資料檔裡的�
 
 let D, R, vectors = [], endT = 0, altMax = 200, now = 0, playing = false, last = 0;
 let route = [], flyId = 0, started = false;
+let flightId = FLIGHTS.some(f => f.id === params.get('flight')) ? params.get('flight') : FLIGHTS[0].id;
 const visibleH = () => canvas.clientHeight - $('dock').offsetHeight;
 
 // t 秒時的數值：在相鄰兩列之間內插。位置用向量內插，跨過換日線也不會出錯
@@ -207,8 +213,9 @@ function pin(P, r, fill) {
   ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p[0], p[1], (r + 2) * dpr, 0, 7); ctx.fill();
   ctx.fillStyle = fill; ctx.beginPath(); ctx.arc(p[0], p[1], r * dpr, 0, 7); ctx.fill();
 }
-function label(P, text) {
+function label(P, text, dy = 0) {
   const p = toScreen(P[0], P[1]);
+  p[1] += dy * dpr;
   ctx.font = `600 ${12.5 * dpr}px system-ui, "Microsoft JhengHei", sans-serif`;
   const flip = p[0] + 10 * dpr + ctx.measureText(text).width > canvas.width - 8 * dpr, gap = (flip ? -10 : 10) * dpr;
   ctx.textAlign = flip ? 'right' : 'left'; ctx.textBaseline = 'middle';
@@ -266,8 +273,9 @@ mapHooks.layers = () => {
   pin(route[0][1], 4.5, '#1d3340');
   pin(route[route.length - 1][1], 4.5, '#1d3340');
   pin(cur, 7, FLOWN);
-  label(route[0][1], pick(D.labels.start));
-  label(route[route.length - 1][1], pick(D.labels.end));
+  const narrow = canvas.clientWidth <= 640;
+  label(route[0][1], pick(D.labels.start), narrow ? -15 : 0);
+  label(route[route.length - 1][1], pick(D.labels.end), narrow ? 15 : 0);
 };
 
 let pending = false, interacting = false, settle = 0;
@@ -310,8 +318,9 @@ function drawChart() {
     x.fillText(`${a}`, CH.l - 5, y);
   }
   x.textBaseline = 'alphabetic'; x.textAlign = 'center';
-  const mStep = niceStep(endT / 60, 4);
-  for (let m = 0; m * 60 <= endT; m += mStep) x.fillText(`${m} ${t('min')}`, chartX(m * 60, w), h - 3);
+  // 兩小時以上用小時當單位
+  const unit = endT > 7200 ? 3600 : 60, tStep = niceStep(endT / unit, 4);
+  for (let m = 0; m * unit <= endT; m += tStep) x.fillText(`${m} ${unit === 60 ? t('min') : t('hr')}`, chartX(m * unit, w), h - 3);
   const line = (upto, color) => {
     x.strokeStyle = color; x.lineWidth = 2; x.lineJoin = 'round'; x.beginPath();
     let started2 = false;
@@ -363,7 +372,7 @@ function clockText(time) {
 function renderHud() {
   const s = sampleAt(now);
   $('clock').textContent = clockText(now);
-  $('alt').textContent = `${s.alt.toFixed(s.alt < 10 ? 1 : 0)} km`;
+  $('alt').textContent = `${s.alt.toFixed(s.alt < 100 ? 1 : 0)} km`;
   $('speed').textContent = `${fmt(s.speed)} km/h`;
   $('dist').textContent = `${fmt(s.dist)} km`;
   let e = D.events[0];
@@ -380,6 +389,10 @@ function applyTexts() {
   document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
   document.querySelectorAll('[data-a]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.a)); });
   $('lang').value = lang;
+  const menu = $('flight'), chosen = flightId;
+  menu.innerHTML = '';
+  for (const f of FLIGHTS) menu.add(new Option(pick(f.name), f.id));
+  menu.value = chosen;
   $('back').href = `./?lang=${lang}`;
   $('play').textContent = playing ? t('pause') : now >= endT && started ? t('replay') : t('play');
   if (!D) return;
@@ -443,7 +456,7 @@ $('chart').addEventListener('pointerdown', e => { chartDown = true; pause(); $('
 $('chart').addEventListener('pointermove', e => {
   const time = chartTime(e);
   if (chartDown) setTime(time);
-  tip.textContent = `${clockText(time)} · ${sampleAt(time).alt.toFixed(0)} km`;
+  tip.textContent = `${clockText(time)} · ${sampleAt(time).alt.toFixed(sampleAt(time).alt < 100 ? 1 : 0)} km`;
   placeTip(e);
 });
 $('chart').addEventListener('pointerup', () => { chartDown = false; });
@@ -511,26 +524,46 @@ function mapTip(e) {
 applyTexts();
 resize(); readBg(); state.folds = true; updateMatrix();
 Object.assign(state, fitWholeMap());
-Promise.all([
-  fetch(DATA_FILE).then(r => { if (!r.ok) throw new Error(`${DATA_FILE}: ${r.status}`); return r.json(); }),
-  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
-]).then(([flight, data]) => {
-  D = flight; R = D.rows; topo = data;
+// 每段飛行約一分鐘播完：挑最接近的倍速
+function setDefaultRate() {
+  const want = endT / 60, opts = [...$('rate').options].map(o => +o.value);
+  $('rate').value = opts.reduce((best, x) => (Math.abs(Math.log(x / want)) < Math.abs(Math.log(best / want)) ? x : best));
+}
+function useFlight(flight, time) {
+  D = flight; R = D.rows;
   vectors = R.lat.map((lat, i) => fromLonLat(R.lon[i], lat));
   endT = R.t[R.t.length - 1];
-  const top = Math.max(...R.alt);
-  const step = niceStep(top, 4);
+  const top = Math.max(...R.alt), step = niceStep(top, 4);
   altMax = Math.ceil(top * 1.02 / step) * step;
   $('scrub').max = endT;
-  now = Math.min(endT, Math.max(0, +params.get('t') || 0));
-  features = topojson.feature(topo, topo.objects.countries).features;
-  assignColors(); buildTexture(); buildIdTexture();
+  now = Math.min(endT, Math.max(0, time));
+  started = false;
+  setDefaultRate();
   rebuildRoute();
   applyTexts();
-  // 面板填入文字後高度會變，要重新對齊
-  Object.assign(state, fitWholeMap());
   buildFlat();
   renderHud();
+}
+const fetchFlight = id => fetch(`flights/${id}.json`).then(r => { if (!r.ok) throw new Error(`flights/${id}.json: ${r.status}`); return r.json(); });
+$('flight').addEventListener('change', e => {
+  const id = e.target.value, url = new URL(location.href);
+  pause(); flyId++;
+  flightId = id;
+  url.searchParams.set('flight', id); url.searchParams.delete('t');
+  history.replaceState(null, '', url);
+  fetchFlight(id).then(f => { if (id !== flightId) return; useFlight(f, 0); goRoute(); })
+    .catch(err => { $('phase').textContent = `${t('fail')}: ${err.message}`; console.error(err); });
+});
+Promise.all([
+  fetchFlight(flightId),
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+]).then(([flight, data]) => {
+  topo = data;
+  features = topojson.feature(topo, topo.objects.countries).features;
+  assignColors(); buildTexture(); buildIdTexture();
+  useFlight(flight, +params.get('t') || 0);
+  // 面板填入文字後高度會變，要重新對齊
+  Object.assign(state, fitWholeMap());
   requestDraw();
 }).catch(err => { $('phase').textContent = `${t('fail')}: ${err.message}`; console.error(err); });
 </script>

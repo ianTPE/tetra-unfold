@@ -77,11 +77,13 @@ Pick a centre (an airport code or city, or the first stop of your trip) and a ra
 
 On the globe the range is a circle, but on this map it is not: within one face it is a smooth oval, and it bends where it crosses a fold line. For example, a 5,000 km circle around Taipei reaches Delhi (4,373 km) and Darwin (4,298 km) but stops just short of Mumbai (5,002 km). Flight hours are converted at an average of 800 km/h, so treat them as a rough guide.
 
-### Starship flight replay (`launch.html`)
+### Flight replay (`launch.html`)
 
 [`launch.html`](launch.html) · [live](https://iantpe.github.io/tetra-unfold/launch.html) replays Starship Flight 11 on the tetrahedral map, with time, altitude, speed, an altitude chart and the same route on an ordinary map. The central edge stays vertical in the middle of the screen, so north and south stay easy to read. **This is a reconstruction for illustration, not measured telemetry.** It was rebuilt from the launch site, the splashdown point, a public timeline and Earth's rotation; altitude and speed during the ascent and entry are assumed. The page only plays a data file and does not calculate trajectories.
 
-**To show another flight,** replace [`flights/starship-11.json`](flights/starship-11.json), or point `DATA_FILE` in `launch.html` at a new file. `rows` holds one array per column: `t` (seconds after liftoff), `lat`, `lon` (degrees), `alt` (km), `speed` (km/h) and `dist` (ground distance in km). The page fills in the values between rows. The same file holds the title, labels, events, sources and map direction.
+The page also replays a **measured** long-range flight: [NASA's Global Hawk on 6–7 September 2012](https://iantpe.github.io/tetra-unfold/launch.html?flight=global-hawk-hs3), from Dryden, California to Wallops, Virginia, around the east side of Hurricane Leslie (19.2 hours, 11,576 km). [`flights/global-hawk-hs3.json`](flights/global-hawk-hs3.json) keeps one row a minute from NASA's navigation files. Gaps of 12 and 4 minutes are joined by straight lines. This file follows NASA's data terms, not this repository's licence. Citation: Sorenson, C. (2025). *Hurricane and Severe Storm Sentinel (HS3) Global Hawk Navigation* [Data set]. NASA GHRC DAAC. https://doi.org/10.5067/HS3/NAV/DATA201
+
+**To show another flight,** add a data file to `flights/` (use [`flights/starship-11.json`](flights/starship-11.json) as a template) and add it to `FLIGHTS` in `launch.html`. `rows` holds one array per column: `t` (seconds after liftoff), `lat`, `lon` (degrees), `alt` (km), `speed` (km/h) and `dist` (ground distance in km). The page fills in the values between rows. The same file holds the title, labels, events, sources and map direction.
 
 **To set the map direction for a new route,** change only `view` in the data file. The zoom is worked out for you.
 

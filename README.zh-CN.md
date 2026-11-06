@@ -79,11 +79,13 @@
 
 在地球上，范围是一个圆；在这张地图上它不是正圆：同一面内是平滑的椭圆，跨过折线时会转折。例如以台北为中心、半径 5,000 公里的圈，涵盖德里（4,373 公里）和达尔文（4,298 公里），孟买（5,002 公里）则刚好在圈外。飞行小时按平均时速 800 公里换算，只是粗略估计。
 
-### Starship 飞行重播（`launch.html`）
+### 飞行重播（`launch.html`）
 
 [`launch.html`](launch.html) · [在线版](https://iantpe.github.io/tetra-unfold/launch.html) 在四面体地图上重播 Starship 第 11 次试飞，并显示时间、高度、速度、高度图，以及同一条路线在传统地图上的样子。中央的边固定在画面正中且保持垂直，南北方向一看就懂。**这是重建示意，不是实测遥测。** 路线由发射场、落点、公开时间表和地球自转重建；上升段和再入段的高度、速度是假设值。这一页只播放数据文件，不计算轨迹。
 
-**要换一次飞行，** 替换 [`flights/starship-11.json`](flights/starship-11.json)，或把 `launch.html` 里的 `DATA_FILE` 指向新文件。`rows` 每一列是一个数组：`t`（升空后秒数）、`lat`、`lon`（度）、`alt`（千米）、`speed`（千米／小时）和 `dist`（地面距离，千米）。行与行之间的数值由页面插值。标题、标签、事件、来源和地图方向也都在这个文件里。
+这一页也能重播**实测**的长程飞行：[NASA Global Hawk 在 2012 年 9 月 6–7 日的飞行](https://iantpe.github.io/tetra-unfold/launch.html?flight=global-hawk-hs3)，从加州 Dryden 飞到弗吉尼亚州 Wallops，途中绕过飓风 Leslie 东侧（19.2 小时、11,576 千米）。[`flights/global-hawk-hs3.json`](flights/global-hawk-hs3.json) 从 NASA 导航文件每分钟取一条。记录有 12 分钟和 4 分钟两段空白，以直线连接。这个文件适用 NASA 的数据条款，不适用本仓库的许可证。引用：Sorenson, C. (2025). *Hurricane and Severe Storm Sentinel (HS3) Global Hawk Navigation* [Data set]. NASA GHRC DAAC. https://doi.org/10.5067/HS3/NAV/DATA201
+
+**要换一次飞行，** 在 `flights/` 新增数据文件（可以用 [`flights/starship-11.json`](flights/starship-11.json) 作模板），再加到 `launch.html` 的 `FLIGHTS`。`rows` 每一列是一个数组：`t`（升空后秒数）、`lat`、`lon`（度）、`alt`（千米）、`speed`（千米／小时）和 `dist`（地面距离，千米）。行与行之间的数值由页面插值。标题、标签、事件、来源和地图方向也都在这个文件里。
 
 **要为新路线设置地图方向，** 只要改数据文件里的 `view`，缩放会自动计算。
 

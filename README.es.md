@@ -79,11 +79,13 @@ Elige un centro (código de aeropuerto, ciudad o la primera parada del itinerari
 
 En el globo la zona es un círculo, pero en este mapa no: dentro de una cara es un óvalo suave y se dobla al cruzar un pliegue. Por ejemplo, un círculo de 5.000 km alrededor de Taipéi alcanza Delhi (4.373 km) y Darwin (4.298 km), pero se queda justo antes de Bombay (5.002 km). Las horas de vuelo se convierten con una media de 800 km/h, así que son solo una estimación.
 
-### Repetición del vuelo de Starship (`launch.html`)
+### Repetición de vuelos (`launch.html`)
 
 [`launch.html`](launch.html) · [en línea](https://iantpe.github.io/tetra-unfold/launch.html) reproduce el 11.º vuelo de prueba de Starship en el mapa tetraédrico, con el tiempo, la altitud, la velocidad, un gráfico de altitud y la misma ruta en un mapa corriente. La arista central se mantiene vertical en el centro de la pantalla, así que el norte y el sur se distinguen fácilmente. **Es una reconstrucción ilustrativa, no telemetría medida.** Se basa en el lugar de lanzamiento, el punto de amerizaje, un calendario público y la rotación de la Tierra. La altitud y la velocidad durante el ascenso y la reentrada son supuestas. La página solo reproduce un archivo de datos y no calcula trayectorias.
 
-**Para mostrar otro vuelo,** sustituye [`flights/starship-11.json`](flights/starship-11.json) o haz que `DATA_FILE` en `launch.html` apunte a un archivo nuevo. `rows` contiene una matriz por columna: `t` (segundos tras el despegue), `lat`, `lon` (grados), `alt` (km), `speed` (km/h) y `dist` (distancia sobre el suelo en km). La página interpola los valores entre filas. El título, las etiquetas, los eventos, las fuentes y la orientación del mapa están en el mismo archivo.
+La página también reproduce un vuelo de largo alcance **medido**: [el Global Hawk de la NASA del 6 al 7 de septiembre de 2012](https://iantpe.github.io/tetra-unfold/launch.html?flight=global-hawk-hs3), de Dryden, en California, a Wallops, en Virginia, rodeando el este del huracán Leslie (19,2 horas, 11 576 km). [`flights/global-hawk-hs3.json`](flights/global-hawk-hs3.json) conserva una fila por minuto de los archivos de navegación de la NASA. Los huecos de 12 y 4 minutos se unen con líneas rectas. Este archivo se rige por las condiciones de datos de la NASA, no por la licencia de este repositorio. Cita: Sorenson, C. (2025). *Hurricane and Severe Storm Sentinel (HS3) Global Hawk Navigation* [Data set]. NASA GHRC DAAC. https://doi.org/10.5067/HS3/NAV/DATA201
+
+**Para mostrar otro vuelo,** añade un archivo de datos en `flights/` ([`flights/starship-11.json`](flights/starship-11.json) sirve de plantilla) y agrégalo a `FLIGHTS` en `launch.html`. `rows` contiene una matriz por columna: `t` (segundos tras el despegue), `lat`, `lon` (grados), `alt` (km), `speed` (km/h) y `dist` (distancia sobre el suelo en km). La página interpola los valores entre filas. El título, las etiquetas, los eventos, las fuentes y la orientación del mapa están en el mismo archivo.
 
 **Para orientar el mapa en una ruta nueva,** cambia solo `view` en el archivo de datos. El zoom se calcula automáticamente.
 
