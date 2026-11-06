@@ -30,7 +30,7 @@ Die Karte gibt es auf 繁體中文, 简体中文, English, 日本語, 한국어,
 
 Reise, Entfernungsradius, Drehung und Einstellungen werden laufend in der Adresse gespeichert. Als Lesezeichen oder an andere geschickt, öffnet sich die Seite genau so, wie du sie verlassen hast. **Link zum Teilen kopieren** im Bedienfeld kopiert die Adresse. [Dieser Link](https://iantpe.github.io/tetra-unfold/?lang=de&trip=TPE,NRT,LHR,SIN&range=TPE,5000) öffnet zum Beispiel die Reise Taipeh → Tokio → London → Singapur mit einem 5.000-km-Radius um Taipeh. Auf keinem Server wird etwas gespeichert; alles steht in der Adresse.
 
-Die Karte besteht aus einer einzigen HTML-Datei sowie `i18n.js` (Oberflächentexte), `trip-order.js` (Berechnung der kürzesten Reihenfolge), `airports.json` und `names/<Sprache>.json` (Flughafen- und Städtenamen). Es muss nichts installiert oder gebaut werden. Zum Laden von D3 und den Ländergrenzen ist eine Internetverbindung nötig.
+Die Karte besteht aus einer einzigen HTML-Datei sowie `i18n.js` (Oberflächentexte), `tetra-map.js` (Projektion und Zeichnen), `trip-order.js` (Berechnung der kürzesten Reihenfolge), `airports.json` und `names/<Sprache>.json` (Flughafen- und Städtenamen). Es muss nichts installiert oder gebaut werden. Zum Laden von D3 und den Ländergrenzen ist eine Internetverbindung nötig.
 
 | Datei | Inhalt |
 |---|---|
@@ -78,6 +78,20 @@ Schließen Sie also mit der Karte Reihenfolgen aus, die Umwege machen, und lasse
 Wähle einen Mittelpunkt (Flughafencode, Stadt oder den ersten Stopp der Reise) und einen Radius in Kilometern oder Flugstunden. Die Karte färbt alle Orte innerhalb dieser Großkreisentfernung ein und listet die Städte mit großen Flughäfen im Kreis auf, die nächsten zuerst. Beim Überfahren mit der Maus wird für jeden Punkt die Entfernung zum Mittelpunkt angezeigt.
 
 Auf dem Globus ist der Bereich ein Kreis, auf dieser Karte aber nicht: Innerhalb einer Fläche ist er ein glattes Oval, und an den Faltlinien knickt er ab. Ein Kreis mit 5.000 km um Taipeh reicht zum Beispiel bis Delhi (4.373 km) und Darwin (4.298 km), endet aber knapp vor Mumbai (5.002 km). Flugstunden werden mit durchschnittlich 800 km/h umgerechnet und sind nur ein grober Richtwert.
+
+### Starship-Flugwiedergabe (`launch.html`)
+
+[`launch.html`](launch.html) · [online](https://iantpe.github.io/tetra-unfold/launch.html) spielt den 11. Starship-Testflug auf der Tetraederkarte ab und zeigt Zeit, Höhe, Geschwindigkeit, ein Höhendiagramm und dieselbe Route auf einer gewöhnlichen Karte. Die mittlere Kante bleibt senkrecht in der Bildschirmmitte, sodass Nord und Süd leicht zu erkennen sind. **Dies ist eine Rekonstruktion zur Veranschaulichung, keine gemessene Telemetrie.** Sie beruht auf dem Startplatz, dem Landepunkt, einem öffentlichen Zeitplan und der Erdrotation. Höhe und Geschwindigkeit in Aufstieg und Wiedereintritt sind angenommen. Die Seite spielt nur eine Datendatei ab und berechnet keine Flugbahnen.
+
+**Für einen anderen Flug** ersetze [`flights/starship-11.json`](flights/starship-11.json) oder lass `DATA_FILE` in `launch.html` auf eine neue Datei zeigen. `rows` enthält ein Array pro Spalte: `t` (Sekunden nach dem Start), `lat`, `lon` (Grad), `alt` (km), `speed` (km/h) und `dist` (Bodenstrecke in km). Werte zwischen den Zeilen interpoliert die Seite. Titel, Beschriftungen, Ereignisse, Quellen und Kartenrichtung stehen in derselben Datei.
+
+**Für die Kartenrichtung einer neuen Route** ändere nur `view` in der Datendatei. Der Zoom wird automatisch berechnet.
+
+1. Öffne die Seite, drücke **Whole route** (ganze Route) und ziehe die Karte, bis die Route gut aussieht.
+2. Gib in der Browserkonsole `[state.yaw, state.pitch]` ein.
+3. Trage die beiden Zahlen in `view` als `yaw` und `pitch` ein.
+
+`yaw` ist der Längengrad auf der Mittellinie minus 90 (liegt das Ergebnis unter −180, addiere 360). `pitch` reicht von 0 bis 70,5; je weiter südlich die Route liegt, desto größer ist meist der Wert. Halte die Route von den farbigen Eckpunkten fern, sonst knickt sie zu einem spitzen V ab.
 
 ## Mit Claude Code, Codex oder Antigravity verwenden
 

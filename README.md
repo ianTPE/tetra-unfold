@@ -28,7 +28,7 @@ The map is available in 繁體中文, 简体中文, English, 日本語, 한국�
 
 Your trip, distance range, rotation and settings are saved in the address as you work, so you can bookmark the page or send it to someone, and it opens exactly as you left it. **Copy share link** in the panel copies the address. For example, [this link](https://iantpe.github.io/tetra-unfold/?lang=en&trip=TPE,NRT,LHR,SIN&range=TPE,5000) opens the Taipei → Tokyo → London → Singapore trip with a 5,000 km range around Taipei. Nothing is stored on a server; everything is in the address.
 
-The map is a single HTML file plus `i18n.js` (interface text), `trip-order.js` (the shortest-order calculation), `airports.json` and `names/<language>.json` (airport and city names). There is nothing to install or build. An internet connection is needed to load D3 and the country data.
+The map is a single HTML file plus `i18n.js` (interface text), `tetra-map.js` (projection and drawing), `trip-order.js` (the shortest-order calculation), `airports.json` and `names/<language>.json` (airport and city names). There is nothing to install or build. An internet connection is needed to load D3 and the country data.
 
 | File | What it shows |
 |---|---|
@@ -76,6 +76,20 @@ So use the map to rule out orders that double back, and let the assistant compar
 Pick a centre (an airport code or city, or the first stop of your trip) and a radius in kilometres or flight hours. The map shades every place within that great-circle distance and lists the cities with large airports inside the circle, nearest first. Hover anywhere to see its distance from the centre.
 
 On the globe the range is a circle, but on this map it is not: within one face it is a smooth oval, and it bends where it crosses a fold line. For example, a 5,000 km circle around Taipei reaches Delhi (4,373 km) and Darwin (4,298 km) but stops just short of Mumbai (5,002 km). Flight hours are converted at an average of 800 km/h, so treat them as a rough guide.
+
+### Starship flight replay (`launch.html`)
+
+[`launch.html`](launch.html) · [live](https://iantpe.github.io/tetra-unfold/launch.html) replays Starship Flight 11 on the tetrahedral map, with time, altitude, speed, an altitude chart and the same route on an ordinary map. The central edge stays vertical in the middle of the screen, so north and south stay easy to read. **This is a reconstruction for illustration, not measured telemetry.** It was rebuilt from the launch site, the splashdown point, a public timeline and Earth's rotation; altitude and speed during the ascent and entry are assumed. The page only plays a data file and does not calculate trajectories.
+
+**To show another flight,** replace [`flights/starship-11.json`](flights/starship-11.json), or point `DATA_FILE` in `launch.html` at a new file. `rows` holds one array per column: `t` (seconds after liftoff), `lat`, `lon` (degrees), `alt` (km), `speed` (km/h) and `dist` (ground distance in km). The page fills in the values between rows. The same file holds the title, labels, events, sources and map direction.
+
+**To set the map direction for a new route,** change only `view` in the data file. The zoom is worked out for you.
+
+1. Open the page, press **Whole route**, and drag the map until the route looks right.
+2. In the browser console, enter `[state.yaw, state.pitch]`.
+3. Put the two numbers in `view` as `yaw` and `pitch`.
+
+`yaw` is the longitude on the central line minus 90 (add 360 if the result is below −180). `pitch` runs from 0 to 70.5, and a route further south usually needs a larger value. Keep the route away from the coloured corner dots, or it folds into a sharp V.
 
 ## Use it with Claude Code, Codex or Antigravity
 

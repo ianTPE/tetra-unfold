@@ -30,7 +30,7 @@ El mapa está disponible en 繁體中文, 简体中文, English, 日本語, 한�
 
 El itinerario, el radio de distancia, el giro del mapa y los ajustes se guardan en la dirección a medida que trabajas, así que puedes guardar la página en favoritos o enviarla y se abrirá exactamente igual. **Copiar enlace para compartir** en el panel copia la dirección. Por ejemplo, [este enlace](https://iantpe.github.io/tetra-unfold/?lang=es&trip=TPE,NRT,LHR,SIN&range=TPE,5000) abre el itinerario Taipéi → Tokio → Londres → Singapur con un radio de 5.000 km alrededor de Taipéi. No se guarda nada en ningún servidor; todo está en la dirección.
 
-El mapa es un solo archivo HTML más `i18n.js` (textos de la interfaz), `trip-order.js` (cálculo del orden más corto), `airports.json` y `names/<idioma>.json` (nombres de aeropuertos y ciudades). No hay nada que instalar ni compilar. Se necesita conexión a Internet para cargar D3 y los datos de los países.
+El mapa es un solo archivo HTML más `i18n.js` (textos de la interfaz), `tetra-map.js` (proyección y dibujo), `trip-order.js` (cálculo del orden más corto), `airports.json` y `names/<idioma>.json` (nombres de aeropuertos y ciudades). No hay nada que instalar ni compilar. Se necesita conexión a Internet para cargar D3 y los datos de los países.
 
 | Archivo | Contenido |
 |---|---|
@@ -78,6 +78,20 @@ Así que usa el mapa para descartar los órdenes que dan vueltas y deja que el a
 Elige un centro (código de aeropuerto, ciudad o la primera parada del itinerario) y un radio en kilómetros u horas de vuelo. El mapa colorea todos los lugares que quedan dentro de esa distancia ortodrómica y enumera las ciudades con aeropuertos grandes dentro del círculo, de la más cercana a la más lejana. Al pasar el ratón por cualquier punto se ve su distancia al centro.
 
 En el globo la zona es un círculo, pero en este mapa no: dentro de una cara es un óvalo suave y se dobla al cruzar un pliegue. Por ejemplo, un círculo de 5.000 km alrededor de Taipéi alcanza Delhi (4.373 km) y Darwin (4.298 km), pero se queda justo antes de Bombay (5.002 km). Las horas de vuelo se convierten con una media de 800 km/h, así que son solo una estimación.
+
+### Repetición del vuelo de Starship (`launch.html`)
+
+[`launch.html`](launch.html) · [en línea](https://iantpe.github.io/tetra-unfold/launch.html) reproduce el 11.º vuelo de prueba de Starship en el mapa tetraédrico, con el tiempo, la altitud, la velocidad, un gráfico de altitud y la misma ruta en un mapa corriente. La arista central se mantiene vertical en el centro de la pantalla, así que el norte y el sur se distinguen fácilmente. **Es una reconstrucción ilustrativa, no telemetría medida.** Se basa en el lugar de lanzamiento, el punto de amerizaje, un calendario público y la rotación de la Tierra. La altitud y la velocidad durante el ascenso y la reentrada son supuestas. La página solo reproduce un archivo de datos y no calcula trayectorias.
+
+**Para mostrar otro vuelo,** sustituye [`flights/starship-11.json`](flights/starship-11.json) o haz que `DATA_FILE` en `launch.html` apunte a un archivo nuevo. `rows` contiene una matriz por columna: `t` (segundos tras el despegue), `lat`, `lon` (grados), `alt` (km), `speed` (km/h) y `dist` (distancia sobre el suelo en km). La página interpola los valores entre filas. El título, las etiquetas, los eventos, las fuentes y la orientación del mapa están en el mismo archivo.
+
+**Para orientar el mapa en una ruta nueva,** cambia solo `view` en el archivo de datos. El zoom se calcula automáticamente.
+
+1. Abre la página, pulsa **Whole route** (ruta completa) y arrastra el mapa hasta que la ruta se vea bien.
+2. En la consola del navegador, escribe `[state.yaw, state.pitch]`.
+3. Pon los dos números en `view` como `yaw` y `pitch`.
+
+`yaw` es la longitud de la línea central menos 90 (si el resultado es menor que −180, suma 360). `pitch` va de 0 a 70,5; cuanto más al sur esté la ruta, mayor suele ser el valor. Mantén la ruta lejos de los puntos de colores de los vértices, o se doblará en una V aguda.
 
 ## Uso con Claude Code, Codex o Antigravity
 

@@ -30,7 +30,7 @@ La carte est disponible en 繁體中文, 简体中文, English, 日本語, 한�
 
 L’itinéraire, le rayon de distance, la rotation et les réglages sont enregistrés dans l’adresse au fil de vos actions : mettez la page en favori ou envoyez-la, elle s’ouvre exactement dans le même état. **Copier le lien de partage** dans le panneau copie l’adresse. Par exemple, [ce lien](https://iantpe.github.io/tetra-unfold/?lang=fr&trip=TPE,NRT,LHR,SIN&range=TPE,5000) ouvre l’itinéraire Taipei → Tokyo → Londres → Singapour avec un rayon de 5 000 km autour de Taipei. Rien n’est stocké sur un serveur : tout est dans l’adresse.
 
-La carte se compose d’un seul fichier HTML, de `i18n.js` (textes de l’interface), de `trip-order.js` (calcul de l’ordre le plus court), de `airports.json` et de `names/<langue>.json` (noms des aéroports et des villes). Rien à installer ni à compiler. Une connexion Internet est nécessaire pour charger D3 et les données des pays.
+La carte se compose d’un seul fichier HTML, de `i18n.js` (textes de l’interface), de `tetra-map.js` (projection et dessin), de `trip-order.js` (calcul de l’ordre le plus court), de `airports.json` et de `names/<langue>.json` (noms des aéroports et des villes). Rien à installer ni à compiler. Une connexion Internet est nécessaire pour charger D3 et les données des pays.
 
 | Fichier | Contenu |
 |---|---|
@@ -78,6 +78,20 @@ Utilisez donc la carte pour écarter les ordres qui font des allers-retours, pui
 Choisissez un centre (code d’aéroport, ville ou première étape de l’itinéraire) et un rayon en kilomètres ou en heures de vol. La carte colore tous les lieux situés à cette distance orthodromique ou moins, et liste les villes dotées de grands aéroports à l’intérieur du cercle, de la plus proche à la plus éloignée. En survolant la carte, on voit la distance de chaque point au centre.
 
 Sur le globe, la zone est un cercle, mais pas sur cette carte : à l’intérieur d’une face, c’est un ovale régulier, qui se plie en franchissant un pli. Par exemple, un cercle de 5 000 km autour de Taipei atteint Delhi (4 373 km) et Darwin (4 298 km), mais s’arrête juste avant Bombay (5 002 km). Les heures de vol sont converties à une moyenne de 800 km/h ; ce n’est qu’une estimation.
+
+### Rejeu du vol de Starship (`launch.html`)
+
+[`launch.html`](launch.html) · [en ligne](https://iantpe.github.io/tetra-unfold/launch.html) rejoue le 11e vol d’essai de Starship sur la carte tétraédrique, avec le temps, l’altitude, la vitesse, un graphique d’altitude et la même route sur une carte ordinaire. L’arête centrale reste verticale au milieu de l’écran, ce qui rend le nord et le sud faciles à repérer. **Il s’agit d’une reconstitution à titre d’illustration, et non de télémétrie mesurée.** Elle repose sur le site de lancement, le point d’amerrissage, un calendrier public et la rotation de la Terre. L’altitude et la vitesse pendant la montée et la rentrée sont supposées. La page ne fait que lire un fichier de données et ne calcule aucune trajectoire.
+
+**Pour afficher un autre vol,** remplacez [`flights/starship-11.json`](flights/starship-11.json) ou faites pointer `DATA_FILE` dans `launch.html` vers un nouveau fichier. `rows` contient un tableau par colonne : `t` (secondes après le décollage), `lat`, `lon` (degrés), `alt` (km), `speed` (km/h) et `dist` (distance au sol en km). La page interpole les valeurs entre les lignes. Le titre, les libellés, les événements, les sources et l’orientation de la carte se trouvent dans le même fichier.
+
+**Pour orienter la carte sur une nouvelle route,** modifiez seulement `view` dans le fichier de données. Le zoom est calculé automatiquement.
+
+1. Ouvrez la page, appuyez sur **Whole route** (route entière), puis faites glisser la carte jusqu’à obtenir une route lisible.
+2. Dans la console du navigateur, saisissez `[state.yaw, state.pitch]`.
+3. Reportez les deux nombres dans `view`, en tant que `yaw` et `pitch`.
+
+`yaw` est la longitude sur la ligne centrale moins 90 (ajoutez 360 si le résultat est inférieur à −180). `pitch` va de 0 à 70,5 ; plus la route est au sud, plus la valeur est en général élevée. Gardez la route à l’écart des points colorés des sommets, sinon elle se plie en un V aigu.
 
 ## Utilisation avec Claude Code, Codex ou Antigravity
 
