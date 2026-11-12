@@ -40,6 +40,7 @@ Commandes :
 
 - Glisser : faire tourner le globe (dans `index.html`, Maj + glisser déplace la vue)
 - Molette : zoom (`index.html`)
+- Clavier (sur les trois pages) : Tab pour sélectionner la carte, puis les flèches pour faire tourner le globe, Maj + flèches pour déplacer la vue et + / - pour zoomer. Dans `index.html`, le mode **Déplacer** inverse les flèches et Maj + flèches
 - Survol : afficher le nom du pays et les coordonnées
 - Sur téléphone (`index.html`) : un doigt fait tourner le globe, deux doigts zooment et déplacent la vue. Toucher affiche le nom. Pour ajouter un aéroport, touchez-le puis appuyez sur **Ajouter à l’itinéraire**. Les réglages et l’itinéraire sont dans la barre en bas de l’écran : touchez-la ou balayez vers le haut pour l’ouvrir
 

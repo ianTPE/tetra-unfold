@@ -38,6 +38,7 @@ Controls:
 
 - Drag: rotate the globe (in `index.html`, Shift + drag pans the view)
 - Mouse wheel: zoom (`index.html`)
+- Keyboard (all three pages): press Tab to focus the map, then use the arrow keys to rotate the globe, Shift + arrow keys to pan and + / - to zoom. In `index.html`, **Pan view** mode swaps the arrow keys and Shift + arrow keys
 - Hover: show the country name and coordinates
 - On a phone (`index.html`): one finger rotates the globe; two fingers zoom and pan. Tap to see a name; to add an airport, tap it and press **Add to trip**. Settings and the trip are in the bar at the bottom of the screen: tap it or swipe up to open it
 

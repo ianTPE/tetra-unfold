@@ -40,6 +40,7 @@ Bedienung:
 
 - Ziehen: Globus drehen (in `index.html` verschiebt Umschalt + Ziehen die Ansicht)
 - Mausrad: zoomen (`index.html`)
+- Tastatur (auf allen drei Seiten): Mit Tab die Karte auswählen, dann mit den Pfeiltasten den Globus drehen, mit Umschalt + Pfeiltasten verschieben und mit + / - zoomen. Im Modus **Verschieben** in `index.html` tauschen Pfeiltasten und Umschalt + Pfeiltasten die Rollen
 - Mauszeiger darüber: Ländername und Koordinaten anzeigen
 - Auf dem Smartphone (`index.html`): Mit einem Finger drehst du den Globus, mit zwei Fingern zoomst und verschiebst du. Tippen zeigt den Namen an. Um einen Flughafen hinzuzufügen, tippe ihn an und wähle **Zur Reise hinzufügen**. Einstellungen und Reise liegen in der Leiste unten am Bildschirm; zum Öffnen antippen oder nach oben wischen
 
