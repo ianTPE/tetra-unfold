@@ -63,6 +63,8 @@
   #map.dragging { cursor: grabbing; }
   /* 用 Tab 選到地圖時才顯示外框，滑鼠點的時候不顯示 */
   #map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+  /* 畫面上不顯示、螢幕閱讀器會讀的文字 */
+  .vh { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
   /* 手機、平板沒有鍵盤，不顯示按鍵說明 */
   @media (pointer: coarse) { #hintKeys { display: none; } }
   .panel {
@@ -199,7 +201,7 @@
 </style>
 </head>
 <body>
-<canvas id="map" tabindex="0" role="application" data-i18n-aria="mapAria" aria-describedby="hintKeys"></canvas>
+<canvas id="map" tabindex="0" role="application" data-i18n-aria="mapAria" aria-describedby="tripSummary rgSummary hintKeys"></canvas>
 <div id="status" data-i18n="loading"></div>
 <div id="tip"></div>
 
@@ -250,14 +252,14 @@
       <button id="apAdd" data-i18n="add"></button>
     </div>
     <datalist id="apList"></datalist>
-    <ol id="stops"></ol>
+    <ol id="stops" role="list"></ol>
     <div class="row"><label><input type="checkbox" id="roundTrip" checked> <span data-i18n="roundTrip"></span></label></div>
     <div class="btns">
       <button id="optimize" data-i18n="optimize"></button>
       <button id="clearTrip" data-i18n="clear"></button>
     </div>
     <div class="btns"><button id="fitRoute" data-i18n="fitRoute"></button></div>
-    <div id="tripSummary"></div>
+    <div id="tripSummary" role="status"></div>
     <div class="hint">
       <p data-i18n="hintClick" data-i18n-touch="hintClickTouch"></p>
       <p data-i18n="hintOptimize"></p>
@@ -283,8 +285,8 @@
       <button id="rgFromTrip" data-i18n="rangeFromTrip"></button>
       <button id="rgClear" data-i18n="clear"></button>
     </div>
-    <div id="rgSummary"></div>
-    <ul id="rgList"></ul>
+    <div id="rgSummary" role="status"></div>
+    <ul id="rgList" role="list"></ul>
     <div class="hint">
       <p data-i18n="hintRange"></p>
       <p data-i18n="hintHours"></p>
@@ -898,7 +900,9 @@ function renderTrip() {
     const leg = k ? fmtKm(legKm(st[k - 1], ap)) : esc(t('start'));
     const full = apName(a) !== a.name ? apName(a) + '\n' + a.name : a.name;
     return `<li><span class="num">${k + 1}</span>` +
-      `<span class="name" title="${esc(full)}">${a.iata} ${esc(a.lcity || a.lname || a.city || a.name)}</span>` +
+      // 全名：滑鼠停在上面看 title；螢幕閱讀器讀隱藏的文字（title 讀不到）
+      `<span class="name" title="${esc(full)}">${a.iata} ${esc(a.lcity || a.lname || a.city || a.name)}` +
+      `<span class="vh">${esc(t('sep'))}${esc(full.replace('\n', t('sep')))}</span></span>` +
       `<span class="leg">${leg}</span>` +
       `<button data-act="up" data-k="${k}" aria-label="${esc(t('moveUp'))}" ${k ? '' : 'disabled'}>↑</button>` +
       `<button data-act="down" data-k="${k}" aria-label="${esc(t('moveDown'))}" ${k < st.length - 1 ? '' : 'disabled'}>↓</button>` +
