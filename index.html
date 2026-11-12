@@ -61,6 +61,10 @@
     display: block; cursor: grab; touch-action: none;
   }
   #map.dragging { cursor: grabbing; }
+  /* 用 Tab 選到地圖時才顯示外框，滑鼠點的時候不顯示 */
+  #map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+  /* 手機、平板沒有鍵盤，不顯示按鍵說明 */
+  @media (pointer: coarse) { #hintKeys { display: none; } }
   .panel {
     position: fixed; top: 16px; left: 16px;
     width: min(300px, calc(100vw - 32px));
@@ -195,7 +199,7 @@
 </style>
 </head>
 <body>
-<canvas id="map"></canvas>
+<canvas id="map" tabindex="0" role="application" data-i18n-aria="mapAria" aria-describedby="hintKeys"></canvas>
 <div id="status" data-i18n="loading"></div>
 <div id="tip"></div>
 
@@ -236,6 +240,7 @@
       <p data-i18n="hintDrag" data-i18n-touch="hintDragTouch"></p>
       <p data-i18n="hintUpDown"></p>
       <p data-i18n="hintWheel" data-i18n-touch="hintWheelTouch"></p>
+      <p id="hintKeys" data-i18n="hintKeys"></p>
     </div>
   </details>
   <details open>
@@ -457,18 +462,39 @@ canvas.addEventListener('pointermove', e => {
   drag.moved = true;
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   drag.x = e.clientX; drag.y = e.clientY;
-  if (drag.pan) {
-    state.cx -= dx / state.scale;
-    state.cy += dy / state.scale;
-  } else {
-    const k = 90 / state.scale;      // 每像素轉幾度，放大時轉得比較細
-    state.yaw = (state.yaw - dx * k + 540) % 360 - 180;
-    // 往上拖：整個地球沿著中央的邊往上移，北極離開上邊中央，南極從下方移到下邊中央
-    // 有限制時：最北到北極對齊上邊中央，最南到南極對齊下邊中央
-    const p = state.pitch - dy * k;
-    state.pitch = state.limit ? Math.max(0, Math.min(SOUTH_PITCH, p)) : ((p % 360) + 540) % 360 - 180;
-    updateMatrix();
-  }
+  if (drag.pan) panBy(dx, dy); else rotateBy(dx, dy);
+  touch();
+});
+// 拖曳和鍵盤共用：畫面內容跟著移動 dx、dy 像素
+function panBy(dx, dy) {
+  state.cx -= dx / state.scale;
+  state.cy += dy / state.scale;
+}
+function rotateBy(dx, dy) {
+  const k = 90 / state.scale;      // 每像素轉幾度，放大時轉得比較細
+  state.yaw = (state.yaw - dx * k + 540) % 360 - 180;
+  // 往上拖：整個地球沿著中央的邊往上移，北極離開上邊中央，南極從下方移到下邊中央
+  // 有限制時：最北到北極對齊上邊中央，最南到南極對齊下邊中央
+  const p = state.pitch - dy * k;
+  state.pitch = state.limit ? Math.max(0, Math.min(SOUTH_PITCH, p)) : ((p % 360) + 540) % 360 - 180;
+  updateMatrix();
+}
+// 鍵盤：方向鍵像一般地圖一樣往那個方向看（內容往反方向移），Shift 和拖曳一樣切換轉動、平移
+const KEY_STEP = 60;               // 每按一下相當於拖曳幾像素
+const ARROWS = { ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] };
+canvas.addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  const r = canvas.getBoundingClientRect();
+  if (ARROWS[e.key]) {
+    const [x, y] = ARROWS[e.key];
+    if ((state.mode === 'pan') !== e.shiftKey) panBy(x * KEY_STEP, y * KEY_STEP);
+    else rotateBy(x * KEY_STEP, y * KEY_STEP);
+  } else if (e.key === '+' || e.key === '=') zoomAt(1.4, r.left + r.width / 2, r.top + r.height / 2);
+  else if (e.key === '-' || e.key === '_') zoomAt(1 / 1.4, r.left + r.width / 2, r.top + r.height / 2);
+  else return;
+  e.preventDefault();
+  flyId++;
+  tip.style.display = 'none';
   touch();
 });
 const endDrag = () => { drag = null; canvas.classList.remove('dragging'); };
