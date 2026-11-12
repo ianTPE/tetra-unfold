@@ -18,6 +18,9 @@
   a { color: var(--accent); }
   #map { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
   #map.dragging { cursor: grabbing; }
+  /* 用 Tab 選到地圖時才顯示外框；手機、平板沒有鍵盤，不顯示按鍵說明 */
+  #map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+  @media (pointer: coarse) { #hintKeys { display: none; } }
   #dock { position: fixed; left: 0; right: 0; bottom: 0; background: var(--panel); border-top: 1px solid var(--line); display: grid; grid-template-columns: 230px 1fr 1fr 310px; gap: 18px; padding: 10px 16px; }
   h1 { font-size: 15px; margin: 0; }
   .tag { color: var(--muted); font-size: 12px; margin-top: 2px; }
@@ -37,7 +40,7 @@
 </style>
 </head>
 <body>
-<canvas id="map"></canvas>
+<canvas id="map" tabindex="0" role="application" data-a="mapAria" aria-describedby="hintKeys"></canvas>
 <div id="dock">
   <div>
     <h1 id="title"></h1>
@@ -70,7 +73,7 @@
     <div class="row"><label for="date" data-t="date"></label><input type="date" id="date"><span id="utc"></span><button id="now" data-t="now"></button></div>
     <input type="range" id="hour" min="0" max="24" step="0.25" aria-label="UTC">
   </div>
-  <p class="note"><span data-t="note"></span> <a id="back" data-t="back"></a></p>
+  <p class="note"><span data-t="note"></span> <span id="hintKeys" data-t="keys"></span> <a id="back" data-t="back"></a></p>
 </div>
 
 <!-- integrity：CDN 上的檔案被改過就不執行。換版本時要重算雜湊 -->
@@ -90,11 +93,13 @@ const TEXT = {
   'zh-Hant': {
     pageTitle: '短波大圓路徑', tag: '短徑、長徑和日夜區', toCircle: '整條大圓', toNorth: '北極在上', short: '短徑', long: '長徑',
     distance: '距離', from: n => `${n}的方位`, dark: '在夜側', date: '日期（UTC）', now: '現在', north: '↑ 北', south: '↓ 南', back: '回世界地圖',
+    keys: '鍵盤：選取地圖後，方向鍵轉動地球，Shift + 方向鍵平移，+ / - 縮放。', mapAria: '地圖',
     note: '較暗的區域是夜側。大圓只是方向參考，不是傳播預測：能不能通聯還要看頻段、電離層和太陽活動。拖曳可轉動地球，上下移動南北；Shift + 拖曳平移，滾輪縮放。',
   },
   en: {
     pageTitle: 'Short-wave Paths', tag: 'Short path, long path, day and night', toCircle: 'Whole circle', toNorth: 'North Pole up', short: 'Short path', long: 'Long path',
     distance: 'Distance', from: n => `From ${n}`, dark: 'In darkness', date: 'Date (UTC)', now: 'Now', north: '↑ N', south: '↓ S', back: 'Back to the world map',
+    keys: 'Keyboard: focus the map, then use the arrow keys to turn the globe, Shift + arrows to pan and + / - to zoom.', mapAria: 'Map',
     note: 'Darker areas are in night. The great circle is a guide to direction, not a propagation prediction: whether a contact works also depends on the band, the ionosphere and solar activity. Drag to turn the globe and move north or south; Shift + drag pans; the wheel zooms.',
   },
 };
@@ -230,6 +235,7 @@ function applyTexts() {
   document.documentElement.lang = lang;
   document.title = `${nameOf(A)} ↔ ${nameOf(B)} · ${t('pageTitle')}`;
   document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+  document.querySelectorAll('[data-a]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.a)); });
   $('title').textContent = `${nameOf(A)} ↔ ${nameOf(B)}`;
   for (const k of ['fromA1', 'fromA2']) $(k).textContent = t('from')(nameOf(A));
   for (const k of ['fromB1', 'fromB2']) $(k).textContent = t('from')(nameOf(B));
@@ -294,7 +300,11 @@ canvas.addEventListener('pointermove', e => {
   if (!drag) return;
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   drag.x = e.clientX; drag.y = e.clientY;
-  if (drag.pan) { state.cx -= dx / state.scale; state.cy += dy / state.scale; }
+  moveBy(dx, dy, drag.pan);
+});
+// 拖曳和鍵盤共用：畫面內容跟著移動 dx、dy 像素
+function moveBy(dx, dy, pan) {
+  if (pan) { state.cx -= dx / state.scale; state.cy += dy / state.scale; }
   else {
     const k = 90 / state.scale;
     state.yaw = (state.yaw - dx * k + 540) % 360 - 180;
@@ -302,11 +312,22 @@ canvas.addEventListener('pointermove', e => {
     updateMatrix(); buildPath();
   }
   touched();
-});
+}
 const end = e => { pointers.delete(e.pointerId); pinch = 0; drag = null; if (!pointers.size) canvas.classList.remove('dragging'); };
 canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 canvas.addEventListener('wheel', e => { e.preventDefault(); zoom(Math.exp(-e.deltaY * .0015), e.clientY); }, { passive: false });
+// 鍵盤：方向鍵像一般地圖一樣往那個方向看（內容往反方向移），Shift + 方向鍵平移，+ / - 縮放
+const ARROWS = { ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] };
+canvas.addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  const r = canvas.getBoundingClientRect(), mid = r.top + r.height / 2;
+  if (ARROWS[e.key]) moveBy(ARROWS[e.key][0] * 60, ARROWS[e.key][1] * 60, e.shiftKey);
+  else if (e.key === '+' || e.key === '=') zoom(1.4, mid);
+  else if (e.key === '-' || e.key === '_') zoom(1 / 1.4, mid);
+  else return;
+  e.preventDefault();
+});
 addEventListener('resize', () => { resize(); readBg(); Object.assign(state, fitTo(path)); requestDraw(); });
 
 // ---- 啟動：打開時就看到整條大圓
