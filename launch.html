@@ -3,13 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Flight Replay · 飛行重播</title>
 <style>
-  :root { --bg: #cfe9f0; --panel: rgba(255,255,255,.96); --text: #1d3340; --muted: #5b7380; --line: #d3e2e8; --accent: #1f8fbf; --field: #fff; --grid: #dbe6ea; }
+  :root { --bg: #cfe9f0; --panel: rgba(255,255,255,.96); --text: #1d3340; --muted: #5b7380; --line: #d3e2e8; --accent: #1f8fbf; --field: #fff; --grid: #dbe6ea; color-scheme: light dark; }
+  :root[data-theme="light"] { color-scheme: light; }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) { --bg: #0f1a20; --panel: rgba(18,30,38,.96); --text: #e3eef2; --muted: #96aeb9; --line: #2c4250; --accent: #5cc0e8; --field: #1b2c36; --grid: #2c4250; }
   }
-  :root[data-theme="dark"] { --bg: #0f1a20; --panel: rgba(18,30,38,.96); --text: #e3eef2; --muted: #96aeb9; --line: #2c4250; --accent: #5cc0e8; --field: #1b2c36; --grid: #2c4250; }
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #0f1a20; --panel: rgba(18,30,38,.96); --text: #e3eef2; --muted: #96aeb9; --line: #2c4250; --accent: #5cc0e8; --field: #1b2c36; --grid: #2c4250; }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; overflow: hidden; }
   body { background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif; }
@@ -90,8 +92,9 @@
 </div>
 <div id="tip"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<!-- integrity：CDN 上的檔案被改過就不執行。換版本時要重算雜湊 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js" integrity="sha384-9dCJK6nh7skY14HrcvlLYlFga9/MehJjL9ONWRflmiXNRuf8p2jiF4Y5PR881PTq" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="tetra-map.js"></script>
 <script>
 // 這一頁只播放資料檔，不計算軌跡。要加一次飛行，在 flights/ 放一個資料檔，再加到這個清單（格式見 README）
@@ -556,7 +559,7 @@ $('flight').addEventListener('change', e => {
 });
 Promise.all([
   fetchFlight(flightId),
-  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json', { integrity: 'sha384-Aw4s9pX1PTPntIYkZ/qV9IYiF5Gv8eTl6Dd/TT56zfO1Wwd+owFwYUuuXNUMrWkc', mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
 ]).then(([flight, data]) => {
   topo = data;
   features = topojson.feature(topo, topo.objects.countries).features;
