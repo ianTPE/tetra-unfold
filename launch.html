@@ -51,13 +51,13 @@
 </style>
 </head>
 <body>
-<canvas id="map" tabindex="0" role="application" data-a="mapAria" aria-describedby="hintKeys"></canvas>
+<canvas id="map" tabindex="0" role="application" data-a="mapAria" aria-describedby="subtitle phase hintKeys"></canvas>
 <div id="dock">
   <div>
     <h1 id="title"></h1>
     <div class="tag" id="subtitle"></div>
     <div class="clock" id="clock">T+00:00:00</div>
-    <div id="phase"></div>
+    <div id="phase" aria-live="polite"></div>
     <div class="hud">
       <div><small data-t="altitude"></small><span id="alt"></span></div>
       <div><small data-t="speed"></small><span id="speed"></span></div>
@@ -66,12 +66,12 @@
   </div>
   <div>
     <div class="cap" data-t="chartCap"></div>
-    <canvas class="inset" id="chart"></canvas>
+    <canvas class="inset" id="chart" role="img"></canvas>
     <input type="range" id="scrub" min="0" step="1" value="0" data-a="timeAria">
   </div>
   <div class="flatbox">
-    <div class="cap" data-t="flatCap"></div>
-    <canvas class="inset" id="flat"></canvas>
+    <div class="cap" id="flatCap" data-t="flatCap"></div>
+    <canvas class="inset" id="flat" role="img" aria-labelledby="flatCap"></canvas>
   </div>
   <div>
     <div class="controls"><select id="flight" data-a="flightAria"></select></div>
@@ -108,14 +108,14 @@ const FLIGHTS = [
 
 const TEXT = {
   'zh-Hant': {
-    pageTitle: '飛行重播', altitude: '高度', speed: '速度', distance: '地面距離', chartCap: '高度與飛行時間',
+    pageTitle: '飛行重播', altitude: '高度', speed: '速度', distance: '地面距離', chartCap: '高度與飛行時間', chartDesc: (a, d) => `高度與飛行時間的圖：最高 ${a} 公里，全程 ${d}`,
     flatCap: '同一條路線，傳統經緯度地圖', toRoute: '整段行程', toNorth: '北極在上', toSouth: '南極在下',
     play: '播放', pause: '暫停', replay: '重播', north: '↑ 北', south: '↓ 南', pole: ['北極', '南極'], ocean: '海洋', min: '分',
     keys: '鍵盤：選取地圖後，方向鍵轉動地球，Shift + 方向鍵平移，+ / - 縮放。', mapAria: '地圖',
     hint: '上下拖曳：北極、南極沿中央的邊移動。左右拖曳：轉動經度。', back: '回世界地圖', timeAria: '飛行時間', rateAria: '播放速度', flightAria: '選擇飛行', fail: '載入失敗', hr: '小時',
   },
   en: {
-    pageTitle: 'Flight Replay', altitude: 'Altitude', speed: 'Speed', distance: 'Ground distance', chartCap: 'Altitude and flight time',
+    pageTitle: 'Flight Replay', altitude: 'Altitude', speed: 'Speed', distance: 'Ground distance', chartCap: 'Altitude and flight time', chartDesc: (a, d) => `Chart of altitude and flight time: highest ${a} km, total ${d}`,
     flatCap: 'The same route on an ordinary map', toRoute: 'Whole route', toNorth: 'North Pole up', toSouth: 'South Pole down',
     play: 'Play', pause: 'Pause', replay: 'Replay', north: '↑ N', south: '↓ S', pole: ['North Pole', 'South Pole'], ocean: 'Ocean', min: 'min',
     keys: 'Keyboard: focus the map, then use the arrow keys to turn the globe, Shift + arrows to pan and + / - to zoom.', mapAria: 'Map',
@@ -129,7 +129,7 @@ let lang = TEXT[params.get('lang')] ? params.get('lang') : browserLang;
 const t = key => TEXT[lang][key];
 const pick = o => o[lang] ?? o.en ?? Object.values(o)[0];   // 資料檔裡的文字
 
-let D, R, vectors = [], endT = 0, altMax = 200, now = 0, playing = false, last = 0;
+let D, R, vectors = [], endT = 0, altTop = 0, altMax = 200, now = 0, playing = false, last = 0;
 let route = [], flyId = 0, started = false;
 let flightId = FLIGHTS.some(f => f.id === params.get('flight')) ? params.get('flight') : FLIGHTS[0].id;
 const visibleH = () => canvas.clientHeight - $('dock').offsetHeight;
@@ -385,8 +385,11 @@ function renderHud() {
   $('dist').textContent = `${fmt(s.dist)} km`;
   let e = D.events[0];
   for (const ev of D.events) if (now >= ev[0]) e = ev;
-  $('phase').textContent = e ? pick(e[1]) : '';
+  const phase = e ? pick(e[1]) : '';
+  if ($('phase').textContent !== phase) $('phase').textContent = phase;
   $('scrub').value = now;
+  // 滑桿讀出時間和階段，而不是秒數
+  $('scrub').setAttribute('aria-valuetext', phase ? `${clockText(now)} ${phase}` : clockText(now));
   drawChart(); drawFlat();
 }
 function setTime(time) { now = Math.min(endT, Math.max(0, time)); renderHud(); repaint(); }
@@ -396,6 +399,8 @@ function applyTexts() {
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
   document.querySelectorAll('[data-a]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.a)); });
+  // 高度圖的文字版：最高高度和全程時間
+  if (R) $('chart').setAttribute('aria-label', t('chartDesc')(altTop.toFixed(altTop < 100 ? 1 : 0), clockText(endT).slice(2)));
   $('lang').value = lang;
   const menu = $('flight'), chosen = flightId;
   menu.innerHTML = '';
@@ -557,6 +562,7 @@ function useFlight(flight, time) {
   vectors = R.lat.map((lat, i) => fromLonLat(R.lon[i], lat));
   endT = R.t[R.t.length - 1];
   const top = Math.max(...R.alt), step = niceStep(top, 4);
+  altTop = top;
   altMax = Math.ceil(top * 1.02 / step) * step;
   $('scrub').max = endT;
   now = Math.min(endT, Math.max(0, time));
